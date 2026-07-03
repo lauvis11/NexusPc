@@ -1,0 +1,14 @@
+# Para ver todos los productos
+GET http://localhost/3000/productos
+
+# Para ver un producto por su id
+GET http://localhost/3000/productos/:id
+
+# Para crear un producto
+POST http://localhost/3000/productos
+
+# Para editar un producto
+PATCH http://localhost/3000/productos/id:
+
+# Para eliminar un producto
+DELETE http://localhost/3000/productos/:id
