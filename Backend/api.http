@@ -1,14 +1,17 @@
-# Para ver todos los productos
-GET http://localhost/3000/productos
+### Para ver todos los productos
+GET http://localhost:3000/productos
 
-# Para ver un producto por su id
-GET http://localhost/3000/productos/:id
+### Para filtrar productos por categoria
+GET http://localhost:3000/productos?categoria=monitores
 
-# Para crear un producto
-POST http://localhost/3000/productos
+### Para ver un producto por su id
+GET http://localhost:3000/productos/:id
 
-# Para editar un producto
-PATCH http://localhost/3000/productos/id:
+### Para crear un producto
+POST http://localhost:3000/productos
 
-# Para eliminar un producto
-DELETE http://localhost/3000/productos/:id
+### Para editar un producto
+PATCH http://localhost:3000/productos/id:
+
+### Para eliminar un producto
+DELETE http://localhost:3000/productos/:id
