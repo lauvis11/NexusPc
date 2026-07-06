@@ -1,6 +1,7 @@
 import express from "express";
 import cors from 'cors'
 import { productosRouter } from "./routes/productos.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
 const PORT = 3000;
@@ -14,6 +15,8 @@ app.get("/", (_, res) => {
 })
 
 app.use('/productos', productosRouter)
+
+app.use(errorHandler)
 
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto: http://localhost/${PORT}`)
