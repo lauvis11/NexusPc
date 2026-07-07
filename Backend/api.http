@@ -27,7 +27,13 @@ Content-Type: application/json
 }
 
 ### Para editar un producto
-PATCH http://localhost:3000/productos/id:
+PATCH http://localhost:3000/productos/3e27aaeb-a7ca-417b-bc63-562f772e3406
+Content-Type: application/json
+
+{
+    "precio": 900.00,
+    "stock": 6
+}
 
 ### Para eliminar un producto
 DELETE http://localhost:3000/productos/:id

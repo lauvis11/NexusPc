@@ -112,4 +112,24 @@ export class ProductosModel{
             client.release()
         }
     }
+
+    static async update({ id, input}: { id: string; input: Omit<Partial<ProductoNuevo>, 'caracteristicas'>  }){
+        const DATOS_PERMITIDOS = new Set(["nombre", "descripcion", "precio", "stock", "img_url", "public_id", "categoria_id"])
+
+        const entries = Object.entries(input).filter(
+            ([key]) => DATOS_PERMITIDOS.has(key)
+        )
+
+        if (entries.length === 0) return null
+
+        const setClauses = entries.map(([key], i) => `${key} = $${i + 1}`)
+        const values = entries.map(([, value]) => value)
+
+        await pool.query(
+            `UPDATE producto SET ${setClauses.join(', ')} WHERE id = $${values.length + 1}`,
+            [...values, id]
+        )
+
+        return await ProductosModel.getById(id)
+    }
 }

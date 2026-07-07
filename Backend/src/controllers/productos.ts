@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { ProductosModel } from "../models/productos.js";
-import { ValidateId, ValidateProducto } from "../schemas/productos.js";
+import { ValidateId, ValidatePartialProducto, ValidateProducto } from "../schemas/productos.js";
 
 export class ProductosController{
     static async getAll(req: Request, res: Response, next: NextFunction){
@@ -31,15 +31,28 @@ export class ProductosController{
         if(!result.success) return res.status(400).json({message: "Datos de producto invalidos"})
         try{
             const ProductoNuevo = await ProductosModel.create(result.data)
-            return res.status(200).json(ProductoNuevo)
+            return res.status(201).json(ProductoNuevo)
         }catch(err){
             return next(err)
         }
     }
 
-    // static async update(req: Request, res: Response){
+    static async update(req: Request, res: Response, next: NextFunction){
+        const { id } = req.params as {id: string}
+        const validId = ValidateId(id)
+        const result = ValidatePartialProducto(req.body)
+        if(!validId.success || !result.success){
+            return res.status(400).json({message: "Invalid Data"})
+        }
 
-    // }
+        try{
+            const productoActualizado = await ProductosModel.update({id: validId.data, input: result.data})
+            if(productoActualizado === null) return res.status(404).json({message: "Datos invalidos"})
+            return res.status(200).json(productoActualizado)
+        }catch(err){
+            return next(err)
+        }
+    }
 
     // static async delete(req: Request, res: Response){
 

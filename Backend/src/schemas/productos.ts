@@ -26,3 +26,7 @@ export type ProductoNuevo = z.infer<typeof productoSchema>
 export function ValidateProducto(input: unknown){
     return productoSchema.safeParse(input)
 }
+
+export function ValidatePartialProducto(input: unknown){
+    return productoSchema.partial().safeParse(input)
+}
