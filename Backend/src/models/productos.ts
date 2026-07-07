@@ -5,18 +5,35 @@ export class ProductosModel{
     static async getAll({ categoria }: {categoria?: string | undefined}){
         if(categoria){
             const producto = await pool.query(
-                `SELECT producto.id, producto.nombre, descripcion, precio, stock, img_url, public_id, created_at, categoria.nombre as categoria FROM producto
+                `SELECT producto.id, producto.nombre, descripcion, precio, stock, img_url, public_id, created_at, categoria.nombre as categoria,
+                json_agg(
+                    json_build_object(
+                        'clave', caracteristica_producto.clave,
+                        'valor', caracteristica_producto.valor
+                    )
+                ) AS caracteristicas
+                FROM producto
                 JOIN categoria ON categoria.id = producto.categoria_id
+                LEFT JOIN caracteristica_producto ON caracteristica_producto.producto_id = producto.id
                 WHERE categoria.nombre = $1
+                GROUP BY producto.id, categoria.nombre
                 `, [categoria]
             )
 
             return producto.rows
         }
         const productos = await pool.query(
-            `SELECT producto.id, producto.nombre, descripcion, precio, stock, img_url, public_id, created_at, categoria.nombre as categoria FROM producto
+            `SELECT producto.id, producto.nombre, descripcion, precio, stock, img_url, public_id, created_at, categoria.nombre as categoria,
+            json_agg(
+                json_build_object(
+                    'clave', caracteristica_producto.clave,
+                    'valor', caracteristica_producto.valor
+                )
+            ) AS caracteristicas
+            FROM producto
             JOIN categoria ON categoria.id = producto.categoria_id
-            `
+            LEFT JOIN caracteristica_producto ON caracteristica_producto.producto_id = producto.id
+            GROUP BY producto.id, categoria.nombre`
         )
 
         return productos.rows
@@ -24,9 +41,18 @@ export class ProductosModel{
 
     static async getById(id: string){
         const producto = await pool.query(
-            `SELECT producto.id, producto.nombre, descripcion, precio, stock, img_url, public_id, created_at, categoria.nombre as categoria FROM producto
+            `SELECT producto.id, producto.nombre, descripcion, precio, stock, img_url, public_id, created_at, categoria.nombre as categoria,
+            json_agg(
+                json_build_object(
+                    'clave', caracteristica_producto.clave,
+                    'valor', caracteristica_producto.valor
+                )
+            ) AS caracteristicas
+            FROM producto
             JOIN categoria ON categoria.id = producto.categoria_id
+            LEFT JOIN caracteristica_producto ON caracteristica_producto.producto_id = producto.id
             WHERE producto.id = $1
+            GROUP BY producto.id, categoria.nombre
             `, [id]
         )
 

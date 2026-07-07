@@ -2,10 +2,10 @@
 GET http://localhost:3000/productos
 
 ### Para filtrar productos por categoria
-GET http://localhost:3000/productos?categoria=monitores
+GET http://localhost:3000/productos?categoria=Placas de Video
 
 ### Para ver un producto por su id
-GET http://localhost:3000/productos/:id
+GET http://localhost:3000/productos/3e27aaeb-a7ca-417b-bc63-562f772e3406
 
 ### Para crear un producto
 POST http://localhost:3000/productos
