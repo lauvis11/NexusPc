@@ -9,6 +9,22 @@ GET http://localhost:3000/productos/:id
 
 ### Para crear un producto
 POST http://localhost:3000/productos
+Content-Type: application/json
+
+{
+    "nombre": "RTX 4070 Ti Super",
+    "descripcion": "Tarjeta gráfica NVIDIA RTX 4070 Ti Super 16GB GDDR6X",
+    "precio": 850.00,
+    "stock": 10,
+    "img_url": "https://fakestoreapi.com/img/81fAn9+IfdL._AC_UY879_.jpg",
+    "public_id": "temp",
+    "categoria_id": 1,
+    "caracteristicas": [
+        { "clave": "VRAM", "valor": "16GB" },
+        { "clave": "Memoria", "valor": "GDDR6X" },
+        { "clave": "Bus", "valor": "256-bit" }
+    ]
+}
 
 ### Para editar un producto
 PATCH http://localhost:3000/productos/id:
