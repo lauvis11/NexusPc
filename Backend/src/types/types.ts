@@ -12,3 +12,8 @@ export interface Producto{
     categoria_id: number
     caracteristicas: CaracteristicaProducto[]
 }
+
+export interface Categoria{
+    id: number, 
+    nombre: string
+}

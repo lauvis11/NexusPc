@@ -37,3 +37,14 @@ Content-Type: application/json
 
 ### Para eliminar un producto
 DELETE http://localhost:3000/productos/3e27aaeb-a7ca-417b-bc63-562f772e3406
+
+### Para ver todas las categorias
+GET http://localhost:3000/categorias
+
+### Para crear una categoria
+POST http://localhost:3000/categorias
+Content-Type: application/json
+
+{
+    "nombre": "Mandos"    
+}
