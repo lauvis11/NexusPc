@@ -54,7 +54,16 @@ export class ProductosController{
         }
     }
 
-    // static async delete(req: Request, res: Response){
-
-    // }
+    static async delete(req: Request, res: Response, next: NextFunction){
+        const { id } = req.params as {id: string}
+        const validId = ValidateId(id)
+        if(!validId.success) return res.status(400).json({message: "Datos invalidos"})
+        try{
+            const productoEliminado = await ProductosModel.delete(validId.data)
+            if(!productoEliminado) return res.status(404).json({message: "No se encontro el producto a eliminar"})
+            return res.status(200).json({message: 'Producto eliminado con exito'})
+        }catch(err){
+            return next(err)
+        }
+    }
 }

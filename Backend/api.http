@@ -36,4 +36,4 @@ Content-Type: application/json
 }
 
 ### Para eliminar un producto
-DELETE http://localhost:3000/productos/:id
+DELETE http://localhost:3000/productos/3e27aaeb-a7ca-417b-bc63-562f772e3406

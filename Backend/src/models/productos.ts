@@ -130,6 +130,18 @@ export class ProductosModel{
             [...values, id]
         )
 
-        return await ProductosModel.getById(id)
+        const productoActualizado = await ProductosModel.getById(id)
+        return productoActualizado
+    }
+
+    static async delete(id: string){
+        const eliminarProducto = await pool.query(
+            `DELETE FROM producto WHERE id = $1 `, [id]
+        )
+
+        // Esto nunca deberia suceder, pero typescript exige tratar este caso
+        if(eliminarProducto.rowCount === null) return null
+
+        return eliminarProducto.rowCount > 0
     }
 }
