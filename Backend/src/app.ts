@@ -2,6 +2,7 @@ import express from "express";
 import cors from 'cors'
 import { productosRouter } from "./routes/productos.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
+import { categoriasRouter } from "./routes/categorias.js";
 
 const app = express();
 const PORT = 3000;
@@ -15,6 +16,7 @@ app.get("/", (_, res) => {
 })
 
 app.use('/productos', productosRouter)
+app.use('/categorias', categoriasRouter)
 
 app.use(errorHandler)
 
