@@ -56,7 +56,7 @@ export class ProductosModel{
             `, [id]
         )
 
-        if(producto === undefined) return null
+        if(producto.rows.length === 0) return null
 
         return producto.rows[0]
     }
