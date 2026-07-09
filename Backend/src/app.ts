@@ -1,9 +1,10 @@
+import "./config/env.js";
 import express from "express";
 import cors from 'cors'
-import "./config/env.js";
 import { productosRouter } from "./routes/productos.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { categoriasRouter } from "./routes/categorias.js";
+import { authRouter } from "./routes/auth.js";
 
 const app = express();
 const PORT = 3000;
@@ -18,6 +19,7 @@ app.get("/", (_, res) => {
 
 app.use('/productos', productosRouter)
 app.use('/categorias', categoriasRouter)
+app.use('/auth', authRouter)
 
 app.use(errorHandler)
 
