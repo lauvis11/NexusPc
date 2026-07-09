@@ -4,4 +4,4 @@ export const categoriasRouter: Router = Router()
 
 categoriasRouter.get("/", CategoriasController.getAll)
 categoriasRouter.post("/", CategoriasController.create)
-// categoriasRouter.put("/", CategoriasController.update)
+categoriasRouter.delete("/:id", CategoriasController.delete)

@@ -22,4 +22,13 @@ export class CategoriasModel{
         )
         return nuevaCategoria.rows[0]
     }
+
+    static async delete(id: string){
+        const eliminarCategoria = await pool.query(
+            `DELETE FROM categoria WHERE id = $1`, [id]
+        )
+
+        if(eliminarCategoria.rowCount === null) return null
+        return eliminarCategoria.rowCount > 0
+    }
 }

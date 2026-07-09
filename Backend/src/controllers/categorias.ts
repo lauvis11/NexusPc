@@ -24,6 +24,14 @@ export class CategoriasController{
         }
     }
 
-    // static async update(req: Request, res: Response, next: NextFunction){}
-
+    static async delete(req: Request, res: Response, next: NextFunction){
+        const { id } = req.params as {id: string}
+        try{
+            const categoriaEliminada = await CategoriasModel.delete(id)
+            if(!categoriaEliminada) return res.status(404).json({message: "No se encontro la categoria a eliminar"})
+            return res.status(200).json({message: 'Categoria eliminada con exito'})
+        }catch(err){
+            return next(err)
+        }
+    }
 }
