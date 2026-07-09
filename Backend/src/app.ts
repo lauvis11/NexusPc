@@ -1,5 +1,6 @@
 import express from "express";
 import cors from 'cors'
+import "./config/env.js";
 import { productosRouter } from "./routes/productos.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { categoriasRouter } from "./routes/categorias.js";
