@@ -61,3 +61,12 @@ Content-Type: application/json
     "email": "gabriel@gmail.com",
     "password": "12345678"
 }
+
+### Para iniciar Sesion
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+    "email": "gabriel@gmail.com",
+    "password": "12345678"
+}

@@ -12,6 +12,6 @@ for (const envVar of requiredEnvVars) {
 
 export const env = {
     DATABASE_URL: process.env.DATABASE_URL as string,
-    SECRET_KEY: process.env.ACCESS_TOKEN_SECRET as string,
-    REFRESH_KEY: process.env.REFRESH_TOKEN_SECRET as string
+    SECRET_KEY: process.env.SECRET_KEY as string,
+    REFRESH_KEY: process.env.REFRESH_KEY as string
 }
