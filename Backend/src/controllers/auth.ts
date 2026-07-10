@@ -30,6 +30,7 @@ export class AuthController{
             const refreshToken = jwt.sign({id: validarUsuario.id}, env.REFRESH_KEY, {
                 expiresIn: "7d"
             })
+            await AuthModel.saveRefreshToken({token: refreshToken, usuarioId: validarUsuario.id})
 
             return res
             .status(200)
