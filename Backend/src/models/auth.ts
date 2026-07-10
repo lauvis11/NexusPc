@@ -54,7 +54,7 @@ export class AuthModel{
         const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         await pool.query(
             `INSERT INTO refresh_token(token, usuario_id, expires_at)
-            VALUES($1, $2)`, [token, usuarioId, expiresAt] 
+            VALUES($1, $2, $3)`, [token, usuarioId, expiresAt] 
         )
         return true
     }
