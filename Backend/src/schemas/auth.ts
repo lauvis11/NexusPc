@@ -1,4 +1,4 @@
-import z, { email } from "zod"
+import z from "zod"
 
 const registerSchema = z.object({
     nombre: z.string().min(3),

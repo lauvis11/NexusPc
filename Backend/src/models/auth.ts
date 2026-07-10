@@ -49,6 +49,16 @@ export class AuthModel{
         return usuarionSinPassword
     }
 
+    static async saveRefreshToken(input: {token: string, usuarioId: number}){
+        const { token, usuarioId } = input
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        await pool.query(
+            `INSERT INTO refresh_token(token, usuario_id, expires_at)
+            VALUES($1, $2)`, [token, usuarioId, expiresAt] 
+        )
+        return true
+    }
+
     static async refresh(){}
     static async logout(){}
     static async forgotPassword(){}
