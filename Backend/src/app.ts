@@ -5,11 +5,13 @@ import { productosRouter } from "./routes/productos.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { categoriasRouter } from "./routes/categorias.js";
 import { authRouter } from "./routes/auth.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const PORT = 3000;
 app.use(cors())
 app.use(express.json());
+app.use(cookieParser())
 
 app.get("/", (_, res) => {
     res.json({
