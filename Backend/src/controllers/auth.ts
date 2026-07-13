@@ -3,6 +3,7 @@ import { ValidateLogin, ValidateRegister } from "../schemas/auth.js";
 import { AuthModel } from "../models/auth.js";
 import jwt from 'jsonwebtoken'
 import { env } from "../config/env.js";
+import { date, email } from "zod";
 
 export class AuthController{
     static async register(req: Request, res: Response, next: NextFunction){
@@ -51,7 +52,33 @@ export class AuthController{
             return next(err)
         }
     }
-    static async refresh(){}
+
+    static async refresh(req: Request, res: Response, next: NextFunction){
+        const refreshToken = req.cookies['refresh-token']
+        if(!refreshToken) return res.status(401).json({message: 'Acceso no autorizado'})
+        try{
+            const verifyRefreshToken = jwt.verify(refreshToken, env.REFRESH_KEY)
+            if(!verifyRefreshToken) return res.status(401).json({message: 'Acceso no autorizado'})
+            const payload = verifyRefreshToken as { id: number, rol: string }
+
+            const findRefToken = await AuthModel.findRefreshToken(refreshToken)
+            if(findRefToken === null || new Date() > new Date(findRefToken.expires_at)) return res.status(401).json({message: 'Acceso no autorizado'})
+
+            const newAccessToken = jwt.sign({id: payload.id, rol: payload.rol}, env.SECRET_KEY, {
+                expiresIn: '1h'
+            })
+
+            return res
+            .cookie('access-token', newAccessToken, {
+                httpOnly: true,
+                sameSite: 'strict'
+            })
+            .status(200)
+            .json({message: 'Token actualizado'})
+        }catch(err){
+            return next(err)
+        }
+    }
     static async logout(){}
     static async forgotPassword(){}
 }

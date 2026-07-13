@@ -59,7 +59,16 @@ export class AuthModel{
         return true
     }
 
-    static async refresh(){}
+    static async findRefreshToken(refreshToken: string){
+        const token = await pool.query(
+            `SELECT token, expires_at FROM refresh_token WHERE token = $1
+            `, [refreshToken]
+        )
+        if(token.rows.length === 0) return null
+
+        return token.rows[0]
+    }
+
     static async logout(){}
     static async forgotPassword(){}
 }
