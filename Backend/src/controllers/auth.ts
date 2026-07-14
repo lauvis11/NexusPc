@@ -3,7 +3,6 @@ import { ValidateLogin, ValidateRegister } from "../schemas/auth.js";
 import { AuthModel } from "../models/auth.js";
 import jwt from 'jsonwebtoken'
 import { env } from "../config/env.js";
-import { date, email } from "zod";
 
 export class AuthController{
     static async register(req: Request, res: Response, next: NextFunction){
@@ -79,6 +78,20 @@ export class AuthController{
             return next(err)
         }
     }
-    static async logout(){}
+
+    static async logout(req: Request, res: Response, next: NextFunction){
+        const usuarioId = req.usuario?.id
+        try{
+            if(!usuarioId) return res.status(401).json({message: "Acceso no autorizado"})
+            await AuthModel.logout(usuarioId)
+            return res
+            .clearCookie("access-token")
+            .clearCookie("refresh-token")
+            .status(200)
+            .json({ message: 'Sesión cerrada correctamente' })
+        }catch(err){
+            return next(err)
+        }
+    }
     static async forgotPassword(){}
 }
