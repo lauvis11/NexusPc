@@ -69,6 +69,13 @@ export class AuthModel{
         return token.rows[0]
     }
 
-    static async logout(){}
+    static async logout(id: number){
+        await pool.query(
+            `DELETE FROM refresh_token WHERE usuario_id = $1
+            `, [id]
+        )
+
+        return true
+    }
     static async forgotPassword(){}
 }
