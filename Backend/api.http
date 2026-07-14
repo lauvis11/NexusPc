@@ -70,3 +70,6 @@ Content-Type: application/json
     "email": "gabriel@gmail.com",
     "password": "12345678"
 }
+
+### Para cerrar sesion
+POST http://localhost:3000/auth/logout
