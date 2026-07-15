@@ -77,25 +77,4 @@ export class AuthModel{
 
         return true
     }
-
-    static async updatePassword({id, password, newPassword}: {id: number, password: string, newPassword: string} ){
-        const getPassword = await pool.query(
-            `SELECT password FROM usuario WHERE id = $1
-            `, [id]
-        )
-        if(getPassword.rows.length === 0) return null
-
-        const validPassword = await bcrypt.compare(password, getPassword.rows[0].password)
-        if(!validPassword) return null
-
-        const hashedNewPassword = await bcrypt.hash(newPassword, 10)
-        await pool.query(
-            `UPDATE usuario SET password = $1 WHERE id = $2
-            `, [hashedNewPassword, id]
-        )
-
-        return true
-    }
-
-    static async forgotPassword(){}
 }

@@ -11,11 +11,6 @@ const loginSchema = z.object({
     password: z.string().min(6).max(50) 
 })
 
-const newPasswordSchema = z.object({
-    password: z.string().min(6).max(50),
-    newPassword: z.string().min(6).max(50)
-})
-
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
 
@@ -25,8 +20,4 @@ export function ValidateRegister(input: unknown){
 
 export function ValidateLogin(input: unknown){
     return loginSchema.safeParse(input)
-}
-
-export function ValidateNewPassword(input: unknown){
-    return newPasswordSchema.safeParse(input)
 }

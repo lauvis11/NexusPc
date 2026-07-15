@@ -7,8 +7,6 @@ authRouter.post("/login", AuthController.login)
 authRouter.post("/register", AuthController.register)
 authRouter.post("/logout", VerifyToken, AuthController.logout)
 authRouter.post("/refresh", AuthController.refresh)
-authRouter.post("/update-password", VerifyToken, AuthController.updatePassword)
-authRouter.post("/forgot-password", AuthController.forgotPassword)
 
 
 

@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { ValidateLogin, ValidateNewPassword, ValidateRegister } from "../schemas/auth.js";
+import { ValidateLogin, ValidateRegister } from "../schemas/auth.js";
 import { AuthModel } from "../models/auth.js";
 import jwt from 'jsonwebtoken'
 import { env } from "../config/env.js";
@@ -93,20 +93,4 @@ export class AuthController{
             return next(err)
         }
     }
-
-    static async updatePassword(req: Request, res: Response, next: NextFunction){
-        const id = req.usuario?.id
-        if(!id) return res.status(401).json({message: 'Acceso no autorizado'}) 
-        const result = ValidateNewPassword(req.body)
-        if(!result.success) return res.status(400).json({message: 'Datos Invalidos'})
-        try{
-            const updatePassword = await AuthModel.updatePassword({id: id, password: result.data.password, newPassword: result.data.newPassword})
-            if(updatePassword === null) return res.status(400).json({message: 'Contraseña incorrecta'})
-            return res.status(200).json({message: 'Contraseña actualizada correctamente'})
-        }catch(err){
-            return next(err)
-        }
-    }
-
-    static async forgotPassword(){}
 }
