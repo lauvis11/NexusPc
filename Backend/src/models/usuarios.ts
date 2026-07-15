@@ -2,7 +2,14 @@ import { pool } from "../config/db.js"
 import bcrypt from 'bcrypt'
 
 export class UsuariosModel{
-    static async getAll(){}
+    static async getAll(){
+        const usuarios = await pool.query(
+            `SELECT id, nombre, email, created_at FROM usuario`
+        )
+
+        return usuarios.rows
+    }
+    
     static async getPerfil(){}
     static async createDatosFacturacion(){}
     static async updateDatosFacturacion(){}
