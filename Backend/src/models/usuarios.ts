@@ -16,6 +16,8 @@ export class UsuariosModel{
             WHERE id = $1`, [id]
         )
 
+        if(usuario.rows.length === 0) return null
+
         return usuario.rows[0]
     }
     static async createDatosFacturacion(){}
