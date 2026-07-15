@@ -3,7 +3,14 @@ import { UsuariosModel } from "../models/usuarios.js"
 import { ValidateNewPassword } from "../schemas/usuarios.js"
 
 export class UsuariosController{
-    static async getAll(){}
+    static async getAll(_req: Request, res: Response, next: NextFunction){
+        try{
+            const usuarios = await UsuariosModel.getAll()
+            return res.status(200).json(usuarios)
+        }catch(err){
+            return next(err)
+        }
+    }
     static async getPerfil(){}
     static async createDatosFacturacion(){}
     static async updateDatosFacturacion(){}

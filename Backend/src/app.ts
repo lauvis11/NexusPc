@@ -6,6 +6,7 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 import { categoriasRouter } from "./routes/categorias.js";
 import { authRouter } from "./routes/auth.js";
 import cookieParser from "cookie-parser";
+import { usuariosRouter } from "./routes/usuarios.js";
 
 const app = express();
 const PORT = 3000;
@@ -22,6 +23,7 @@ app.get("/", (_, res) => {
 app.use('/productos', productosRouter)
 app.use('/categorias', categoriasRouter)
 app.use('/auth', authRouter)
+app.use('/usuarios', usuariosRouter)
 
 app.use(errorHandler)
 
