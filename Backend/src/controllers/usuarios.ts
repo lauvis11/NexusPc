@@ -11,7 +11,17 @@ export class UsuariosController{
             return next(err)
         }
     }
-    static async getPerfil(){}
+    static async getPerfil(req: Request, res: Response, next: NextFunction){
+        const id = req.usuario?.id
+        if(!id) return res.status(401).json({message: 'Acceso no autorizado'})
+        try{
+            const usuario = await UsuariosModel.getPerfil(id)
+            if(usuario === null) return res.status(404).json({message: 'El usuario no existe'})
+            return res.status(200).json(usuario)
+        }catch(err){
+            return next(err)
+        }
+    }
     static async createDatosFacturacion(){}
     static async updateDatosFacturacion(){}
     static async deleteUsuario(){}
