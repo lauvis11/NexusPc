@@ -94,7 +94,7 @@ export class AuthController{
         }
     }
 
-    static async resetPassword(req: Request, res: Response, next: NextFunction){
+    static async updatePassword(req: Request, res: Response, next: NextFunction){
         const id = req.usuario?.id
         if(!id) return res.status(401).json({message: 'Acceso no autorizado'}) 
         const result = ValidateNewPassword(req.body)

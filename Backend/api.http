@@ -73,3 +73,12 @@ Content-Type: application/json
 
 ### Para cerrar sesion
 POST http://localhost:3000/auth/logout
+
+### Para recuperar la contraseña
+POST http://localhost:3000/auth/update-password
+Content-Type: application/json
+
+{
+    "password": "12345678",
+    "newPassword": "87654321"
+}
