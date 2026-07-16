@@ -1,5 +1,6 @@
 import { pool } from "../config/db.js"
 import bcrypt from 'bcrypt'
+import type { FacturacionInput } from "../schemas/datos_facturacion.js"
 
 export class UsuariosModel{
     static async getAll(){
@@ -33,7 +34,31 @@ export class UsuariosModel{
         return usuario.rows[0]
     }
 
-    static async createDatosFacturacion(){}
+    static async createDatosFacturacion({id, input}: {id: number, input: FacturacionInput}){
+            const {
+                nombre_completo,
+                dni,
+                direccion,
+                ciudad,
+                provincia,
+                codigo_postal
+            } = input
+
+            const existe = await pool.query(
+                `SELECT id FROM datos_facturacion WHERE usuario_id = $1`, [id]
+            )
+            if(existe.rows.length > 0) return null
+    
+            const insertarDatos = await pool.query(
+                `INSERT INTO datos_facturacion(nombre_completo, dni, direccion, ciudad, provincia, codigo_postal, usuario_id)
+                VALUES($1, $2, $3, $4, $5, $6, $7)
+                RETURNING usuario_id, nombre_completo, dni, direccion, ciudad, provincia, codigo_postal
+                `, [nombre_completo, dni, direccion, ciudad, provincia, codigo_postal, id]
+            )
+
+            return insertarDatos.rows[0]
+    }
+    
     static async updateDatosFacturacion(){}
     static async deleteUsuario(){}
     static async updatePassword({id, password, newPassword}: {id: number, password: string, newPassword: string} ){
