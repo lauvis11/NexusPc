@@ -18,6 +18,6 @@ export function ValidateFacturacion(input: unknown){
     return facturacionSchema.safeParse(input)
 }
 
-export function ValidateUpdateFacturacion(input: unknown){
+export function ValidatePartialFacturacion(input: unknown){
     return updateFacturacionSchema.partial().safeParse(input)
 }

@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express"
 import { UsuariosModel } from "../models/usuarios.js"
 import { ValidateNewPassword } from "../schemas/usuarios.js"
-import { ValidateFacturacion } from "../schemas/datos_facturacion.js"
+import { ValidateFacturacion, ValidatePartialFacturacion } from "../schemas/datos_facturacion.js"
 
 export class UsuariosController{
     static async getAll(_req: Request, res: Response, next: NextFunction){
@@ -40,7 +40,21 @@ export class UsuariosController{
         }
     }
 
-    static async updateDatosFacturacion(){}
+    static async updateDatosFacturacion(req: Request, res: Response, next: NextFunction){
+        const id = req.usuario?.id
+        if(!id) return res.status(401).json({message: "Acceso no autorizado"})
+        const result = ValidatePartialFacturacion(req.body)
+        if(!result.success) return res.status(400).json({message: "Datos invalidos"})
+
+        try{
+            const updateDatos = await UsuariosModel.updateDatosFacturacion({id: id, input: result.data})
+            if(updateDatos === null) return res.status(404).json({ message: "No tenés datos de facturación cargados, creálos primero" })
+            return res.status(200).json(updateDatos)
+        }catch(err){
+            return next(err)
+        }
+    }
+
     static async deleteUsuario(){}
 
     static async updatePassword(req: Request, res: Response, next: NextFunction){
