@@ -85,3 +85,6 @@ Content-Type: application/json
 
 ### Para ver todos los usuarios
 GET http://localhost:3000/usuarios
+
+### Para ver el perfil
+GET http://localhost:3000/usuarios/perfil

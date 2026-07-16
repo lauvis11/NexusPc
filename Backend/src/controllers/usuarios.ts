@@ -11,6 +11,7 @@ export class UsuariosController{
             return next(err)
         }
     }
+    
     static async getPerfil(req: Request, res: Response, next: NextFunction){
         const id = req.usuario?.id
         if(!id) return res.status(401).json({message: 'Acceso no autorizado'})

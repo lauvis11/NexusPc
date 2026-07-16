@@ -12,14 +12,27 @@ export class UsuariosModel{
     
     static async getPerfil(id: number){
         const usuario = await pool.query(
-            `SELECT id, nombre, email, created_at FROM usuario
-            WHERE id = $1`, [id]
+            `SELECT 
+                usuario.id, 
+                nombre, 
+                email, 
+                created_at, 
+                datos_facturacion.nombre_completo,
+                datos_facturacion.dni,
+                datos_facturacion.direccion,
+                datos_facturacion.ciudad,
+                datos_facturacion.provincia,
+                datos_facturacion.codigo_postal
+            FROM usuario
+            LEFT JOIN datos_facturacion ON datos_facturacion.usuario_id = usuario.id
+            WHERE usuario.id = $1`, [id]
         )
 
         if(usuario.rows.length === 0) return null
 
         return usuario.rows[0]
     }
+
     static async createDatosFacturacion(){}
     static async updateDatosFacturacion(){}
     static async deleteUsuario(){}
