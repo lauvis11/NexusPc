@@ -101,3 +101,11 @@ Content-Type: application/json
     "provincia": "Tucumán",
     "codigo_postal": "4000"
 }
+
+### Para actualizar los datos de facturacion
+PATCH http://localhost:3000/usuarios/datos-facturacion
+Content-Type: application/json
+
+{
+    "codigo_postal": "4420"
+}
