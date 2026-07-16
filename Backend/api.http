@@ -88,3 +88,16 @@ GET http://localhost:3000/usuarios
 
 ### Para ver el perfil
 GET http://localhost:3000/usuarios/perfil
+
+### Para crear los datos de facturacion
+POST http://localhost:3000/usuarios/datos-facturacion
+Content-Type: application/json
+
+{
+    "nombre_completo": "Gabriel Fernández",
+    "dni": "12345678",
+    "direccion": "Av. Siempre Viva 742",
+    "ciudad": "Tucumán",
+    "provincia": "Tucumán",
+    "codigo_postal": "4000"
+}

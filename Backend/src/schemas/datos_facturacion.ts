@@ -9,8 +9,15 @@ const facturacionSchema = z.object({
     codigo_postal: z.string().min(4)
 })
 
+const updateFacturacionSchema = facturacionSchema.omit({dni: true})
+
 export type FacturacionInput = z.infer<typeof facturacionSchema>
+export type UpdateFacturacionInput = z.infer<typeof updateFacturacionSchema>
 
 export function ValidateFacturacion(input: unknown){
     return facturacionSchema.safeParse(input)
+}
+
+export function ValidateUpdateFacturacion(input: unknown){
+    return updateFacturacionSchema.partial().safeParse(input)
 }
