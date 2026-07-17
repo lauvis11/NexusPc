@@ -55,7 +55,18 @@ export class UsuariosController{
         }
     }
 
-    static async deleteUsuario(){}
+    static async deleteUsuario(req: Request, res: Response, next: NextFunction){
+        const { id } = req.params as { id: string }
+        const idNum = parseInt(id)
+        if(isNaN(idNum)) return res.status(400).json({ message: 'ID inválido' })
+        try{
+            const desactivarCuenta = await UsuariosModel.deleteUsuario(idNum)
+            if(desactivarCuenta === null) return res.status(404).json({message: "No se encontro el usuario"})
+            return res.status(200).json({message: "Usuario eliminado con exito"})
+        }catch(err){
+            return next(err)
+        }
+    }
 
     static async updatePassword(req: Request, res: Response, next: NextFunction){
         const id = req.usuario?.id
