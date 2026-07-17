@@ -5,7 +5,8 @@ import type { FacturacionInput, UpdateFacturacionInput } from "../schemas/datos_
 export class UsuariosModel{
     static async getAll(){
         const usuarios = await pool.query(
-            `SELECT id, nombre, email, created_at FROM usuario`
+            `SELECT id, nombre, email, created_at FROM usuario
+            WHERE activo = true`
         )
 
         return usuarios.rows
@@ -26,7 +27,7 @@ export class UsuariosModel{
                 datos_facturacion.codigo_postal
             FROM usuario
             LEFT JOIN datos_facturacion ON datos_facturacion.usuario_id = usuario.id
-            WHERE usuario.id = $1`, [id]
+            WHERE usuario.id = $1 AND activo = true`, [id]
         )
 
         if(usuario.rows.length === 0) return null
@@ -84,7 +85,21 @@ export class UsuariosModel{
 
         return updateDatos.rows[0]
     }
-    static async deleteUsuario(){}
+
+    static async deleteUsuario(id: number){
+        await pool.query(
+            `DELETE FROM refresh_token WHERE usuario_id = $1`, [id]
+        )
+
+        const desactivarCuenta = await pool.query(
+            `UPDATE usuario SET activo = false
+            WHERE id = $1
+            RETURNING id`, [id]
+        )
+        if(desactivarCuenta.rows.length === 0) return null
+        return true
+    }
+
     static async updatePassword({id, password, newPassword}: {id: number, password: string, newPassword: string} ){
         const getPassword = await pool.query(
             `SELECT password FROM usuario WHERE id = $1
