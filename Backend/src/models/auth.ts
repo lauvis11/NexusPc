@@ -32,7 +32,7 @@ export class AuthModel{
 
         const usuario = await pool.query(
             `SELECT id, nombre, password FROM usuario 
-            WHERE email = $1
+            WHERE email = $1 AND activo = true
             `, [email]
         )
 
