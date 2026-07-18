@@ -67,8 +67,8 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-    "email": "juan@gmail.com",
-    "password": "12345678"
+    "email": "gabriel@gmail.com",
+    "password": "87654321"
 }
 
 ### Para cerrar sesion
@@ -112,3 +112,6 @@ Content-Type: application/json
 
 ### Para que el admin elimine una cuenta
 DELETE http://localhost:3000/usuarios/2
+
+### Para ver las ordenes
+GET http://localhost:3000/ordenes

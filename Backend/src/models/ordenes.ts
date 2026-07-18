@@ -13,8 +13,8 @@ export class OrdenesModel{
                 json_agg(
                     json_build_object(
                         'nombre', producto.nombre,
-                        'cantidad' detalle_orden.cantidad,
-                        'precio_unitario' detalle_orden.precio_unitario
+                        'cantidad', detalle_orden.cantidad,
+                        'precio_unitario', detalle_orden.precio_unitario
                     )
                 ) AS productos
             FROM orden
@@ -43,8 +43,8 @@ export class OrdenesModel{
                 json_agg(
                     json_build_object(
                         'nombre', producto.nombre,
-                        'cantidad' detalle_orden.cantidad,
-                        'precio_unitario' detalle_orden.precio_unitario
+                        'cantidad', detalle_orden.cantidad,
+                        'precio_unitario', detalle_orden.precio_unitario
                     )
                 ) AS productos
             FROM orden

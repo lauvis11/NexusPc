@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { OrdenesController } from "../controllers/ordenes.js";
+import { VerifyToken } from "../middlewares/verifyToken.js";
 export const ordenesRouter: Router = Router()
 
-ordenesRouter.get("/", OrdenesController.getAll)
+ordenesRouter.get("/", VerifyToken, OrdenesController.getAll)
 
