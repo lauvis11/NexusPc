@@ -90,6 +90,8 @@ export class OrdenesModel{
             ORDER BY orden.created_at DESC`, [id]
         )
 
+        if(orden.rows.length === 0) return null
+
         return orden.rows[0]
     }
 }
