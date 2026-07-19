@@ -20,11 +20,16 @@ export class OrdenesController{
 
     static async getById(req: Request, res: Response, next: NextFunction){
         const id = req.params.id as string
+        const usuario = req.usuario
+        if(!usuario) return res.status(401).json({ message: 'Acceso no autorizado' })
         const validId = ValidateId(id)
         if(!validId.success) return res.status(400).json({message: 'Datos invalidos'})
         try{
             const orden = await OrdenesModel.getById(validId.data)
             if(orden === null) return res.status(404).json({message: 'No se encontro la orden'})
+            if(usuario.rol === 'CLIENTE' && orden.usuario_id !== usuario.id){
+                return res.status(403).json({ message: 'No tenés permisos para ver esta orden' })
+            }
             return res.status(200).json(orden)
         }catch(err){
             return next(err)
