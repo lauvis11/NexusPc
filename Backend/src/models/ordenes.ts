@@ -109,7 +109,9 @@ export class OrdenesModel{
             const itemsValidados: { producto_id: string, cantidad: number, precio_unitario: number }[] = []
             let total = 0
 
-            for (const item of input.productos) {
+            const productosOrdenados = [...input.productos].sort((a, b) => a.id.localeCompare(b.id))
+
+            for (const item of productosOrdenados) {
                 const productoResult = await client.query(
                     `SELECT precio, stock FROM producto WHERE id = $1 FOR UPDATE`,
                     [item.id]
@@ -125,12 +127,12 @@ export class OrdenesModel{
                     throw new Error(`Stock insuficiente para el producto ${item.id}`)
                 }
 
-                total += precio * item.cantidad
+                total += Number(precio) * item.cantidad
 
                 itemsValidados.push({
                     producto_id: item.id,
                     cantidad: item.cantidad,
-                    precio_unitario: precio,
+                    precio_unitario: Number(precio),
                 })
             }
 
