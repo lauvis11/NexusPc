@@ -101,6 +101,7 @@ export class OrdenesModel{
             `SELECT id FROM datos_facturacion WHERE usuario_id = $1`, [id]
         )
         if(existe.rows.length === 0) return null
+        const datosFacturacionId = existe.rows[0].id
         
         const client = await pool.connect()
         try{
@@ -137,10 +138,10 @@ export class OrdenesModel{
             }
 
             const ordenResult = await client.query(
-                `INSERT INTO orden(usuario_id, total, estado)
-                VALUES($1, $2, $3)
+                `INSERT INTO orden(usuario_id, datos_facturacion_id, total, estado)
+                VALUES($1, $2, $3, $4)
                 RETURNING id`,
-                [id, total, 'PENDIENTE']
+                [id, datosFacturacionId, total, 'PENDIENTE']
             )
             const ordenId = ordenResult.rows[0].id
 

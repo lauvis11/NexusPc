@@ -118,3 +118,16 @@ GET http://localhost:3000/ordenes
 
 ### Para ver una orden por su id
 GET http://localhost:3000/ordenes/550e8400-e29b-41d4-a716-446655440000
+
+### Para realizar una orden
+POST http://localhost:3000/ordenes
+Content-Type: application/json
+
+{
+    "productos": [
+        {
+            "id": "d7576046-b2db-4e68-b0ff-b51781532338",
+            "cantidad": 3
+        }
+    ]
+}
