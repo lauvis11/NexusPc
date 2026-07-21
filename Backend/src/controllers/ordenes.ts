@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { OrdenesModel } from "../models/ordenes.js";
 import { ValidateId } from "../schemas/productos.js";
+import { ValidateOrden } from "../schemas/ordenes.js";
 
 export class OrdenesController{
     static async getAll(req: Request, res: Response, next: NextFunction){
@@ -31,6 +32,20 @@ export class OrdenesController{
                 return res.status(403).json({ message: 'No tenés permisos para ver esta orden' })
             }
             return res.status(200).json(orden)
+        }catch(err){
+            return next(err)
+        }
+    }
+
+    static async create(req: Request, res: Response, next: NextFunction){
+        const id = req.usuario?.id
+        if(!id) return res.status(401).json({message: 'Acceso no autorizado'})
+        const result = ValidateOrden(req.body)
+        if(!result.success) return res.status(400).json({message: 'Datos invalidos'})
+        try{
+            const nuevaOrden = await OrdenesModel.create({id, input: result.data})
+            if(nuevaOrden === null) return res.status(409).json({message: 'Debes cargar tus datos de facturación antes de crear una orden'})
+            return res.status(201).json(nuevaOrden)
         }catch(err){
             return next(err)
         }
