@@ -47,6 +47,10 @@ export class OrdenesController{
             if(nuevaOrden === null) return res.status(409).json({message: 'Debes cargar tus datos de facturación antes de crear una orden'})
             return res.status(201).json(nuevaOrden)
         }catch(err){
+            if(err instanceof Error){
+                if(err.message.includes('no encontrado')) return res.status(404).json({message: err.message})
+                if(err.message.includes('Stock insuficiente')) return res.status(409).json({message: err.message})
+            }
             return next(err)
         }
     }
