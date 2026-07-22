@@ -6,4 +6,4 @@ export const ordenesRouter: Router = Router()
 ordenesRouter.get("/", VerifyToken, OrdenesController.getAll)
 ordenesRouter.get("/:id", VerifyToken, OrdenesController.getById)
 ordenesRouter.post("/", VerifyToken, OrdenesController.create)
-
+ordenesRouter.patch("/:id/estado", VerifyToken, OrdenesController.updateEstado)

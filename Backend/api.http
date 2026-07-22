@@ -131,3 +131,11 @@ Content-Type: application/json
         }
     ]
 }
+
+### Para actualizar el estado de una orden (solo ADMIN)
+PATCH http://localhost:3000/ordenes/d7576046-b2db-4e68-b0ff-b51781532338/estado
+Content-Type: application/json
+
+{
+    "estado": "PAGADO"
+}
