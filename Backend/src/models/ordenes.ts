@@ -1,5 +1,5 @@
 import { pool } from "../config/db.js";
-import type { OrdenInput } from "../schemas/ordenes.js";
+import type { OrdenInput, EstadoOrden } from "../schemas/ordenes.js";
 
 export class OrdenesModel{
     static async getAll(){
@@ -165,6 +165,64 @@ export class OrdenesModel{
             await client.query('ROLLBACK')
             throw error
         }finally{
+            client.release()
+        }
+    }
+
+    static async updateEstado({ ordenId, nuevoEstado }: { ordenId: string, nuevoEstado: EstadoOrden }){
+        const TRANSICIONES: Record<EstadoOrden, EstadoOrden[]> = {
+            PENDIENTE:  ['PAGADO', 'CANCELADA'],
+            PAGADO:     ['ENVIADO', 'CANCELADA'],
+            ENVIADO:    ['COMPLETADA'],
+            COMPLETADA: [],
+            CANCELADA:  [],
+        }
+
+        const client = await pool.connect()
+        try {
+            await client.query('BEGIN')
+
+            // Bloquear la orden mientras se procesa
+            const ordenResult = await client.query(
+                `SELECT id, estado FROM orden WHERE id = $1 FOR UPDATE`, [ordenId]
+            )
+
+            if (ordenResult.rows.length === 0) {
+                throw new Error('Orden no encontrada')
+            }
+
+            const estadoActual: EstadoOrden = ordenResult.rows[0].estado
+
+            if (!TRANSICIONES[estadoActual].includes(nuevoEstado)) {
+                throw new Error(`Transición inválida: no se puede pasar de ${estadoActual} a ${nuevoEstado}`)
+            }
+
+            // Devolver stock si se cancela
+            if (nuevoEstado === 'CANCELADA') {
+                const detalles = await client.query(
+                    `SELECT producto_id, cantidad FROM detalle_orden WHERE orden_id = $1`, [ordenId]
+                )
+
+                for (const detalle of detalles.rows) {
+                    await client.query(
+                        `UPDATE producto SET stock = stock + $1 WHERE id = $2`,
+                        [detalle.cantidad, detalle.producto_id]
+                    )
+                }
+            }
+
+            await client.query(
+                `UPDATE orden SET estado = $1 WHERE id = $2`,
+                [nuevoEstado, ordenId]
+            )
+
+            await client.query('COMMIT')
+
+            return await OrdenesModel.getById(ordenId)
+        } catch (error) {
+            await client.query('ROLLBACK')
+            throw error
+        } finally {
             client.release()
         }
     }
