@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { OrdenesModel } from "../models/ordenes.js";
 import { ValidateId } from "../schemas/productos.js";
-import { ValidateOrden } from "../schemas/ordenes.js";
+import { ValidateOrden, ValidateEstadoOrden } from "../schemas/ordenes.js";
 
 export class OrdenesController{
     static async getAll(req: Request, res: Response, next: NextFunction){
@@ -50,6 +50,27 @@ export class OrdenesController{
             if(err instanceof Error){
                 if(err.message.includes('no encontrado')) return res.status(404).json({message: err.message})
                 if(err.message.includes('Stock insuficiente')) return res.status(409).json({message: err.message})
+            }
+            return next(err)
+        }
+    }
+
+    static async updateEstado(req: Request, res: Response, next: NextFunction){
+        const usuario = req.usuario
+        if(!usuario) return res.status(401).json({message: 'Acceso no autorizado'})
+        if(usuario.rol !== 'ADMIN') return res.status(403).json({message: 'No tenés permisos para realizar esta acción'})
+
+        const { id } = req.params as { id: string }
+        const result = ValidateEstadoOrden(req.body)
+        if(!result.success) return res.status(400).json({message: 'Estado inválido'})
+
+        try{
+            const ordenActualizada = await OrdenesModel.updateEstado({ ordenId: id, nuevoEstado: result.data.estado })
+            return res.status(200).json(ordenActualizada)
+        }catch(err){
+            if(err instanceof Error){
+                if(err.message.includes('no encontrada')) return res.status(404).json({message: err.message})
+                if(err.message.includes('Transición inválida')) return res.status(409).json({message: err.message})
             }
             return next(err)
         }
