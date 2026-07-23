@@ -5,10 +5,19 @@ import { ValidateId, ValidatePartialProducto, ValidateProducto } from "../schema
 export class ProductosController{
     static async getAll(req: Request, res: Response, next: NextFunction){
         const categoria = typeof req.query.categoria === 'string'
-        ? req.query.categoria
-        : undefined
+            ? req.query.categoria
+            : undefined
+
+        const subcategoria_id = req.query.subcategoria_id !== undefined
+            ? Number(req.query.subcategoria_id)
+            : undefined
+
+        if (subcategoria_id !== undefined && isNaN(subcategoria_id)) {
+            return res.status(400).json({ message: 'El subcategoria_id debe ser un número válido' })
+        }
+
         try{
-            const productos = await ProductosModel.getAll({ categoria })
+            const productos = await ProductosModel.getAll({ categoria, subcategoria_id })
             return res.status(200).json(productos)
         }catch(err){
             return next(err)

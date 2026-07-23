@@ -4,6 +4,9 @@ GET http://localhost:3000/productos
 ### Para filtrar productos por categoria
 GET http://localhost:3000/productos?categoria=Placas de Video
 
+### Para filtrar productos por subcategoria
+GET http://localhost:3000/productos?subcategoria_id=1
+
 ### Para ver un producto por su id
 GET http://localhost:3000/productos/3e27aaeb-a7ca-417b-bc63-562f772e3406
 
@@ -51,6 +54,24 @@ Content-Type: application/json
 
 ### Para eliminar una categoria
 DELETE http://localhost:3000/categorias/13
+
+### Para ver todas las subcategorias
+GET http://localhost:3000/subcategorias
+
+### Para filtrar subcategorias por categoria_id (Select dependiente)
+GET http://localhost:3000/subcategorias?categoria_id=1
+
+### Para crear una subcategoria (solo ADMIN)
+POST http://localhost:3000/subcategorias
+Content-Type: application/json
+
+{
+    "nombre": "Fuentes de Alimentación",
+    "categoria_id": 1
+}
+
+### Para eliminar una subcategoria (solo ADMIN)
+DELETE http://localhost:3000/subcategorias/1
 
 ### Para registrarse
 POST http://localhost:3000/auth/register
