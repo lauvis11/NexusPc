@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { SubcategoriasModel } from "../models/subcategorias.js";
+import { ValidateSubcategoria } from "../schemas/subcategorias.js";
 
 export class SubcategoriasController{
     static async getAll(req: Request, res: Response, next: NextFunction){
@@ -19,4 +20,20 @@ export class SubcategoriasController{
         }
     }
 
+    static async create(req: Request, res: Response, next: NextFunction){
+        const result = ValidateSubcategoria(req.body)
+        if(!result.success) return res.status(400).json({message: 'Datos invalidos'})
+        try{
+            const nuevaSubcategoria = await SubcategoriasModel.create(result.data)
+            if(nuevaSubcategoria === null) {
+                return res.status(404).json({message: 'La categoría especificada no existe'})
+            }
+            if(nuevaSubcategoria === 'CONFLICT') {
+                return res.status(409).json({message: 'La subcategoría ya existe para esta categoría'})
+            }
+            return res.status(201).json(nuevaSubcategoria)
+        }catch(err){
+            return next(err)
+        }
+    }
 }
