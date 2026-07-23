@@ -36,4 +36,20 @@ export class SubcategoriasController{
             return next(err)
         }
     }
+
+    static async delete(req: Request, res: Response, next: NextFunction){
+        const id = Number(req.params.id)
+        if(isNaN(id) || !Number.isInteger(id) || id <= 0){
+            return res.status(400).json({message: 'El id debe ser un número entero positivo'})
+        }
+        try{
+            const subcategoriaEliminada = await SubcategoriasModel.delete(id)
+            if(!subcategoriaEliminada) {
+                return res.status(404).json({message: 'No se encontró la subcategoría a eliminar'})
+            }
+            return res.status(200).json({message: 'Subcategoría eliminada con éxito'})
+        }catch(err){
+            return next(err)
+        }
+    }
 }
