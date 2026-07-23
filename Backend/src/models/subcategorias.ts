@@ -23,11 +23,18 @@ export class SubcategoriasModel{
         )
         if(categoriaExiste.rows.length === 0) return null
 
-        const nuevaSubcategoria = await pool.query(
-            `INSERT INTO subcategoria(nombre, categoria_id) VALUES($1, $2)
-            RETURNING id, nombre, categoria_id`, [nombre, categoria_id]
-        )
-        return nuevaSubcategoria.rows[0]
+        try {
+            const nuevaSubcategoria = await pool.query(
+                `INSERT INTO subcategoria(nombre, categoria_id) VALUES($1, $2)
+                RETURNING id, nombre, categoria_id`, [nombre, categoria_id]
+            )
+            return nuevaSubcategoria.rows[0]
+        } catch (error: unknown) {
+            if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
+                return 'CONFLICT'
+            }
+            throw error
+        }
     }
 
     static async delete(id: number){
