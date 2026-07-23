@@ -29,4 +29,13 @@ export class SubcategoriasModel{
         )
         return nuevaSubcategoria.rows[0]
     }
+
+    static async delete(id: number){
+        const eliminarSubcategoria = await pool.query(
+            `DELETE FROM subcategoria WHERE id = $1`, [id]
+        )
+
+        if(eliminarSubcategoria.rowCount === null) return null
+        return eliminarSubcategoria.rowCount > 0
+    }
 }
