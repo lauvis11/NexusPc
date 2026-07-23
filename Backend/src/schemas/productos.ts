@@ -17,6 +17,7 @@ const productoSchema = z.object({
     img_url: z.url('La URL de la imagen no es válida'),
     public_id: z.string(),
     categoria_id: z.number().int().positive(),
+    subcategoria_id: z.number().int().positive().optional(),
     caracteristicas: z.array(caracteristicaSchema).min(1, 'Debe tener al menos una característica')
 })
 

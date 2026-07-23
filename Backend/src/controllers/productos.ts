@@ -33,6 +33,9 @@ export class ProductosController{
             const ProductoNuevo = await ProductosModel.create(result.data)
             return res.status(201).json(ProductoNuevo)
         }catch(err){
+            if (err instanceof Error && err.message.includes('subcategoría')) {
+                return res.status(400).json({message: err.message})
+            }
             return next(err)
         }
     }
@@ -50,6 +53,9 @@ export class ProductosController{
             if(productoActualizado === null) return res.status(404).json({message: "Datos invalidos"})
             return res.status(200).json(productoActualizado)
         }catch(err){
+            if (err instanceof Error && err.message.includes('subcategoría')) {
+                return res.status(400).json({message: err.message})
+            }
             return next(err)
         }
     }

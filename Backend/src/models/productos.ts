@@ -2,57 +2,79 @@ import { pool } from "../config/db.js";
 import type { ProductoNuevo } from "../schemas/productos.js"
 
 export class ProductosModel{
-    static async getAll({ categoria }: {categoria?: string | undefined}){
-        if(categoria){
-            const producto = await pool.query(
-                `SELECT producto.id, producto.nombre, descripcion, precio, stock, img_url, public_id, created_at, categoria.nombre as categoria,
+    static async getAll({ categoria, subcategoria_id }: {categoria?: string | undefined, subcategoria_id?: number | undefined}){
+        const conditions: string[] = []
+        const values: (string | number)[] = []
+
+        if (categoria) {
+            values.push(categoria)
+            conditions.push(`categoria.nombre = $${values.length}`)
+        }
+
+        if (subcategoria_id !== undefined) {
+            values.push(subcategoria_id)
+            conditions.push(`producto.subcategoria_id = $${values.length}`)
+        }
+
+        const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+
+        const query = `
+            SELECT 
+                producto.id, 
+                producto.nombre, 
+                descripcion, 
+                precio, 
+                stock, 
+                img_url, 
+                public_id, 
+                producto.created_at, 
+                categoria.nombre as categoria,
+                subcategoria.nombre as subcategoria,
+                producto.subcategoria_id,
                 json_agg(
                     json_build_object(
                         'clave', caracteristica_producto.clave,
                         'valor', caracteristica_producto.valor
                     )
                 ) AS caracteristicas
-                FROM producto
-                JOIN categoria ON categoria.id = producto.categoria_id
-                LEFT JOIN caracteristica_producto ON caracteristica_producto.producto_id = producto.id
-                WHERE categoria.nombre = $1
-                GROUP BY producto.id, categoria.nombre
-                `, [categoria]
-            )
-
-            return producto.rows
-        }
-        const productos = await pool.query(
-            `SELECT producto.id, producto.nombre, descripcion, precio, stock, img_url, public_id, created_at, categoria.nombre as categoria,
-            json_agg(
-                json_build_object(
-                    'clave', caracteristica_producto.clave,
-                    'valor', caracteristica_producto.valor
-                )
-            ) AS caracteristicas
             FROM producto
             JOIN categoria ON categoria.id = producto.categoria_id
+            LEFT JOIN subcategoria ON subcategoria.id = producto.subcategoria_id
             LEFT JOIN caracteristica_producto ON caracteristica_producto.producto_id = producto.id
-            GROUP BY producto.id, categoria.nombre`
-        )
+            ${whereClause}
+            GROUP BY producto.id, categoria.nombre, subcategoria.nombre
+        `
 
+        const productos = await pool.query(query, values)
         return productos.rows
     }
 
     static async getById(id: string){
         const producto = await pool.query(
-            `SELECT producto.id, producto.nombre, descripcion, precio, stock, img_url, public_id, created_at, categoria.nombre as categoria,
-            json_agg(
-                json_build_object(
-                    'clave', caracteristica_producto.clave,
-                    'valor', caracteristica_producto.valor
-                )
-            ) AS caracteristicas
+            `SELECT 
+                producto.id, 
+                producto.nombre, 
+                descripcion, 
+                precio, 
+                stock, 
+                img_url, 
+                public_id, 
+                producto.created_at, 
+                categoria.nombre as categoria,
+                subcategoria.nombre as subcategoria,
+                producto.subcategoria_id,
+                json_agg(
+                    json_build_object(
+                        'clave', caracteristica_producto.clave,
+                        'valor', caracteristica_producto.valor
+                    )
+                ) AS caracteristicas
             FROM producto
             JOIN categoria ON categoria.id = producto.categoria_id
+            LEFT JOIN subcategoria ON subcategoria.id = producto.subcategoria_id
             LEFT JOIN caracteristica_producto ON caracteristica_producto.producto_id = producto.id
             WHERE producto.id = $1
-            GROUP BY producto.id, categoria.nombre
+            GROUP BY producto.id, categoria.nombre, subcategoria.nombre
             `, [id]
         )
 
@@ -72,19 +94,36 @@ export class ProductosModel{
             img_url,
             public_id,
             categoria_id,
+            subcategoria_id,
             caracteristicas
         } = input
 
         try{
+            // Validar subcategoría si se proporciona
+            if (subcategoria_id !== undefined) {
+                const subcategoriaResult = await client.query(
+                    `SELECT categoria_id FROM subcategoria WHERE id = $1`,
+                    [subcategoria_id]
+                )
+
+                if (subcategoriaResult.rows.length === 0) {
+                    throw new Error('La subcategoría especificada no existe')
+                }
+
+                if (subcategoriaResult.rows[0].categoria_id !== categoria_id) {
+                    throw new Error('La subcategoría no pertenece a la categoría especificada')
+                }
+            }
+
             await client.query(
                 `BEGIN`
             )
 
             const result = await client.query(
-                `INSERT INTO producto(nombre, descripcion, precio, stock, img_url, public_id, categoria_id)
-                VALUES($1, $2, $3, $4, $5, $6, $7)
+                `INSERT INTO producto(nombre, descripcion, precio, stock, img_url, public_id, categoria_id, subcategoria_id)
+                VALUES($1, $2, $3, $4, $5, $6, $7, $8)
                 RETURNING id
-                `, [nombre, descripcion, precio, stock, img_url, public_id, categoria_id] 
+                `, [nombre, descripcion, precio, stock, img_url, public_id, categoria_id, subcategoria_id ?? null] 
             ) 
 
             const productoId = result.rows[0].id
@@ -114,7 +153,35 @@ export class ProductosModel{
     }
 
     static async update({ id, input}: { id: string; input: Omit<Partial<ProductoNuevo>, 'caracteristicas'>  }){
-        const DATOS_PERMITIDOS = new Set(["nombre", "descripcion", "precio", "stock", "img_url", "public_id", "categoria_id"])
+        const DATOS_PERMITIDOS = new Set(["nombre", "descripcion", "precio", "stock", "img_url", "public_id", "categoria_id", "subcategoria_id"])
+
+        // Validar subcategoría si se proporciona
+        if (input.subcategoria_id !== undefined && input.subcategoria_id !== null) {
+            let catId = input.categoria_id
+
+            if (catId === undefined) {
+                const currentProduct = await pool.query(
+                    `SELECT categoria_id FROM producto WHERE id = $1`, [id]
+                )
+                if (currentProduct.rows.length === 0) {
+                    return null
+                }
+                catId = currentProduct.rows[0].categoria_id
+            }
+
+            const subcategoriaResult = await pool.query(
+                `SELECT categoria_id FROM subcategoria WHERE id = $1`,
+                [input.subcategoria_id]
+            )
+
+            if (subcategoriaResult.rows.length === 0) {
+                throw new Error('La subcategoría especificada no existe')
+            }
+
+            if (subcategoriaResult.rows[0].categoria_id !== catId) {
+                throw new Error('La subcategoría no pertenece a la categoría especificada')
+            }
+        }
 
         const entries = Object.entries(input).filter(
             ([key]) => DATOS_PERMITIDOS.has(key)
