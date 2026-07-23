@@ -15,17 +15,18 @@ POST http://localhost:3000/productos
 Content-Type: application/json
 
 {
-    "nombre": "RTX 4070 Ti Super",
-    "descripcion": "Tarjeta gráfica NVIDIA RTX 4070 Ti Super 16GB GDDR6X",
-    "precio": 850.00,
-    "stock": 10,
+    "nombre": "RTX 5060",
+    "descripcion": "Tarjeta gráfica NVIDIA RTX 5060 8GB GDDR7",
+    "precio": 420.00,
+    "stock": 15,
     "img_url": "https://fakestoreapi.com/img/81fAn9+IfdL._AC_UY879_.jpg",
     "public_id": "temp",
-    "categoria_id": 1,
+    "categoria_id": 4,
+    "subcategoria_id": 1,
     "caracteristicas": [
-        { "clave": "VRAM", "valor": "16GB" },
-        { "clave": "Memoria", "valor": "GDDR6X" },
-        { "clave": "Bus", "valor": "256-bit" }
+        { "clave": "VRAM", "valor": "8GB" },
+        { "clave": "Memoria", "valor": "GDDR7" },
+        { "clave": "Bus", "valor": "128-bit" }
     ]
 }
 
