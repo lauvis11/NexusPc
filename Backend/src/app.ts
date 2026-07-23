@@ -8,6 +8,7 @@ import { authRouter } from "./routes/auth.js";
 import cookieParser from "cookie-parser";
 import { usuariosRouter } from "./routes/usuarios.js";
 import { ordenesRouter } from "./routes/ordenes.js";
+import { subcategoriasRouter } from "./routes/subcategorias.js";
 
 const app = express();
 const PORT = 3000;
@@ -23,6 +24,7 @@ app.get("/", (_, res) => {
 
 app.use('/productos', productosRouter)
 app.use('/categorias', categoriasRouter)
+app.use('/subcategorias', subcategoriasRouter)
 app.use('/auth', authRouter)
 app.use('/usuarios', usuariosRouter)
 app.use('/ordenes', ordenesRouter)
