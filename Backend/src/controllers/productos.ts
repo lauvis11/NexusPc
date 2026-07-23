@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { ProductosModel } from "../models/productos.js";
 import { ValidateId, ValidatePartialProducto, ValidateProducto } from "../schemas/productos.js";
+import cloudinary from "../config/cloudinary.js";
 
 export class ProductosController{
     static async getAll(req: Request, res: Response, next: NextFunction){
@@ -58,6 +59,14 @@ export class ProductosController{
         }
 
         try{
+            // Si viene un public_id nuevo, destruir la imagen vieja en Cloudinary
+            if (result.data.public_id) {
+                const productoActual = await ProductosModel.getById(validId.data)
+                if (productoActual && productoActual.public_id && productoActual.public_id !== result.data.public_id) {
+                    await cloudinary.uploader.destroy(productoActual.public_id)
+                }
+            }
+
             const productoActualizado = await ProductosModel.update({id: validId.data, input: result.data})
             if(productoActualizado === null) return res.status(404).json({message: "Datos invalidos"})
             return res.status(200).json(productoActualizado)
@@ -74,8 +83,18 @@ export class ProductosController{
         const validId = ValidateId(id)
         if(!validId.success) return res.status(400).json({message: "Datos invalidos"})
         try{
+            // Obtener producto antes de borrar para acceder al public_id
+            const producto = await ProductosModel.getById(validId.data)
+            if(!producto) return res.status(404).json({message: "No se encontro el producto a eliminar"})
+
             const productoEliminado = await ProductosModel.delete(validId.data)
             if(!productoEliminado) return res.status(404).json({message: "No se encontro el producto a eliminar"})
+
+            // Eliminar imagen de Cloudinary
+            if (producto.public_id) {
+                await cloudinary.uploader.destroy(producto.public_id)
+            }
+
             return res.status(200).json({message: 'Producto eliminado con exito'})
         }catch(err){
             return next(err)

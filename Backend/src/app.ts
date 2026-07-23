@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 import { usuariosRouter } from "./routes/usuarios.js";
 import { ordenesRouter } from "./routes/ordenes.js";
 import { subcategoriasRouter } from "./routes/subcategorias.js";
+import { uploadRouter } from "./routes/upload.js";
 
 const app = express();
 const PORT = 3000;
@@ -28,6 +29,7 @@ app.use('/subcategorias', subcategoriasRouter)
 app.use('/auth', authRouter)
 app.use('/usuarios', usuariosRouter)
 app.use('/ordenes', ordenesRouter)
+app.use('/admin/upload', uploadRouter)
 
 app.use(errorHandler)
 
