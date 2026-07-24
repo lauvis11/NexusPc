@@ -173,3 +173,6 @@ Content-Type: image/jpeg
 < ./ejemplo.jpg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
+### Crear preferencia de pago
+POST http://localhost:3000/ordenes/1/pago
+
