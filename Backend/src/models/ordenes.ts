@@ -1,5 +1,7 @@
+import { Preference } from "mercadopago";
 import { pool } from "../config/db.js";
 import type { OrdenInput, EstadoOrden } from "../schemas/ordenes.js";
+import { client } from "../services/mercadopago.js";
 
 export class OrdenesModel{
     static async getAll(){
@@ -225,5 +227,49 @@ export class OrdenesModel{
         } finally {
             client.release()
         }
+    }
+
+    static async crearPreferenciaPago({orden_id, usuario_id}: {orden_id: string, usuario_id: number}){
+        const orden = await pool.query(
+            `SELECT usuario_id, estado FROM orden
+            WHERE id = $1`, [orden_id]
+        )
+        if(orden.rows.length === 0 || orden.rows[0].usuario_id !== usuario_id) throw new Error('La orden no existe')
+        if(orden.rows[0].estado !== 'PENDIENTE') throw new Error('La orden no está pendiente de pago')
+
+        const detalleOrden = await pool.query(
+            `SELECT p.nombre, do.producto_id, do.cantidad, do.precio_unitario
+            FROM detalle_orden do
+            JOIN producto p ON p.id = do.producto_id
+            WHERE do.orden_id = $1`, [orden_id]
+        )
+
+        const items = detalleOrden.rows.map(d => ({
+            id: d.producto_id,
+            title: d.nombre,
+            quantity: d.cantidad,
+            unit_price: Number(d.precio_unitario),
+            currency_id: 'ARS'
+        }))
+
+        const preference = new Preference(client)
+        const resultado = await preference.create({
+            body: {
+                items,
+                external_reference: orden_id,
+                back_urls: {
+                    success: 'http://localhost:3000/pago/exito',
+                    failure: 'http://localhost:3000/pago/error',
+                    pending: 'http://localhost:3000/pago/pendiente'
+                }
+            }
+        })
+        const { id: preferenceId, init_point } = resultado
+        await pool.query(
+            `UPDATE orden SET preference_id = $1 WHERE id = $2`,
+            [preferenceId, orden_id]
+        )
+
+        return { init_point }
     }
 }
