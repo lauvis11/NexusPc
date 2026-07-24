@@ -4,7 +4,8 @@ const requiredEnvVars = [
     'REFRESH_KEY',
     'CLOUDINARY_CLOUD_NAME',
     'CLOUDINARY_API_KEY',
-    'CLOUDINARY_API_SECRET'
+    'CLOUDINARY_API_SECRET',
+    'TEST_ACCESS_TOKEN'
 ] as const
 
 for (const envVar of requiredEnvVars) {
@@ -19,5 +20,6 @@ export const env = {
     REFRESH_KEY: process.env.REFRESH_KEY as string,
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
-    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string
+    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
+    TEST_ACCESS_TOKEN: process.env.TEST_ACCESS_TOKEN as string
 }
