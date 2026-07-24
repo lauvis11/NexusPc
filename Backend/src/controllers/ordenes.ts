@@ -75,4 +75,21 @@ export class OrdenesController{
             return next(err)
         }
     }
+
+    static async crearPreferenciaPago(req: Request, res: Response, next: NextFunction){
+        const usuario = req.usuario
+        if(!usuario) return res.status(401).json({message: 'Acceso no autorizado'})
+        const { id } = req.params as { id: string }
+
+        try{
+            const realizarPago = await OrdenesModel.crearPreferenciaPago({ orden_id: id, usuario_id: usuario.id })
+            return res.status(200).json(realizarPago)
+        }catch(err){
+            if (err instanceof Error) {
+                if (err.message.includes('no existe')) return res.status(404).json({ message: err.message })
+                if (err.message.includes('no está pendiente')) return res.status(409).json({ message: err.message })
+            }
+            return next(err)
+        }
+    }
 }
