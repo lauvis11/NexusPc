@@ -229,34 +229,44 @@ export class OrdenesModel{
         }
     }
 
+    // Creamos el metodo para manejar los pagos, recibe orden_id y usuario_id como parametro
     static async crearPreferenciaPago({orden_id, usuario_id}: {orden_id: string, usuario_id: number}){
+        // Buscamos la orden por su id
         const orden = await pool.query(
             `SELECT usuario_id, estado FROM orden
-            WHERE id = $1`, [orden_id]
+            WHERE id = $1`, [orden_id] // Traemos usuario_id y estado
         )
+        // Si la query no trae datos o si el usuario_id no corresponde con el del parametro tiramos un error
         if(orden.rows.length === 0 || orden.rows[0].usuario_id !== usuario_id) throw new Error('La orden no existe')
+        // Si el estado de la orden es diferente a PENDIENTE tiramos un error
         if(orden.rows[0].estado !== 'PENDIENTE') throw new Error('La orden no está pendiente de pago')
 
+        // Buscamos los detalle de la orden
         const detalleOrden = await pool.query(
             `SELECT p.nombre, do.producto_id, do.cantidad, do.precio_unitario
             FROM detalle_orden do
             JOIN producto p ON p.id = do.producto_id
-            WHERE do.orden_id = $1`, [orden_id]
+            WHERE do.orden_id = $1`, [orden_id] // Traemos el nombre del producto con el JOIN y los detalles de la ordenç
         )
-
-        const items = detalleOrden.rows.map(d => ({
-            id: d.producto_id,
-            title: d.nombre,
-            quantity: d.cantidad,
-            unit_price: Number(d.precio_unitario),
+        
+        // Para cada producto de la orden creamos un objeto con sus datos y lo guardamos en un array 
+        const items = detalleOrden.rows.map(p => ({
+            id: p.producto_id,
+            title: p.nombre,
+            quantity: p.cantidad,
+            unit_price: Number(p.precio_unitario),
             currency_id: 'ARS'
         }))
 
+        // Iniciamos una instancia de preference de mercadopago e utilizamos el cliente de la configuracion 
         const preference = new Preference(client)
+        // Llama a la instancia para crear una "preferencia de pago", un objeto que describe QUÉ se va a cobrar y CÓMO manejar el resultado
         const resultado = await preference.create({
             body: {
-                items,
-                external_reference: orden_id,
+                items, // datos de los productos
+                external_reference: orden_id, // id de la orden del usuario para saber a que orden corresponde ese pago
+                
+                // URLs del frontend a las que MercadoPago redirige al usuario después de que intenta pagar, según cómo haya salido
                 back_urls: {
                     success: 'http://localhost:3000/pago/exito',
                     failure: 'http://localhost:3000/pago/error',
@@ -264,12 +274,16 @@ export class OrdenesModel{
                 }
             }
         })
+
+        // Extraemos de resultado preferenceId e init_point
         const { id: preferenceId, init_point } = resultado
+        // Insertamos el preferenceId en la tabla orden
         await pool.query(
-            `UPDATE orden SET preference_id = $1 WHERE id = $2`,
-            [preferenceId, orden_id]
+            `UPDATE orden SET preference_id = $1
+            WHERE id = $2`, [preferenceId, orden_id]
         )
 
-        return { init_point }
+        // Retornamos init_point
+        return {init_point}
     }
 }
