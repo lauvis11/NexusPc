@@ -20,9 +20,17 @@ export class WebhookController{
             // Si hay un estadoNuevo lo guardamos, si no terminamos la operacion
             const nuevoEstado = mapaEstados[status]
             if(!nuevoEstado) return res.status(200).send()
+
             // Actualizamos el estado del Pago
-            await OrdenesModel.updateEstado({ordenId: external_reference, nuevoEstado})
-            
+            try {
+                await OrdenesModel.updateEstado({ ordenId: external_reference, nuevoEstado })
+            } catch (error) {
+                // Si ya estaba en ese estado o la transición no aplica, no es un error real del webhook,
+                // simplemente ignoramos (probablemente sea un reintento de MercadoPago)
+                if (!(error instanceof Error && error.message.includes('Transición inválida'))) {
+                    throw error // si es otro tipo de error, sí lo propagamos
+                }
+            }
             return res.status(200).send()
         }catch(err){
             return next(err) // Manejamos el error con el middleware
