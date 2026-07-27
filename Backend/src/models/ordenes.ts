@@ -2,6 +2,7 @@ import { Preference } from "mercadopago";
 import { pool } from "../config/db.js";
 import type { OrdenInput, EstadoOrden } from "../schemas/ordenes.js";
 import { client } from "../services/mercadopago.js";
+import { env } from "../config/env.js";
 
 export class OrdenesModel{
     static async getAll(){
@@ -243,10 +244,10 @@ export class OrdenesModel{
 
         // Buscamos los detalle de la orden
         const detalleOrden = await pool.query(
-            `SELECT p.nombre, do.producto_id, do.cantidad, do.precio_unitario
-            FROM detalle_orden do
-            JOIN producto p ON p.id = do.producto_id
-            WHERE do.orden_id = $1`, [orden_id] // Traemos el nombre del producto con el JOIN y los detalles de la ordenç
+            `SELECT p.nombre, det.producto_id, det.cantidad, det.precio_unitario
+            FROM detalle_orden det
+            JOIN producto p ON p.id = det.producto_id
+            WHERE det.orden_id = $1`, [orden_id] // Traemos el nombre del producto con el JOIN y los detalles de la ordenç
         )
         
         // Para cada producto de la orden creamos un objeto con sus datos y lo guardamos en un array 
@@ -271,7 +272,8 @@ export class OrdenesModel{
                     success: 'http://localhost:3000/pago/exito',
                     failure: 'http://localhost:3000/pago/error',
                     pending: 'http://localhost:3000/pago/pendiente'
-                }
+                },
+                notification_url: env.WEBHOOK_URL
             }
         })
 
