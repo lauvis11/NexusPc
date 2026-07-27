@@ -11,10 +11,16 @@ import { ordenesRouter } from "./routes/ordenes.js";
 import { subcategoriasRouter } from "./routes/subcategorias.js";
 import { uploadRouter } from "./routes/upload.js";
 import { webhookRouter } from "./routes/webhooks.js";
+import { env } from "./config/env.js";
 
 const app = express();
 const PORT = 3000;
-app.use(cors())
+app.use(cors({
+    origin: env.FRONTEND_URL,
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE']
+}))
+
 app.use(express.json());
 app.use(cookieParser())
 

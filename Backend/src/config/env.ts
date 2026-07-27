@@ -1,4 +1,5 @@
 const requiredEnvVars = [
+    'FRONTEND_URL',
     'DATABASE_URL',
     'SECRET_KEY',
     'REFRESH_KEY',
@@ -16,6 +17,7 @@ for (const envVar of requiredEnvVars) {
 }
 
 export const env = {
+    FRONTEND_URL: process.env.FRONTEND_URL as string,
     DATABASE_URL: process.env.DATABASE_URL as string,
     SECRET_KEY: process.env.SECRET_KEY as string,
     REFRESH_KEY: process.env.REFRESH_KEY as string,
