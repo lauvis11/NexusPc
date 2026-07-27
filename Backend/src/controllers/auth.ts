@@ -58,19 +58,27 @@ export class AuthController{
         try{
             const verifyRefreshToken = jwt.verify(refreshToken, env.REFRESH_KEY)
             if(!verifyRefreshToken) return res.status(401).json({message: 'Acceso no autorizado'})
-            const payload = verifyRefreshToken as { id: number, rol: string }
+            const payload = verifyRefreshToken as { id: number }
 
             const findRefToken = await AuthModel.findRefreshToken(refreshToken)
             if(findRefToken === null || new Date() > new Date(findRefToken.expires_at)) return res.status(401).json({message: 'Acceso no autorizado'})
 
-            const newAccessToken = jwt.sign({id: payload.id, rol: payload.rol}, env.SECRET_KEY, {
+            // Obtenemos el rol actual desde la DB en lugar de confiar en el token viejo.
+            // Esto garantiza que si el rol del usuario cambió (o la cuenta fue desactivada),
+            // el nuevo access token refleje el estado real.
+            const rolActual = await AuthModel.getRolById(payload.id)
+            if(rolActual === null) return res.status(401).json({message: 'Acceso no autorizado'})
+
+            const newAccessToken = jwt.sign({id: payload.id, rol: rolActual}, env.SECRET_KEY, {
                 expiresIn: '1h'
             })
 
             return res
             .cookie('access-token', newAccessToken, {
                 httpOnly: true,
-                sameSite: 'strict'
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 60 * 60 * 1000  // 1 hora en milisegundos
             })
             .status(200)
             .json({message: 'Token actualizado'})

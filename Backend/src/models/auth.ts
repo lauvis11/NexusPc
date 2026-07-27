@@ -31,7 +31,7 @@ export class AuthModel{
         const { email, password } = input
 
         const usuario = await pool.query(
-            `SELECT id, nombre, password FROM usuario 
+            `SELECT id, nombre, password, rol FROM usuario 
             WHERE email = $1 AND activo = true
             `, [email]
         )
@@ -44,9 +44,9 @@ export class AuthModel{
 
         if(!validPassword) return null
 
-        const {password: _, ...usuarionSinPassword } = usuario.rows[0]
+        const {password: _, ...usuarioSinPassword } = usuario.rows[0]
 
-        return usuarionSinPassword
+        return usuarioSinPassword
     }
 
     static async saveRefreshToken(input: {token: string, usuarioId: number}){
@@ -76,5 +76,16 @@ export class AuthModel{
         )
 
         return true
+    }
+
+    // Obtiene el rol actual del usuario desde la DB.
+    // Se usa en el refresh para no confiar en el rol del token viejo,
+    // garantizando que un cambio de rol se refleje en el siguiente access token.
+    static async getRolById(id: number){
+        const result = await pool.query(
+            `SELECT rol FROM usuario WHERE id = $1 AND activo = true`, [id]
+        )
+        if(result.rows.length === 0) return null
+        return result.rows[0].rol as string
     }
 }
