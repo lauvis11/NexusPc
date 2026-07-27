@@ -3,4 +3,5 @@ import { WebhookController } from "../controllers/webhooks.js";
 
 export const webhookRouter: Router = Router()
 
-webhookRouter.post("/mercadopago", WebhookController.verifyPago)
+// Verificamos la firma y luego actualizamos el estado del pago
+webhookRouter.post("/mercadopago", WebhookController.verificarFirmaMP, WebhookController.verifyPago)

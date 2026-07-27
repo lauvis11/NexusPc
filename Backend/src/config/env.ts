@@ -7,7 +7,8 @@ const requiredEnvVars = [
     'CLOUDINARY_API_KEY',
     'CLOUDINARY_API_SECRET',
     'TEST_ACCESS_TOKEN',
-    'WEBHOOK_URL'
+    'WEBHOOK_URL',
+    'WEBHOOK_SECRET'
 ] as const
 
 for (const envVar of requiredEnvVars) {
@@ -25,5 +26,6 @@ export const env = {
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
     TEST_ACCESS_TOKEN: process.env.TEST_ACCESS_TOKEN as string,
-    WEBHOOK_URL: process.env.WEBHOOK_URL as string
+    WEBHOOK_URL: process.env.WEBHOOK_URL as string,
+    WEBHOOK_SECRET: process.env.WEBHOOK_SECRET as string,
 }
