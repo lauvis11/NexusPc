@@ -59,6 +59,10 @@ export class UsuariosController{
         const { id } = req.params as { id: string }
         const idNum = parseInt(id)
         if(isNaN(idNum)) return res.status(400).json({ message: 'ID inválido' })
+        
+        // Evita que un admin se elimine a sí mismo
+        if(idNum === req.usuario?.id) return res.status(400).json({message: 'No podés eliminar tu propia cuenta'})
+        
         try{
             const desactivarCuenta = await UsuariosModel.deleteUsuario(idNum)
             if(desactivarCuenta === null) return res.status(404).json({message: "No se encontro el usuario"})
