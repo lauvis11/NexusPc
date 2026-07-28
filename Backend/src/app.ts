@@ -12,9 +12,12 @@ import { subcategoriasRouter } from "./routes/subcategorias.js";
 import { uploadRouter } from "./routes/upload.js";
 import { webhookRouter } from "./routes/webhooks.js";
 import { env } from "./config/env.js";
+import helmet from "helmet";
 
 const app = express();
 const PORT = 3000;
+
+app.use(helmet());
 app.use(cors({
     origin: env.FRONTEND_URL,
     credentials: true,
