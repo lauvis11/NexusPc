@@ -111,12 +111,32 @@ export class UsuariosModel{
         if(!validPassword) return null
 
         const hashedNewPassword = await bcrypt.hash(newPassword, 10)
-        await pool.query(
-            `UPDATE usuario SET password = $1 WHERE id = $2
-            `, [hashedNewPassword, id]
-        )
 
-        return true
+        // Usamos una transacción para garantizar atomicidad:
+        // si el DELETE de tokens falla, el UPDATE de contraseña también se revierte,
+        // evitando que la contraseña cambie pero los tokens sigan activos.
+        const client = await pool.connect()
+        try {
+            await client.query('BEGIN')
+
+            await client.query(
+                `UPDATE usuario SET password = $1 WHERE id = $2`, [hashedNewPassword, id]
+            )
+
+            // Invalida todas las sesiones activas (refresh tokens) del usuario,
+            // así si alguien robó un refresh token, deja de servirle apenas cambia la contraseña
+            await client.query(
+                `DELETE FROM refresh_token WHERE usuario_id = $1`, [id]
+            )
+
+            await client.query('COMMIT')
+            return true
+        } catch (error) {
+            await client.query('ROLLBACK')
+            throw error
+        } finally {
+            client.release()
+        }
     }
 
     static async forgotPassword(){}
