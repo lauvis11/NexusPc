@@ -92,9 +92,16 @@ export class AuthController{
         try{
             if(!usuarioId) return res.status(401).json({message: "Acceso no autorizado"})
             await AuthModel.logout(usuarioId)
+
+            const cookieOptions = {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict' as const
+            }
+
             return res
-            .clearCookie("access-token")
-            .clearCookie("refresh-token")
+            .clearCookie("access-token", cookieOptions)
+            .clearCookie("refresh-token", cookieOptions)
             .status(200)
             .json({ message: 'Sesión cerrada correctamente' })
         }catch(err){
