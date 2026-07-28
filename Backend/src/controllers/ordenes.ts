@@ -61,11 +61,14 @@ export class OrdenesController{
         if(usuario.rol !== 'ADMIN') return res.status(403).json({message: 'No tenés permisos para realizar esta acción'})
 
         const { id } = req.params as { id: string }
+        const validId = ValidateId(id)
+        if(!validId.success) return res.status(400).json({message: 'ID de orden inválido'})
+
         const result = ValidateEstadoOrden(req.body)
         if(!result.success) return res.status(400).json({message: 'Estado inválido'})
 
         try{
-            const ordenActualizada = await OrdenesModel.updateEstado({ ordenId: id, nuevoEstado: result.data.estado })
+            const ordenActualizada = await OrdenesModel.updateEstado({ ordenId: validId.data, nuevoEstado: result.data.estado })
             return res.status(200).json(ordenActualizada)
         }catch(err){
             if(err instanceof Error){
