@@ -25,7 +25,10 @@ export class CategoriasController{
     }
 
     static async delete(req: Request, res: Response, next: NextFunction){
-        const { id } = req.params as {id: string}
+        const id = Number(req.params.id)
+        if(isNaN(id) || !Number.isInteger(id) || id <= 0){
+            return res.status(400).json({message: 'El id debe ser un número entero positivo'})
+        }
         try{
             const categoriaEliminada = await CategoriasModel.delete(id)
             if(!categoriaEliminada) return res.status(404).json({message: "No se encontro la categoria a eliminar"})

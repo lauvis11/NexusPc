@@ -23,7 +23,7 @@ export class CategoriasModel{
         return nuevaCategoria.rows[0]
     }
 
-    static async delete(id: string){
+    static async delete(id: number){
         const eliminarCategoria = await pool.query(
             `DELETE FROM categoria WHERE id = $1`, [id]
         )
