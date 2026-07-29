@@ -1,9 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
-import { Payment } from "mercadopago";
+import { Payment, WebhookSignatureValidator, InvalidWebhookSignatureError } from "mercadopago";
 import { client, mapaEstados } from "../services/mercadopago.js";
 import { OrdenesModel } from "../models/ordenes.js";
 import { env } from "../config/env.js";
-import crypto from "crypto";
 
 export class WebhookController{
     // Verifica el pago recibido desde MercadoPago y actualiza el estado de la orden
@@ -38,73 +37,38 @@ export class WebhookController{
         }
     }
 
-    // Metodo que verifica la firma HMAC-SHA256 enviada por MercadoPagoen el header `x-signature`.
+    // Middleware que verifica la firma HMAC-SHA256 de MercadoPago usando el SDK oficial.
+    // Delega en WebhookSignatureValidator (normaliza dataId a minúsculas y hace comparación
+    // en tiempo constante internamente), siguiendo la recomendación oficial de MP.
     static verificarFirmaMP(req: Request, res: Response, next: NextFunction){
         try {
             const xSignature = req.headers['x-signature'] as string | undefined
             const xRequestId = req.headers['x-request-id'] as string | undefined
+            const dataId     = req.query['data.id'] as string | undefined
 
-            // Si no llegan los headers de seguridad, rechazamos la petición
+            // Sin headers de seguridad rechazamos directamente
             if (!xSignature || !xRequestId) {
                 return res.status(400).json({ message: 'Firma de webhook ausente' })
             }
 
-            // Extraemos el data.id del query param (puede venir como "data.id" o "id")
-            const dataId = req.query['data.id'] as string | undefined
+            // Sin data.id puede ser un evento de prueba — dejamos pasar
+            if (!dataId) return next()
 
-            if (!dataId) {
-                // Si no hay data.id (ej: evento de prueba), dejamos pasar sin verificar
-                return next()
-            }
+            WebhookSignatureValidator.validate({
+                xSignature,
+                xRequestId,
+                dataId,
+                secret: env.WEBHOOK_SECRET
+            })
 
-            // Parseamos el header x-signature para extraer ts y v1
-            // Formato: "ts=<timestamp>,v1=<hash>"
-            const partes = xSignature.split(',')
-
-            const ts = partes
-                .find(p => p.trim().startsWith('ts='))
-                ?.split('=')
-                .slice(1)
-                .join('=')
-                .trim()
-
-            const v1 = partes
-                .find(p => p.trim().startsWith('v1='))
-                ?.split('=')
-                .slice(1)
-                .join('=')
-                .trim()
-
-            if (!ts || !v1) {
-                return res.status(400).json({ message: 'Formato de firma inválido' })
-            }
-
-            // Construimos el manifest exactamente como lo define MercadoPago
-            const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`
-
-            // Calculamos el HMAC-SHA256 del manifest con nuestra clave secreta
-            const hmacCalculado = crypto
-                .createHmac('sha256', env.WEBHOOK_SECRET)
-                .update(manifest)
-                .digest('hex')
-
-            // Comparamos en tiempo constante para prevenir ataques de timing
-            const firmaValida = crypto.timingSafeEqual(
-                Buffer.from(hmacCalculado, 'hex'),
-                Buffer.from(v1, 'hex')
-            )
-
-            if (!firmaValida) {
+            return next()
+        } catch (error) {
+            if (error instanceof InvalidWebhookSignatureError) {
                 console.warn('[WEBHOOK] Firma inválida — posible petición no autorizada')
                 return res.status(401).json({ message: 'Firma de webhook inválida' })
             }
-
-            // Firma válida, continuamos al handler
-            return next()
-        } catch (error) {
-            // Si el buffer tiene longitud distinta, timingSafeEqual lanza un error
-            console.warn('[WEBHOOK] Error al verificar firma:', error)
-            return res.status(401).json({ message: 'Firma de webhook inválida' })
+            // Error inesperado (no de firma) → lo propagamos
+            return res.status(500).json({ message: 'Error al verificar firma' })
         }
     }
 }

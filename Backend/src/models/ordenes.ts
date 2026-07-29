@@ -264,10 +264,11 @@ export class OrdenesModel{
         // Llama a la instancia para crear una "preferencia de pago", un objeto que describe QUÉ se va a cobrar y CÓMO manejar el resultado
         const resultado = await preference.create({
             body: {
-                items, // datos de los productos
-                external_reference: orden_id, // id de la orden del usuario para saber a que orden corresponde ese pago
-                
-                // URLs del frontend a las que MercadoPago redirige al usuario después de que intenta pagar, según cómo haya salido
+                items,
+                external_reference: orden_id,
+                // Redirige automáticamente al comprador de vuelta al sitio tras un pago aprobado
+                auto_return: 'approved',
+                // URLs del frontend a las que MercadoPago redirige al usuario según el resultado del pago
                 back_urls: {
                     success: 'http://localhost:3000/pago/exito',
                     failure: 'http://localhost:3000/pago/error',
