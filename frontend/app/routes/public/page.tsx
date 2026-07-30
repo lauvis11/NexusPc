@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Header } from "../../shared/components/layout/Header";
 import { Beneficios } from "../../shared/components/layout/Beneficios";
+import { Footer } from "../../shared/components/layout/Footer";
 import { Categorias } from "../../shared/components/home/Categorias";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -112,6 +113,9 @@ export default function Home() {
         selectedCategoryId={selectedCategory}
         onSelectCategory={(id) => setSelectedCategory(id)}
       />
+
+      {/* FOOTER */}
+      <Footer />
     </div>
   );
 }
