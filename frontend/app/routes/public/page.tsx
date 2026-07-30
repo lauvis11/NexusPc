@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Header } from "../shared/components/layout/Header";
-import { Beneficios } from "../shared/components/layout/Beneficios";
-import { Categorias } from "../shared/components/home/Categorias";
+import { Header } from "../../shared/components/layout/Header";
+import { Beneficios } from "../../shared/components/layout/Beneficios";
+import { Categorias } from "../../shared/components/home/Categorias";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Banners del Hero Carousel

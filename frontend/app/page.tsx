@@ -1,4 +1,4 @@
-import Home from "./public/page";
+import Home from "./routes/public/page";
 
 export default function RootPage() {
   return (
