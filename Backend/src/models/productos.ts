@@ -2,7 +2,17 @@ import { pool } from "../config/db.js";
 import type { ProductoNuevo } from "../schemas/productos.js"
 
 export class ProductosModel{
-    static async getAll({ categoria, subcategoria_id }: {categoria?: string | undefined, subcategoria_id?: number | undefined}){
+    static async getAll({
+        categoria,
+        subcategoria_id,
+        page = 1,
+        limit = 20
+    }: {
+        categoria?: string | undefined
+        subcategoria_id?: number | undefined
+        page?: number
+        limit?: number
+    }) {
         const conditions: string[] = []
         const values: (string | number)[] = []
 
@@ -17,6 +27,22 @@ export class ProductosModel{
         }
 
         const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+
+        // 1. Obtener total de productos filtrados
+        const countQuery = `
+            SELECT COUNT(DISTINCT producto.id) AS total
+            FROM producto
+            JOIN categoria ON categoria.id = producto.categoria_id
+            LEFT JOIN subcategoria ON subcategoria.id = producto.subcategoria_id
+            ${whereClause}
+        `
+        const countResult = await pool.query(countQuery, values)
+        const total = parseInt(countResult.rows[0]?.total ?? '0', 10)
+
+        // 2. Obtener los productos paginados
+        const offset = (page - 1) * limit
+        const limitParamIndex = values.length + 1
+        const offsetParamIndex = values.length + 2
 
         const query = `
             SELECT 
@@ -43,10 +69,17 @@ export class ProductosModel{
             LEFT JOIN caracteristica_producto ON caracteristica_producto.producto_id = producto.id
             ${whereClause}
             GROUP BY producto.id, categoria.nombre, subcategoria.nombre
+            ORDER BY producto.created_at DESC, producto.id DESC
+            LIMIT $${limitParamIndex} OFFSET $${offsetParamIndex}
         `
 
-        const productos = await pool.query(query, values)
-        return productos.rows
+        const paginatedValues = [...values, limit, offset]
+        const productos = await pool.query(query, paginatedValues)
+
+        return {
+            data: productos.rows,
+            total
+        }
     }
 
     static async getById(id: string){

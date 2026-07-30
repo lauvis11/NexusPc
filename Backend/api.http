@@ -1,8 +1,11 @@
-### Para ver todos los productos
+### Para ver todos los productos (con paginación por defecto page=1, limit=20)
 GET http://localhost:3000/productos
 
-### Para filtrar productos por categoria
-GET http://localhost:3000/productos?categoria=Placas de Video
+### Para ver productos paginados especificando página y límite
+GET http://localhost:3000/productos?page=1&limit=20
+
+### Para filtrar productos por categoria y paginar
+GET http://localhost:3000/productos?categoria=Placas de Video&page=1&limit=5
 
 ### Para filtrar productos por subcategoria
 GET http://localhost:3000/productos?subcategoria_id=1

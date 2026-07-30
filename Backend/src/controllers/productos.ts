@@ -17,9 +17,31 @@ export class ProductosController{
             return res.status(400).json({ message: 'El subcategoria_id debe ser un número válido' })
         }
 
+        const rawPage = Number(req.query.page)
+        const rawLimit = Number(req.query.limit)
+
+        const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1
+        const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? rawLimit : 20
+
         try{
-            const productos = await ProductosModel.getAll({ categoria, subcategoria_id })
-            return res.status(200).json(productos)
+            const { data, total } = await ProductosModel.getAll({
+                categoria,
+                subcategoria_id,
+                page,
+                limit
+            })
+
+            const totalPages = Math.ceil(total / limit)
+
+            return res.status(200).json({
+                data,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages
+                }
+            })
         }catch(err){
             return next(err)
         }
