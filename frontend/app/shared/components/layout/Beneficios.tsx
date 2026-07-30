@@ -1,47 +1,39 @@
-import { Truck, CreditCard, ShieldCheck, Headphones } from "lucide-react";
+"use client";
+
+import { Truck, CreditCard, ShieldCheck } from "lucide-react";
 
 export function Beneficios() {
   return (
-    <section className="bg-surface border-b border-border py-8">
+    <section className="w-full py-8 border-b border-border/40 bg-surface-alt/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="flex items-center gap-5 p-4 rounded-2xl">
-            <div className="w-14 h-14 rounded-2xl bg-primary-tint text-primary flex items-center justify-center shrink-0 shadow-xs">
-              <Truck className="w-7 h-7" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-surface border border-border/50 shadow-2xs">
+            <div className="w-12 h-12 rounded-full bg-primary-tint flex items-center justify-center text-primary shrink-0">
+              <Truck className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-bold text-ink text-base sm:text-lg leading-snug">Envíos a todo el país</h4>
-              <p className="text-sm text-ink-secondary mt-0.5">Despacho express en 24hs</p>
+              <h4 className="font-bold text-ink text-sm sm:text-base">Envíos a todo el país</h4>
+              <p className="text-xs text-ink-secondary mt-0.5">Despachos rápidos y asegurados a tu puerta.</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-5 p-4 rounded-2xl">
-            <div className="w-14 h-14 rounded-2xl bg-primary-tint text-primary flex items-center justify-center shrink-0 shadow-xs">
-              <CreditCard className="w-7 h-7" />
+          <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-surface border border-border/50 shadow-2xs">
+            <div className="w-12 h-12 rounded-full bg-primary-tint flex items-center justify-center text-primary shrink-0">
+              <CreditCard className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-bold text-ink text-base sm:text-lg leading-snug">12 Cuotas Fijas</h4>
-              <p className="text-sm text-ink-secondary mt-0.5">Aceptamos todas las tarjetas</p>
+              <h4 className="font-bold text-ink text-sm sm:text-base">12 Cuotas Fijas</h4>
+              <p className="text-xs text-ink-secondary mt-0.5">Aceptamos todas las tarjetas de crédito.</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-5 p-4 rounded-2xl">
-            <div className="w-14 h-14 rounded-2xl bg-primary-tint text-primary flex items-center justify-center shrink-0 shadow-xs">
-              <ShieldCheck className="w-7 h-7" />
+          <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-surface border border-border/50 shadow-2xs">
+            <div className="w-12 h-12 rounded-full bg-primary-tint flex items-center justify-center text-primary shrink-0">
+              <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="font-bold text-ink text-base sm:text-lg leading-snug">Garantía Directa 1 Año</h4>
-              <p className="text-sm text-ink-secondary mt-0.5">Soporte directo oficial</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-5 p-4 rounded-2xl">
-            <div className="w-14 h-14 rounded-2xl bg-primary-tint text-primary flex items-center justify-center shrink-0 shadow-xs">
-              <Headphones className="w-7 h-7" />
-            </div>
-            <div>
-              <h4 className="font-bold text-ink text-base sm:text-lg leading-snug">Asesoramiento Gamer</h4>
-              <p className="text-sm text-ink-secondary mt-0.5">Especialistas en armado</p>
+              <h4 className="font-bold text-ink text-sm sm:text-base">Garantía Oficial NexusPC</h4>
+              <p className="text-xs text-ink-secondary mt-0.5">Componentes 100% originales de marcas líderes.</p>
             </div>
           </div>
         </div>
