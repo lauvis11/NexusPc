@@ -1,7 +1,9 @@
-export default function Home() {
+import Home from "./public/page";
+
+export default function RootPage() {
   return (
-    <main>
-      <h1>NexusPc</h1>
-    </main>
-  );
+    <>
+      <Home />
+    </>
+  )
 }
