@@ -1,20 +1,20 @@
 ### Para ver todos los productos (con paginación por defecto page=1, limit=20)
-GET http://localhost:3000/productos
+GET http://localhost:4000/productos
 
 ### Para ver productos paginados especificando página y límite
-GET http://localhost:3000/productos?page=1&limit=20
+GET http://localhost:4000/productos?page=1&limit=20
 
 ### Para filtrar productos por categoria y paginar
-GET http://localhost:3000/productos?categoria=Placas de Video&page=1&limit=5
+GET http://localhost:4000/productos?categoria=Placas de Video&page=1&limit=5
 
 ### Para filtrar productos por subcategoria
-GET http://localhost:3000/productos?subcategoria_id=1
+GET http://localhost:4000/productos?subcategoria_id=1
 
 ### Para ver un producto por su id
-GET http://localhost:3000/productos/3e27aaeb-a7ca-417b-bc63-562f772e3406
+GET http://localhost:4000/productos/3e27aaeb-a7ca-417b-bc63-562f772e3406
 
 ### Para crear un producto
-POST http://localhost:3000/productos
+POST http://localhost:4000/productos
 Content-Type: application/json
 
 {
@@ -34,7 +34,7 @@ Content-Type: application/json
 }
 
 ### Para editar un producto
-PATCH http://localhost:3000/productos/b10425ea-fd3f-4fff-b580-4c6361f48770
+PATCH http://localhost:4000/productos/b10425ea-fd3f-4fff-b580-4c6361f48770
 Content-Type: application/json
 
 {
@@ -42,13 +42,13 @@ Content-Type: application/json
 }
 
 ### Para eliminar un producto
-DELETE http://localhost:3000/productos/3e27aaeb-a7ca-417b-bc63-562f772e3406
+DELETE http://localhost:4000/productos/3e27aaeb-a7ca-417b-bc63-562f772e3406
 
 ### Para ver todas las categorias
-GET http://localhost:3000/categorias
+GET http://localhost:4000/categorias
 
 ### Para crear una categoria
-POST http://localhost:3000/categorias
+POST http://localhost:4000/categorias
 Content-Type: application/json
 
 {
@@ -56,16 +56,16 @@ Content-Type: application/json
 }
 
 ### Para eliminar una categoria
-DELETE http://localhost:3000/categorias/13
+DELETE http://localhost:4000/categorias/13
 
 ### Para ver todas las subcategorias
-GET http://localhost:3000/subcategorias
+GET http://localhost:4000/subcategorias
 
 ### Para filtrar subcategorias por categoria_id (Select dependiente)
-GET http://localhost:3000/subcategorias?categoria_id=1
+GET http://localhost:4000/subcategorias?categoria_id=1
 
 ### Para crear una subcategoria (solo ADMIN)
-POST http://localhost:3000/subcategorias
+POST http://localhost:4000/subcategorias
 Content-Type: application/json
 
 {
@@ -74,10 +74,10 @@ Content-Type: application/json
 }
 
 ### Para eliminar una subcategoria (solo ADMIN)
-DELETE http://localhost:3000/subcategorias/1
+DELETE http://localhost:4000/subcategorias/1
 
 ### Para registrarse
-POST http://localhost:3000/auth/register
+POST http://localhost:4000/auth/register
 Content-Type: application/json
 
 {
@@ -87,7 +87,7 @@ Content-Type: application/json
 }
 
 ### Para iniciar Sesion
-POST http://localhost:3000/auth/login
+POST http://localhost:4000/auth/login
 Content-Type: application/json
 
 {
@@ -96,10 +96,10 @@ Content-Type: application/json
 }
 
 ### Para cerrar sesion
-POST http://localhost:3000/auth/logout
+POST http://localhost:4000/auth/logout
 
 ### Para recuperar la contraseña
-POST http://localhost:3000/auth/update-password
+POST http://localhost:4000/auth/update-password
 Content-Type: application/json
 
 {
@@ -108,13 +108,13 @@ Content-Type: application/json
 }
 
 ### Para ver todos los usuarios
-GET http://localhost:3000/usuarios
+GET http://localhost:4000/usuarios
 
 ### Para ver el perfil
-GET http://localhost:3000/usuarios/perfil
+GET http://localhost:4000/usuarios/perfil
 
 ### Para crear los datos de facturacion
-POST http://localhost:3000/usuarios/datos-facturacion
+POST http://localhost:4000/usuarios/datos-facturacion
 Content-Type: application/json
 
 {
@@ -127,7 +127,7 @@ Content-Type: application/json
 }
 
 ### Para actualizar los datos de facturacion
-PATCH http://localhost:3000/usuarios/datos-facturacion
+PATCH http://localhost:4000/usuarios/datos-facturacion
 Content-Type: application/json
 
 {
@@ -135,16 +135,16 @@ Content-Type: application/json
 }
 
 ### Para que el admin elimine una cuenta
-DELETE http://localhost:3000/usuarios/2
+DELETE http://localhost:4000/usuarios/2
 
 ### Para ver las ordenes
-GET http://localhost:3000/ordenes
+GET http://localhost:4000/ordenes
 
 ### Para ver una orden por su id
-GET http://localhost:3000/ordenes/507171c5-2c52-4b79-ba68-e0565d4d3ceb
+GET http://localhost:4000/ordenes/507171c5-2c52-4b79-ba68-e0565d4d3ceb
 
 ### Para realizar una orden
-POST http://localhost:3000/ordenes
+POST http://localhost:4000/ordenes
 Content-Type: application/json
 
 {
@@ -157,7 +157,7 @@ Content-Type: application/json
 }
 
 ### Para actualizar el estado de una orden (solo ADMIN)
-PATCH http://localhost:3000/ordenes/d7576046-b2db-4e68-b0ff-b51781532338/estado
+PATCH http://localhost:4000/ordenes/d7576046-b2db-4e68-b0ff-b51781532338/estado
 Content-Type: application/json
 
 {
@@ -165,7 +165,7 @@ Content-Type: application/json
 }
 
 ### Para subir una imagen a Cloudinary (solo ADMIN)
-POST http://localhost:3000/admin/upload
+POST http://localhost:4000/admin/upload
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
@@ -176,6 +176,6 @@ Content-Type: image/jpeg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### Crear preferencia de pago
-POST http://localhost:3000/ordenes/507171c5-2c52-4b79-ba68-e0565d4d3ceb/pago
+POST http://localhost:4000/ordenes/507171c5-2c52-4b79-ba68-e0565d4d3ceb/pago
 
 

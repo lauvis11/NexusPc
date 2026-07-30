@@ -15,7 +15,7 @@ import { env } from "./config/env.js";
 import helmet from "helmet";
 
 const app = express();
-const PORT = 3000;
+const PORT = 4000;
 
 app.use(helmet());
 app.use(cors({
@@ -45,5 +45,5 @@ app.use('/webhooks', webhookRouter)
 app.use(errorHandler)
 
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto: http://localhost/${PORT}`)
+    console.log(`Servidor corriendo en el puerto: http://localhost:${PORT}`)
 })
