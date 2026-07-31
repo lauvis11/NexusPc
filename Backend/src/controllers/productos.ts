@@ -5,8 +5,9 @@ import cloudinary from "../config/cloudinary.js";
 
 export class ProductosController{
     static async getAll(req: Request, res: Response, next: NextFunction){
+        // --- Filtros de categoría (existentes) ---
         const categoria = typeof req.query.categoria === 'string'
-            ? req.query.categoria
+            ? req.query.categoria.trim() || undefined
             : undefined
 
         const subcategoria_id = req.query.subcategoria_id !== undefined
@@ -17,6 +18,36 @@ export class ProductosController{
             return res.status(400).json({ message: 'El subcategoria_id debe ser un número válido' })
         }
 
+        // --- Filtros nuevos ---
+        const precio_min = req.query.precio_min !== undefined
+            ? Number(req.query.precio_min)
+            : undefined
+
+        if (precio_min !== undefined && (isNaN(precio_min) || precio_min < 0)) {
+            return res.status(400).json({ message: 'El precio_min debe ser un número positivo' })
+        }
+
+        const precio_max = req.query.precio_max !== undefined
+            ? Number(req.query.precio_max)
+            : undefined
+
+        if (precio_max !== undefined && (isNaN(precio_max) || precio_max < 0)) {
+            return res.status(400).json({ message: 'El precio_max debe ser un número positivo' })
+        }
+
+        if (precio_min !== undefined && precio_max !== undefined && precio_min > precio_max) {
+            return res.status(400).json({ message: 'El precio_min no puede ser mayor que precio_max' })
+        }
+
+        // en_stock=true filtra solo productos disponibles; cualquier otro valor se ignora
+        const en_stock = req.query.en_stock === 'true' ? true : undefined
+
+        // busqueda: se acepta solo si es string no vacío (el % lo agrega el modelo)
+        const busqueda = typeof req.query.busqueda === 'string'
+            ? req.query.busqueda.trim() || undefined
+            : undefined
+
+        // --- Paginación ---
         const rawPage = Number(req.query.page)
         const rawLimit = Number(req.query.limit)
 
@@ -27,6 +58,10 @@ export class ProductosController{
             const { data, total } = await ProductosModel.getAll({
                 categoria,
                 subcategoria_id,
+                precio_min,
+                precio_max,
+                en_stock,
+                busqueda,
                 page,
                 limit
             })

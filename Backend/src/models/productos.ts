@@ -5,17 +5,26 @@ export class ProductosModel{
     static async getAll({
         categoria,
         subcategoria_id,
+        precio_min,
+        precio_max,
+        en_stock,
+        busqueda,
         page = 1,
         limit = 20
     }: {
-        categoria?: string | undefined
-        subcategoria_id?: number | undefined
+        categoria?: string
+        subcategoria_id?: number
+        precio_min?: number
+        precio_max?: number
+        en_stock?: boolean
+        busqueda?: string
         page?: number
         limit?: number
     }) {
         const conditions: string[] = []
         const values: (string | number)[] = []
 
+        // Filtros ya existentes
         if (categoria) {
             values.push(categoria)
             conditions.push(`categoria.nombre = $${values.length}`)
@@ -26,9 +35,30 @@ export class ProductosModel{
             conditions.push(`producto.subcategoria_id = $${values.length}`)
         }
 
+        // Filtros nuevos — todos parametrizados, sin interpolación de valores
+        if (precio_min !== undefined) {
+            values.push(precio_min)
+            conditions.push(`producto.precio >= $${values.length}`)
+        }
+
+        if (precio_max !== undefined) {
+            values.push(precio_max)
+            conditions.push(`producto.precio <= $${values.length}`)
+        }
+
+        if (en_stock === true) {
+            conditions.push(`producto.stock > 0`)
+        }
+
+        if (busqueda) {
+            // El patrón % se construye en TypeScript y se pasa como valor parametrizado
+            values.push(`%${busqueda}%`)
+            conditions.push(`producto.nombre ILIKE $${values.length}`)
+        }
+
         const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
 
-        // 1. Obtener total de productos filtrados
+        // 1. Obtener total de productos filtrados (con los mismos filtros)
         const countQuery = `
             SELECT COUNT(DISTINCT producto.id) AS total
             FROM producto

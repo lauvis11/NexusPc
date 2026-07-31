@@ -10,8 +10,24 @@ GET http://localhost:4000/productos?categoria=Placas de Video&page=1&limit=5
 ### Para filtrar productos por subcategoria
 GET http://localhost:4000/productos?subcategoria_id=1
 
+### Para buscar productos por nombre (case-insensitive)
+GET http://localhost:4000/productos?busqueda=RTX
+
+### Para filtrar por rango de precio
+GET http://localhost:4000/productos?precio_min=100&precio_max=500
+
+### Para ver solo productos en stock
+GET http://localhost:4000/productos?en_stock=true
+
+### Combinando filtros: categoria + rango de precio + en stock + paginación
+GET http://localhost:4000/productos?categoria=Placas de Video&precio_min=200&precio_max=1000&en_stock=true&page=1&limit=10
+
+### Búsqueda con filtros
+GET http://localhost:4000/productos?busqueda=RTX&precio_max=800&en_stock=true
+
 ### Para ver un producto por su id
 GET http://localhost:4000/productos/3e27aaeb-a7ca-417b-bc63-562f772e3406
+
 
 ### Para crear un producto
 POST http://localhost:4000/productos
