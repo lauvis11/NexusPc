@@ -5,6 +5,7 @@ import { Header } from "../../shared/components/layout/Header";
 import { Beneficios } from "../../shared/components/layout/Beneficios";
 import { Footer } from "../../shared/components/layout/Footer";
 import { Categorias } from "../../shared/components/home/Categorias";
+import { SeccionDestacados } from "../../features/productos/components/SeccionDestacados";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Banners del Hero Carousel
@@ -107,6 +108,9 @@ export default function Home() {
 
       {/* BENEFICIOS */}
       <Beneficios />
+
+      {/* PRODUCTOS DESTACADOS */}
+      <SeccionDestacados />
 
       {/* CATEGORÍAS (Usando el JSON de tu API) */}
       <Categorias
