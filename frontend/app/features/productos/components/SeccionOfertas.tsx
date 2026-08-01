@@ -207,14 +207,14 @@ export function SeccionOfertas({
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrev}
-            className="w-10 h-10 rounded-full border border-border bg-surface text-ink hover:border-green-500 hover:text-green-500 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+            className="w-10 h-10 rounded-full border border-border bg-surface text-ink hover:border-primary hover:text-primary flex items-center justify-center transition-colors shadow-xs cursor-pointer"
             aria-label="Anterior oferta"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={handleNext}
-            className="w-10 h-10 rounded-full border border-border bg-surface text-ink hover:border-green-500 hover:text-green-500 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+            className="w-10 h-10 rounded-full border border-border bg-surface text-ink hover:border-primary hover:text-primary flex items-center justify-center transition-colors shadow-xs cursor-pointer"
             aria-label="Siguiente oferta"
           >
             <ChevronRight className="w-5 h-5" />

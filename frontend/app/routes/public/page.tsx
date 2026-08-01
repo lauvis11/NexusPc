@@ -6,6 +6,7 @@ import { Beneficios } from "../../shared/components/layout/Beneficios";
 import { Footer } from "../../shared/components/layout/Footer";
 import { Categorias } from "../../shared/components/home/Categorias";
 import { SeccionDestacados } from "../../features/productos/components/SeccionDestacados";
+import { SeccionOfertas } from "../../features/productos/components/SeccionOfertas";
 import { SeccionNvidia } from "../../features/productos/components/SeccionNvidia";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -110,8 +111,8 @@ export default function Home() {
       {/* BENEFICIOS */}
       <Beneficios />
 
-      {/* PRODUCTOS DESTACADOS */}
-      <SeccionDestacados />
+      {/* PRODUCTOS EN OFERTA */}
+      <SeccionOfertas />
 
       {/* CATEGORÍAS (Usando el JSON de tu API) */}
       <Categorias
@@ -121,6 +122,9 @@ export default function Home() {
 
       {/* SECCIÓN BRAND NVIDIA */}
       <SeccionNvidia />
+
+      {/* PRODUCTOS DESTACADOS */}
+      <SeccionDestacados />
 
       {/* FOOTER */}
       <Footer />
