@@ -3,6 +3,7 @@ export interface Producto{
     nombre: string
     descripcion: string
     precio: number
+    precioOferta?: number | null
     stock: number
     img_url: string
     public_id: string
