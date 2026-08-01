@@ -6,6 +6,7 @@ import { Beneficios } from "../../shared/components/layout/Beneficios";
 import { Footer } from "../../shared/components/layout/Footer";
 import { Categorias } from "../../shared/components/home/Categorias";
 import { SeccionDestacados } from "../../features/productos/components/SeccionDestacados";
+import { SeccionNvidia } from "../../features/productos/components/SeccionNvidia";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Banners del Hero Carousel
@@ -117,6 +118,9 @@ export default function Home() {
         selectedCategoryId={selectedCategory}
         onSelectCategory={(id) => setSelectedCategory(id)}
       />
+
+      {/* SECCIÓN BRAND NVIDIA */}
+      <SeccionNvidia />
 
       {/* FOOTER */}
       <Footer />
