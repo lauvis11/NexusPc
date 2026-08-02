@@ -56,50 +56,53 @@ export default function Home() {
     <div className="min-h-screen bg-surface-alt text-ink font-sans flex flex-col selection:bg-primary-tint selection:text-primary">
       {/* Header Modular */}
       <Header />
-      <div className="pt-[112px]"></div>
+
+      {/* Spacer responsivo para header fijo (64px en mobile, 112px en desktop) */}
+      <div className="pt-16 sm:pt-[112px]"></div>
 
       {/* HERO CAROUSEL */}
-      <section className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="relative w-full overflow-hidden rounded-2xl border border-border shadow-lg group bg-slate-900">
+      <section className="relative w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-6">
+        <div className="relative w-full overflow-hidden rounded-xl sm:rounded-2xl border border-border shadow-md group bg-slate-950">
           {/* Slide Link */}
           <a
             href={HERO_BANNERS[currentSlide].link}
-            className="relative block w-full h-[220px] sm:h-[340px] md:h-[400px] lg:h-[460px] overflow-hidden"
+            className="relative block w-full h-[180px] xs:h-[220px] sm:h-[340px] md:h-[400px] lg:h-[460px] overflow-hidden"
           >
             <img
               src={HERO_BANNERS[currentSlide].image}
               alt={HERO_BANNERS[currentSlide].title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center"
+              loading="eager"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent to-transparent"></div>
           </a>
 
           {/* Controls */}
           <button
             onClick={prevSlide}
             aria-label="Anterior"
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-ink/70 hover:bg-primary text-surface flex items-center justify-center backdrop-blur-xs border border-surface/20 transition-all opacity-80 hover:opacity-100 shadow-md"
+            className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-ink/70 hover:bg-primary text-surface flex items-center justify-center backdrop-blur-xs border border-surface/20 transition-all opacity-80 hover:opacity-100 shadow-md cursor-pointer"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           <button
             onClick={nextSlide}
             aria-label="Siguiente"
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-ink/70 hover:bg-primary text-surface flex items-center justify-center backdrop-blur-xs border border-surface/20 transition-all opacity-80 hover:opacity-100 shadow-md"
+            className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-ink/70 hover:bg-primary text-surface flex items-center justify-center backdrop-blur-xs border border-surface/20 transition-all opacity-80 hover:opacity-100 shadow-md cursor-pointer"
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
           {/* Indicators */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10 bg-ink/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-surface/10">
+          <div className="absolute bottom-2.5 sm:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:gap-2 z-10 bg-ink/60 backdrop-blur-md px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-surface/10">
             {HERO_BANNERS.map((banner, index) => (
               <button
                 key={banner.id}
                 onClick={() => setCurrentSlide(index)}
-                className={`h-2.5 rounded-full transition-all duration-300 ${
+                className={`h-2 sm:h-2.5 rounded-full transition-all duration-300 ${
                   currentSlide === index
-                    ? "w-7 bg-primary"
-                    : "w-2.5 bg-surface/50 hover:bg-surface"
+                    ? "w-5 sm:w-7 bg-primary"
+                    : "w-2 sm:w-2.5 bg-surface/50 hover:bg-surface"
                 }`}
                 aria-label={`Ir al slide ${index + 1}`}
               />
