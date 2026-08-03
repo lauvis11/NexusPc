@@ -7,10 +7,10 @@ export function Footer() {
     <footer className="w-full bg-surface border-t border-border mt-auto">
       {/* Main Footer Links */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-8 sm:gap-10">
           
-          {/* Brand Column (2 Spans on large screens) */}
-          <div className="lg:col-span-2 space-y-4">
+          {/* Brand Column (2 Spans en todas las pantallas) */}
+          <div className="col-span-2 lg:col-span-2 space-y-4">
             <a href="/" className="inline-flex items-center gap-2">
               <Cpu className="w-7 h-7 text-primary" />
               <span className="text-2xl font-bold tracking-tight text-primary">
@@ -100,7 +100,7 @@ export function Footer() {
           </div>
 
           {/* Columna 3: Legales */}
-          <div className="space-y-4">
+          <div className="col-span-2 sm:col-span-1 lg:col-span-1 space-y-4">
             <h4 className="text-sm font-semibold tracking-wider text-ink uppercase">Legales</h4>
             <ul className="space-y-2.5 text-sm">
               <li>
