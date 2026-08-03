@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductoCard } from "./ProductoCard";
 import type { Producto } from "../types/types";
@@ -169,6 +169,9 @@ export function SeccionOfertas({
 }: SeccionOfertasProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsVisible, setItemsVisible] = useState(4);
+  const [gapPx, setGapPx] = useState(24);
+
+  const touchStartX = useRef<number | null>(null);
 
   // Solo productos en oferta y con stock
   const productosEnOferta = productos.filter(
@@ -178,28 +181,51 @@ export function SeccionOfertas({
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 640) setItemsVisible(1);
-      else if (window.innerWidth < 1024) setItemsVisible(2);
-      else setItemsVisible(4);
+      if (window.innerWidth < 640) {
+        setItemsVisible(2.25); // 2 cards completas + 3ra asomada (< 50%)
+        setGapPx(12);
+      } else if (window.innerWidth < 1024) {
+        setItemsVisible(2);
+        setGapPx(24);
+      } else {
+        setItemsVisible(4);
+        setGapPx(24);
+      }
     };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const maxIndex = Math.max(0, totalItems - itemsVisible);
+  const maxIndex = Math.max(0, totalItems - Math.floor(itemsVisible));
 
   const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
-  const handleNext = () => setCurrentIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
+  const handleNext = () => setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+
+  // Touch handlers para swipe en mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diffX = touchStartX.current - e.changedTouches[0].clientX;
+    if (diffX > 40) {
+      handleNext();
+    } else if (diffX < -40) {
+      handlePrev();
+    }
+    touchStartX.current = null;
+  };
 
   if (productosEnOferta.length === 0) return null;
 
   return (
-    <section className="w-full py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section className="w-full py-8 sm:py-16 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 overflow-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8 gap-4">
+      <div className="flex justify-between items-center mb-6 sm:mb-8 gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
+          <h2 className="text-xl sm:text-3xl font-black text-ink tracking-tight">
             Productos en <span className="text-primary font-black">oferta</span>
           </h2>
         </div>
@@ -207,33 +233,37 @@ export function SeccionOfertas({
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrev}
-            className="w-10 h-10 rounded-full border border-border bg-surface text-ink hover:border-primary hover:text-primary flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-border bg-surface text-ink hover:border-primary hover:text-primary flex items-center justify-center transition-colors shadow-xs cursor-pointer"
             aria-label="Anterior oferta"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
           <button
             onClick={handleNext}
-            className="w-10 h-10 rounded-full border border-border bg-surface text-ink hover:border-primary hover:text-primary flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-border bg-surface text-ink hover:border-primary hover:text-primary flex items-center justify-center transition-colors shadow-xs cursor-pointer"
             aria-label="Siguiente oferta"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>
 
-      {/* Carrusel */}
-      <div className="relative py-2">
+      {/* Carrusel Deslizante */}
+      <div
+        className="relative py-2 touch-pan-y"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <div
-          className="flex transition-transform duration-500 ease-in-out gap-6"
+          className="flex transition-transform duration-500 ease-in-out gap-3 sm:gap-6"
           style={{
-            transform: `translateX(calc(-${currentIndex} * (100% + 1.5rem) / ${itemsVisible}))`,
+            transform: `translateX(calc(-${currentIndex} * (100% + ${gapPx}px) / ${itemsVisible}))`,
           }}
         >
           {productosEnOferta.map((producto) => (
             <div
               key={producto.id}
-              className="w-full sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3*1.5rem)/4)] shrink-0"
+              className="w-[calc((100%-12px)/2.25)] sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3*1.5rem)/4)] shrink-0"
             >
               <ProductoCard producto={producto} onAddToCart={onAddToCart} />
             </div>
