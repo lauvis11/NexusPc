@@ -4,6 +4,7 @@ import { Header } from "../../../../shared/components/layout/Header";
 import { Footer } from "../../../../shared/components/layout/Footer";
 import { ProductoPricing } from "../../../../features/productos/components/ProductoPricing";
 import { Especificaciones } from "../../../../features/productos/components/Especificaciones";
+import { ProductosRelacionados } from "../../../../features/productos/components/ProductosRelacionados";
 import type { Producto } from "../../../../features/productos/types/types";
 
 // Mock del producto individual para prueba
@@ -53,6 +54,12 @@ export default function ProductoIndividualPage() {
           caracteristicas={MOCK_PRODUCTO_INDIVIDUAL.caracteristicas}
           descripcion={MOCK_PRODUCTO_INDIVIDUAL.descripcion}
           nombre={MOCK_PRODUCTO_INDIVIDUAL.nombre}
+        />
+
+        {/* Componente Tercera Sección: Productos Relacionados (Misma Categoría) */}
+        <ProductosRelacionados
+          categoria={MOCK_PRODUCTO_INDIVIDUAL.categoria}
+          productoIdActual={MOCK_PRODUCTO_INDIVIDUAL.id}
         />
       </main>
 
