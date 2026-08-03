@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Cpu,
   Laptop,
@@ -52,6 +52,7 @@ interface CategoriasProps {
 export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const totalSlides = 2;
+  const touchStartX = useRef<number | null>(null);
 
   const handlePrev = () => {
     setCurrentSlide((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
@@ -59,6 +60,21 @@ export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasP
 
   const handleNext = () => {
     setCurrentSlide((prev) => (prev === totalSlides - 1 ? 0 : prev + 1));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diffX = touchStartX.current - e.changedTouches[0].clientX;
+    if (diffX > 40) {
+      handleNext();
+    } else if (diffX < -40) {
+      handlePrev();
+    }
+    touchStartX.current = null;
   };
 
   const renderCategoriaCard = (cat: Categoria) => {
@@ -69,19 +85,19 @@ export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasP
       <button
         key={cat.id}
         onClick={() => onSelectCategory && onSelectCategory(cat.id)}
-        className="flex flex-col items-center justify-center p-3 text-center transition-colors group cursor-pointer w-full"
+        className="flex flex-col items-center justify-center p-1.5 sm:p-3 text-center transition-colors group cursor-pointer w-full select-none"
       >
         <div
-          className={`w-18 h-18 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mb-3 shrink-0 transition-colors ${
+          className={`w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-1.5 sm:mb-3 shrink-0 transition-colors ${
             isSelected
               ? "bg-primary text-surface shadow-md shadow-primary/30"
               : "bg-primary-tint text-primary group-hover:bg-primary group-hover:text-surface"
           }`}
         >
-          <Icon className="w-9 h-9 sm:w-10 sm:h-10" />
+          <Icon className="w-7 h-7 sm:w-10 sm:h-10" />
         </div>
         <h3
-          className={`font-extrabold text-base sm:text-lg tracking-tight leading-snug transition-colors w-full text-center ${
+          className={`font-extrabold text-xs sm:text-lg tracking-tight leading-snug transition-colors w-full text-center ${
             isSelected ? "text-primary font-black" : "text-ink group-hover:text-primary"
           }`}
         >
@@ -99,10 +115,10 @@ export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasP
   ];
 
   return (
-    <section className="py-12 sm:py-16 max-w-7xl mx-auto px-0 sm:px-2 lg:px-2">
-      <div className="flex flex-row justify-between items-center mb-8 w-full px-0 gap-4">
+    <section className="py-8 sm:py-16 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 overflow-hidden">
+      <div className="flex justify-between items-center mb-6 sm:mb-8 gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
+          <h2 className="text-xl sm:text-3xl font-black text-ink tracking-tight">
             Explora nuestras <span className="text-primary font-black">categorías</span>
           </h2>
         </div>
@@ -110,33 +126,37 @@ export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasP
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrev}
-            className="w-10 h-10 rounded-full border border-border bg-surface text-ink hover:border-primary hover:text-primary flex items-center justify-center transition-colors shadow-xs"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-border bg-surface text-ink hover:border-primary hover:text-primary flex items-center justify-center transition-colors shadow-xs cursor-pointer"
             aria-label="Anterior slide"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
           <button
             onClick={handleNext}
-            className="w-10 h-10 rounded-full border border-border bg-surface text-ink hover:border-primary hover:text-primary flex items-center justify-center transition-colors shadow-xs"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-border bg-surface text-ink hover:border-primary hover:text-primary flex items-center justify-center transition-colors shadow-xs cursor-pointer"
             aria-label="Siguiente slide"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>
 
-      {/* Carrusel Slider Continuo */}
-      <div className="overflow-hidden relative py-2">
+      {/* Carrusel Slider Continuo con soporte táctil */}
+      <div
+        className="overflow-hidden relative py-2 touch-pan-y"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <div
-          className="flex transition-transform duration-500 ease-in-out gap-8"
+          className="flex transition-transform duration-500 ease-in-out gap-3 sm:gap-8"
           style={{
-            transform: `translateX(calc(-${currentSlide} * (100% + 2rem) / 3))`,
+            transform: `translateX(calc(-${currentSlide} * (100% + 0.75rem) / 3))`,
           }}
         >
           {COLUMNAS.map((col, idx) => (
             <div
               key={idx}
-              className="w-[calc((100%-2*2rem)/3)] shrink-0 flex flex-col gap-8 items-center"
+              className="w-[calc((100%-2*0.75rem)/3)] sm:w-[calc((100%-2*2rem)/3)] shrink-0 flex flex-col gap-3 sm:gap-8 items-center"
             >
               {renderCategoriaCard(col[0])}
               {renderCategoriaCard(col[1])}
@@ -146,15 +166,15 @@ export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasP
       </div>
 
       {/* Indicadores del Carrusel */}
-      <div className="flex justify-center items-center gap-2 mt-6">
+      <div className="flex justify-center items-center gap-2 mt-4 sm:mt-6">
         {Array.from({ length: totalSlides }).map((_, idx) => (
           <button
             key={idx}
             onClick={() => setCurrentSlide(idx)}
-            className={`h-2.5 rounded-full transition-all duration-300 ${
+            className={`h-2 sm:h-2.5 rounded-full transition-all duration-300 ${
               currentSlide === idx
-                ? "w-8 bg-primary"
-                : "w-2.5 bg-border hover:bg-ink-secondary/50"
+                ? "w-6 sm:w-8 bg-primary"
+                : "w-2 sm:w-2.5 bg-border hover:bg-ink-secondary"
             }`}
             aria-label={`Ir al slide ${idx + 1}`}
           />
