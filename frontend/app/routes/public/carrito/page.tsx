@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { Header } from "../../../shared/components/layout/Header";
 import { Footer } from "../../../shared/components/layout/Footer";
 import { ProductosCarrito } from "../../../features/carrito/components/ProductosCarrito";
+import { ResumenCompra } from "../../../features/carrito/components/ResumenCompra";
 
 export default function CarritoPage() {
   return (
@@ -37,6 +38,11 @@ export default function CarritoPage() {
           {/* ── SECCIÓN 2: LISTA DE PRODUCTOS (LG: 8 Cols) ────────── */}
           <div className="lg:col-span-8">
             <ProductosCarrito />
+          </div>
+
+          {/* ── SECCIÓN 3: RESUMEN DE COMPRA (LG: 4 Cols) ──────────── */}
+          <div className="lg:col-span-4">
+            <ResumenCompra />
           </div>
 
         </div>
