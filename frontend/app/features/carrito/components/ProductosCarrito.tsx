@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import type { Producto } from "../../productos/types/types";
+import { estaEnOferta } from "../../productos/utils/ofertaUtils";
 
 export interface ItemCarrito {
   producto: Producto;
@@ -24,6 +25,7 @@ const MOCK_ITEMS_CARRITO: ItemCarrito[] = [
       nombre: "NVIDIA GeForce RTX 4080 Super 16GB",
       descripcion: "Arquitectura Ada Lovelace con DLSS 3.5 y rendimiento masivo en 4K.",
       precio: 1549000,
+      precioOferta: 1299000,
       stock: 5,
       img_url: "https://lh3.googleusercontent.com/aida-public/AB6AXuCWX3bfpju9Pa0yZXJIJ1Ur4ULqeO3o-YktB6dDt4NibRDy-3WA09S55UPJ-elnLyW_Z3Dv_APKww1Eeu4vP4A0A7o9f0fQ_3zEgs9F4hUJWTIVRBEMBAJp9HVoO05Ak6lX-D73idAYZ7BlvyvWOPClrcPn_CwwkqT5S28S2mdO5RrmsyH7hOIiwaIBN__g9r_rL-MRgxGyiDSDpJI2sSXnbJe2SGCjaXACvtfvK0K7hCCEwA4E4FKy",
       public_id: "rtx-4080-super",
@@ -142,7 +144,10 @@ export function ProductosCarrito({
       {/* Cart Items List */}
       <div className="divide-y divide-border/50">
         {items.map(({ producto, cantidad }) => {
-          const subtotal = producto.precio * cantidad;
+          const enOferta = estaEnOferta(producto);
+          const precioUnitario = enOferta ? producto.precioOferta! : producto.precio;
+          const descuento = enOferta ? producto.precio - producto.precioOferta! : 0;
+          const subtotal = precioUnitario * cantidad;
 
           return (
             <div
@@ -163,9 +168,16 @@ export function ProductosCarrito({
                 </Link>
 
                 <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-ink-secondary/80">
-                    {producto.subcategoria || producto.categoria}
-                  </span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-ink-secondary/80">
+                      {producto.subcategoria || producto.categoria}
+                    </span>
+                    {enOferta && (
+                      <span className="bg-primary/10 text-primary border border-primary/20 text-[10px] font-extrabold px-2 py-0.5 rounded-md">
+                        Descuento de {formatearPrecio(descuento)}
+                      </span>
+                    )}
+                  </div>
                   <Link
                     href={`/productos/${producto.id}`}
                     className="font-bold text-sm sm:text-base text-ink line-clamp-2 leading-snug hover:text-primary transition-colors cursor-pointer"
@@ -182,10 +194,23 @@ export function ProductosCarrito({
                 </div>
               </div>
 
-              {/* Precio Unitario */}
-              <div className="col-span-4 md:col-span-2 flex md:justify-center items-center font-bold text-xs sm:text-sm text-ink">
-                <span className="md:hidden text-ink-secondary font-semibold mr-1">Precio:</span>
-                {formatearPrecio(producto.precio)}
+              {/* Precio */}
+              <div className="col-span-4 md:col-span-2 flex flex-col items-center justify-center text-center">
+                <span className="md:hidden text-ink-secondary font-semibold text-[11px] mb-0.5">Precio:</span>
+                {enOferta ? (
+                  <div className="flex flex-col items-center justify-center leading-tight text-center">
+                    <span className="text-[11px] text-ink-secondary/70 line-through font-normal">
+                      {formatearPrecio(producto.precio)}
+                    </span>
+                    <span className="text-primary font-black text-sm sm:text-base">
+                      {formatearPrecio(producto.precioOferta!)}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="font-black text-sm sm:text-base text-ink">
+                    {formatearPrecio(producto.precio)}
+                  </span>
+                )}
               </div>
 
               {/* Selector de Cantidad */}
