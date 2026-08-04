@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Header } from "../../../shared/components/layout/Header";
 import { Footer } from "../../../shared/components/layout/Footer";
+import { ProductosCarrito } from "../../../features/carrito/components/ProductosCarrito";
 
 export default function CarritoPage() {
   return (
@@ -28,6 +29,16 @@ export default function CarritoPage() {
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
             <span>Continuar comprando</span>
           </Link>
+        </div>
+
+        {/* ── GRID PRINCIPAL DEL CARRITO ──────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* ── SECCIÓN 2: LISTA DE PRODUCTOS (LG: 8 Cols) ────────── */}
+          <div className="lg:col-span-8">
+            <ProductosCarrito />
+          </div>
+
         </div>
 
       </main>
