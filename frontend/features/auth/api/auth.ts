@@ -1,6 +1,6 @@
 import { LoginInput, RegisterInput } from "@/features/auth/schemas/auth.schema";
 
-const API_URL = process.env.NEXT_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function login(data: LoginInput) {
   const response = await fetch(`${API_URL}/auth/login`, {
@@ -16,8 +16,7 @@ export async function login(data: LoginInput) {
     throw new Error(error.message);
   }
 
-  const result = await response.json();
-  return result;
+  return response.json();
 }
 
 export async function register(data: RegisterInput) {
@@ -34,8 +33,7 @@ export async function register(data: RegisterInput) {
     throw new Error(error.message);
   }
 
-  const result = await response.json();
-  return result;
+  return response.json();
 }
 
 export async function logout() {
@@ -48,6 +46,5 @@ export async function logout() {
     throw new Error(error.message);
   }
 
-  const result = await response.json();
-  return result;
+  return response.json();
 }
