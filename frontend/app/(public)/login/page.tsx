@@ -1,6 +1,6 @@
 "use client";
 
-import LoginForm from "@/features/usuarios/components/LoginForm";
+import LoginForm from "@/features/auth/components/LoginForm";
 
 export default function LoginPage() {
   return (
