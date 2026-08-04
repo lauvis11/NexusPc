@@ -1,11 +1,11 @@
 "use client";
 
-import { Header } from "../../../../shared/components/layout/Header";
-import { Footer } from "../../../../shared/components/layout/Footer";
-import { ProductoPricing } from "../../../../features/productos/components/ProductoPricing";
-import { Especificaciones } from "../../../../features/productos/components/Especificaciones";
-import { ProductosRelacionados } from "../../../../features/productos/components/ProductosRelacionados";
-import type { Producto } from "../../../../features/productos/types/types";
+import { Header } from "@/shared/components/layout/Header";
+import { Footer } from "@/shared/components/layout/Footer";
+import { ProductoPricing } from "@/features/productos/components/ProductoPricing";
+import { Especificaciones } from "@/features/productos/components/Especificaciones";
+import { ProductosRelacionados } from "@/features/productos/components/ProductosRelacionados";
+import type { Producto } from "@/features/productos/types/types";
 
 // Mock del producto individual para prueba
 const MOCK_PRODUCTO_INDIVIDUAL: Producto = {

@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Header } from "../../../shared/components/layout/Header";
-import { Footer } from "../../../shared/components/layout/Footer";
-import { ProductosCarrito } from "../../../features/carrito/components/ProductosCarrito";
-import { ResumenCompra } from "../../../features/carrito/components/ResumenCompra";
+import { Header } from "@/shared/components/layout/Header";
+import { Footer } from "@/shared/components/layout/Footer";
+import { ProductosCarrito } from "@/features/carrito/components/ProductosCarrito";
+import { ResumenCompra } from "@/features/carrito/components/ResumenCompra";
 
 export default function CarritoPage() {
   return (

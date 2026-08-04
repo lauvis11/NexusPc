@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Header } from "../../shared/components/layout/Header";
-import { Beneficios } from "../../shared/components/layout/Beneficios";
-import { Footer } from "../../shared/components/layout/Footer";
-import { Categorias } from "../../shared/components/home/Categorias";
-import { SeccionDestacados } from "../../features/productos/components/SeccionDestacados";
-import { SeccionOfertas } from "../../features/productos/components/SeccionOfertas";
-import { SeccionNvidia } from "../../features/productos/components/SeccionNvidia";
+import { Header } from "@/shared/components/layout/Header";
+import { Beneficios } from "@/shared/components/layout/Beneficios";
+import { Footer } from "@/shared/components/layout/Footer";
+import { Categorias } from "@/shared/components/home/Categorias";
+import { SeccionDestacados } from "@/features/productos/components/SeccionDestacados";
+import { SeccionOfertas } from "@/features/productos/components/SeccionOfertas";
+import { SeccionNvidia } from "@/features/productos/components/SeccionNvidia";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Banners del Hero Carousel

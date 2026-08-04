@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Header } from "../../../shared/components/layout/Header";
-import { Footer } from "../../../shared/components/layout/Footer";
-import { ProductoCard } from "../../../features/productos/components/ProductoCard";
+import { Header } from "@/shared/components/layout/Header";
+import { Footer } from "@/shared/components/layout/Footer";
+import { ProductoCard } from "@/features/productos/components/ProductoCard";
 import {
   FiltroCategorias,
   FiltrosState,
-} from "../../../features/productos/components/FiltroCategorias";
-import type { Producto } from "../../../features/productos/types/types";
+} from "@/features/productos/components/FiltroCategorias";
+import type { Producto } from "@/features/productos/types/types";
 import {
   SlidersHorizontal,
   ChevronLeft,
