@@ -27,7 +27,7 @@ export default function RegisterForm() {
     // Validar en tiempo real con Zod
     const result = registerSchema.safeParse(nextData);
     if (!result.success) {
-      const fieldError = result.error.issues.find((issue) => issue.path[0] === field);
+      const fieldError = result.error.issues.find((issue: any) => issue.path[0] === field);
       setErrors((prev) => ({
         ...prev,
         [field]: fieldError ? fieldError.message : undefined,
@@ -53,12 +53,17 @@ export default function RegisterForm() {
     setServerError(null);
     setIsSubmitting(true);
 
-    try{
+    try {
       await register(result.data);
       router.push("/");
-    }catch(error){
-      setServerError(error instanceof Error ? error.message : "Error al registrarse");
-    }finally {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error al registrarse";
+      if (message.includes("Failed to fetch") || message.includes("NetworkError")) {
+        setServerError("Ocurrió un error inesperado en el servidor");
+      } else {
+        setServerError(message);
+      }
+    } finally {
       setIsSubmitting(false);
     }
   };

@@ -55,7 +55,12 @@ export default function LoginForm() {
       await login(result.data);
       router.push("/");
     } catch (error) {
-      setServerError(error instanceof Error ? error.message : "Error al iniciar sesión");
+      const message = error instanceof Error ? error.message : "Error al iniciar sesión";
+      if (message.includes("Failed to fetch") || message.includes("NetworkError")) {
+        setServerError("Ocurrió un error inesperado en el servidor");
+      } else {
+        setServerError(message);
+      }
     } finally {
       setIsSubmitting(false);
     }
