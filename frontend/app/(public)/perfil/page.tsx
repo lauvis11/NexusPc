@@ -6,7 +6,7 @@ import { Footer } from "@/shared/components/layout/Footer";
 import { UserSidebar } from "@/features/auth/components/UserSidebar";
 import { MisDatosForm } from "@/features/auth/components/MisDatosForm";
 import { MisCompras } from "@/features/auth/components/MisCompras";
-import { ShieldCheck } from "lucide-react";
+import { CambiarPasswordForm } from "@/features/auth/components/CambiarPasswordForm";
 
 export default function PerfilPage() {
   const [activeTab, setActiveTab] = useState<
@@ -34,24 +34,7 @@ export default function PerfilPage() {
           <div className="flex-1 w-full bg-surface rounded-2xl p-6 sm:p-8 border border-border shadow-xs">
             {activeTab === "mis-datos" && <MisDatosForm />}
             {activeTab === "mis-compras" && <MisCompras />}
-
-            {activeTab === "cambiar-contraseña" && (
-              <div className="space-y-6">
-                <div className="pb-6 border-b border-border/50">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
-                    Cambiar Contraseña
-                  </h1>
-                  <p className="text-sm text-ink-secondary mt-1">
-                    Actualiza tu contraseña de acceso
-                  </p>
-                </div>
-
-                <div className="p-8 text-center space-y-3 bg-surface-alt/50 rounded-2xl border border-dashed border-border">
-                  <ShieldCheck className="w-10 h-10 text-primary mx-auto" />
-                  <p className="font-extrabold text-ink text-base">Cambio de Contraseña</p>
-                </div>
-              </div>
-            )}
+            {activeTab === "cambiar-contraseña" && <CambiarPasswordForm />}
           </div>
         </div>
       </main>
