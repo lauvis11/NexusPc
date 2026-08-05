@@ -5,7 +5,8 @@ import { Header } from "@/shared/components/layout/Header";
 import { Footer } from "@/shared/components/layout/Footer";
 import { UserSidebar } from "@/features/auth/components/UserSidebar";
 import { MisDatosForm } from "@/features/auth/components/MisDatosForm";
-import { Package, ShieldCheck } from "lucide-react";
+import { MisCompras } from "@/features/auth/components/MisCompras";
+import { ShieldCheck } from "lucide-react";
 
 export default function PerfilPage() {
   const [activeTab, setActiveTab] = useState<
@@ -32,27 +33,7 @@ export default function PerfilPage() {
           {/* Canvas Contenido Principal */}
           <div className="flex-1 w-full bg-surface rounded-2xl p-6 sm:p-8 border border-border shadow-xs">
             {activeTab === "mis-datos" && <MisDatosForm />}
-
-            {activeTab === "mis-compras" && (
-              <div className="space-y-6">
-                <div className="pb-6 border-b border-border/50">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
-                    Mis Compras
-                  </h1>
-                  <p className="text-sm text-ink-secondary mt-1">
-                    Historial y seguimiento de tus pedidos realizados
-                  </p>
-                </div>
-
-                <div className="p-8 text-center space-y-3 bg-surface-alt/50 rounded-2xl border border-dashed border-border">
-                  <Package className="w-10 h-10 text-primary mx-auto" />
-                  <p className="font-extrabold text-ink text-base">Aún no tienes compras realizadas</p>
-                  <p className="text-xs text-ink-secondary max-w-sm mx-auto">
-                    Cuando realices tu primer pedido, podrás seguir su estado de envío y factura desde aquí.
-                  </p>
-                </div>
-              </div>
-            )}
+            {activeTab === "mis-compras" && <MisCompras />}
 
             {activeTab === "cambiar-contraseña" && (
               <div className="space-y-6">
