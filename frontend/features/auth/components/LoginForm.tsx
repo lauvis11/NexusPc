@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
 import { loginSchema, type LoginInput } from "../schemas/auth.schema";
+import { login } from "../api/auth";
 
 export default function LoginForm() {
   const [formData, setFormData] = useState<LoginInput>({
@@ -11,13 +13,15 @@ export default function LoginForm() {
     password: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof LoginInput, string>>>({});
+  const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const router = useRouter();
 
   const handleChange = (field: keyof LoginInput, value: string) => {
     const nextData = { ...formData, [field]: value };
     setFormData(nextData);
+    if (serverError) setServerError(null);
 
     // Validar en tiempo real con Zod
     const result = loginSchema.safeParse(nextData);
@@ -32,30 +36,29 @@ export default function LoginForm() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const result = loginSchema.safeParse(formData);
 
     if (!result.success) {
-      const newErrors: Partial<Record<keyof LoginInput, string>> = {};
-      result.error.issues.forEach((issue: any) => {
-        const fieldName = issue.path[0] as keyof LoginInput;
-        if (!newErrors[fieldName]) {
-          newErrors[fieldName] = issue.message;
-        }
+      return setErrors({
+        email: result.error.issues.find((i: any) => i.path[0] === "email")?.message,
+        password: result.error.issues.find((i: any) => i.path[0] === "password")?.message,
       });
-      setErrors(newErrors);
-      return;
     }
 
     setErrors({});
+    setServerError(null);
     setIsSubmitting(true);
 
-    // Simulación de respuesta de API
-    setTimeout(() => {
+    try {
+      await login(result.data);
+      router.push("/");
+    } catch (error) {
+      setServerError(error instanceof Error ? error.message : "Error al iniciar sesión");
+    } finally {
       setIsSubmitting(false);
-      setSubmitSuccess(true);
-    }, 1000);
+    }
   };
 
   return (
@@ -64,17 +67,18 @@ export default function LoginForm() {
       <div className="bg-surface rounded-2xl p-6 sm:p-8 shadow-xl border border-border relative overflow-hidden backdrop-blur-md">
         <div className="mb-6 text-center">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
-            Bienvenido de nuevo
+            Iniciar Sesión
           </h1>
           <p className="text-sm text-ink-secondary mt-1">
             Ingresa tus datos para acceder a tu cuenta
           </p>
         </div>
 
-        {submitSuccess && (
-          <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-sm font-bold flex items-center gap-2 animate-fade-in">
-            <ShieldCheck className="w-5 h-5 flex-shrink-0" />
-            <span>¡Inicio de sesión exitoso! Redirigiendo...</span>
+        {/* Mensaje de Error del Servidor */}
+        {serverError && (
+          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 text-sm font-bold flex items-center gap-2 animate-fade-in">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <span>{serverError}</span>
           </div>
         )}
 
