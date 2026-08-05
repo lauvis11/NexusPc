@@ -4,19 +4,13 @@ import { useState } from "react";
 import { Header } from "@/shared/components/layout/Header";
 import { Footer } from "@/shared/components/layout/Footer";
 import { UserSidebar } from "@/features/auth/components/UserSidebar";
-import { User, Mail, Phone, Save, Package, ShieldCheck, MapPin } from "lucide-react";
+import { MisDatosForm } from "@/features/auth/components/MisDatosForm";
+import { Package, ShieldCheck } from "lucide-react";
 
 export default function PerfilPage() {
   const [activeTab, setActiveTab] = useState<
-    "mis-datos" | "mis-compras" | "direcciones" | "seguridad" | "favoritos"
+    "mis-datos" | "mis-compras" | "cambiar-contraseña"
   >("mis-datos");
-
-  const [formData, setFormData] = useState({
-    nombre: "Julián",
-    apellido: "Velásquez",
-    email: "julian.v@techcore.com",
-    telefono: "+54 9 11 4000-8800",
-  });
 
   return (
     <div className="min-h-screen bg-surface-alt text-ink font-sans flex flex-col selection:bg-primary-tint selection:text-primary">
@@ -35,97 +29,9 @@ export default function PerfilPage() {
             }}
           />
 
-          {/* Canvas Contenido Principal (Mockup) */}
+          {/* Canvas Contenido Principal */}
           <div className="flex-1 w-full bg-surface rounded-2xl p-6 sm:p-8 border border-border shadow-xs">
-            {activeTab === "mis-datos" && (
-              <div className="space-y-6">
-                <div className="pb-6 border-b border-border/50">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
-                    Información Personal
-                  </h1>
-                  <p className="text-sm text-ink-secondary mt-1">
-                    Actualiza tus datos personales y datos de contacto
-                  </p>
-                </div>
-
-                <form className="grid grid-cols-1 sm:grid-cols-2 gap-6" onSubmit={(e) => e.preventDefault()}>
-                  {/* Nombre */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs sm:text-sm font-bold text-ink">
-                      Nombre
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-secondary" />
-                      <input
-                        type="text"
-                        value={formData.nombre}
-                        onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-sm text-ink focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Apellido */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs sm:text-sm font-bold text-ink">
-                      Apellido
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-secondary" />
-                      <input
-                        type="text"
-                        value={formData.apellido}
-                        onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-sm text-ink focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Email */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs sm:text-sm font-bold text-ink">
-                      Correo Electrónico
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-secondary" />
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-sm text-ink focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Teléfono */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs sm:text-sm font-bold text-ink">
-                      Teléfono
-                    </label>
-                    <div className="relative">
-                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-secondary" />
-                      <input
-                        type="tel"
-                        value={formData.telefono}
-                        onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-sm text-ink focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Guardar Cambios */}
-                  <div className="sm:col-span-2 pt-4 flex justify-end gap-3 border-t border-border/50">
-                    <button
-                      type="submit"
-                      className="inline-flex items-center gap-2 bg-primary text-surface font-extrabold px-6 py-3 rounded-xl hover:bg-primary-hover transition-all shadow-md cursor-pointer"
-                    >
-                      <Save className="w-4 h-4" />
-                      <span>Guardar Cambios</span>
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
+            {activeTab === "mis-datos" && <MisDatosForm />}
 
             {activeTab === "mis-compras" && (
               <div className="space-y-6">
@@ -148,38 +54,20 @@ export default function PerfilPage() {
               </div>
             )}
 
-            {activeTab === "direcciones" && (
+            {activeTab === "cambiar-contraseña" && (
               <div className="space-y-6">
                 <div className="pb-6 border-b border-border/50">
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
-                    Direcciones
+                    Cambiar Contraseña
                   </h1>
                   <p className="text-sm text-ink-secondary mt-1">
-                    Gestiona tus direcciones de envío y facturación
-                  </p>
-                </div>
-
-                <div className="p-8 text-center space-y-3 bg-surface-alt/50 rounded-2xl border border-dashed border-border">
-                  <MapPin className="w-10 h-10 text-primary mx-auto" />
-                  <p className="font-extrabold text-ink text-base">No hay direcciones guardadas</p>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "seguridad" && (
-              <div className="space-y-6">
-                <div className="pb-6 border-b border-border/50">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
-                    Seguridad
-                  </h1>
-                  <p className="text-sm text-ink-secondary mt-1">
-                    Cambio de contraseña y opciones de acceso
+                    Actualiza tu contraseña de acceso
                   </p>
                 </div>
 
                 <div className="p-8 text-center space-y-3 bg-surface-alt/50 rounded-2xl border border-dashed border-border">
                   <ShieldCheck className="w-10 h-10 text-primary mx-auto" />
-                  <p className="font-extrabold text-ink text-base">Seguridad de la Cuenta</p>
+                  <p className="font-extrabold text-ink text-base">Cambio de Contraseña</p>
                 </div>
               </div>
             )}

@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { User, Package, MapPin, Shield, Heart, LogOut } from "lucide-react";
+import { User, Package, Shield, LogOut } from "lucide-react";
 
 interface UserSidebarProps {
-  activeTab?: "mis-datos" | "mis-compras" | "direcciones" | "seguridad" | "favoritos";
+  activeTab?: "mis-datos" | "mis-compras" | "cambiar-contraseña" | string;
   onTabChange?: (tab: string) => void;
 }
 
