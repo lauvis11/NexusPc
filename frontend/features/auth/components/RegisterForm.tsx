@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { User, Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { User, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
 import { registerSchema, type RegisterInput } from "../schemas/auth.schema";
+import { register } from "../api/auth";
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState<RegisterInput>({
@@ -12,18 +14,20 @@ export default function RegisterForm() {
     password: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterInput, string>>>({});
+  const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const router = useRouter();
 
   const handleChange = (field: keyof RegisterInput, value: string) => {
     const nextData = { ...formData, [field]: value };
     setFormData(nextData);
+    if (serverError) setServerError(null);
 
     // Validar en tiempo real con Zod
     const result = registerSchema.safeParse(nextData);
     if (!result.success) {
-      const fieldError = result.error.issues.find((issue: any) => issue.path[0] === field);
+      const fieldError = result.error.issues.find((issue) => issue.path[0] === field);
       setErrors((prev) => ({
         ...prev,
         [field]: fieldError ? fieldError.message : undefined,
@@ -33,30 +37,30 @@ export default function RegisterForm() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     const result = registerSchema.safeParse(formData);
 
     if (!result.success) {
-      const newErrors: Partial<Record<keyof RegisterInput, string>> = {};
-      result.error.issues.forEach((issue: any) => {
-        const fieldName = issue.path[0] as keyof RegisterInput;
-        if (!newErrors[fieldName]) {
-          newErrors[fieldName] = issue.message;
-        }
+      return setErrors({
+        nombre: result.error.issues.find((i: any) => i.path[0] === "nombre")?.message,
+        email: result.error.issues.find((i: any) => i.path[0] === "email")?.message,
+        password: result.error.issues.find((i: any) => i.path[0] === "password")?.message,
       });
-      setErrors(newErrors);
-      return;
     }
 
     setErrors({});
+    setServerError(null);
     setIsSubmitting(true);
 
-    // Simulación de respuesta de API
-    setTimeout(() => {
+    try{
+      await register(result.data);
+      router.push("/");
+    }catch(error){
+      setServerError(error instanceof Error ? error.message : "Error al registrarse");
+    }finally {
       setIsSubmitting(false);
-      setSubmitSuccess(true);
-    }, 1000);
+    }
   };
 
   return (
@@ -72,10 +76,11 @@ export default function RegisterForm() {
           </p>
         </div>
 
-        {submitSuccess && (
-          <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-sm font-bold flex items-center gap-2 animate-fade-in">
-            <ShieldCheck className="w-5 h-5 flex-shrink-0" />
-            <span>¡Registro completado con éxito! Redirigiendo...</span>
+        {/* Mensaje de Error del Servidor */}
+        {serverError && (
+          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 text-sm font-bold flex items-center gap-2 animate-fade-in">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <span>{serverError}</span>
           </div>
         )}
 
