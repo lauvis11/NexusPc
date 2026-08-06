@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Search, ShoppingCart, User, Cpu, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, User, Cpu, Menu, X, LogOut, ChevronDown, Loader2 } from "lucide-react";
+import { useAuth } from "@/features/auth/context/auth-context";
 
 const NAV_LINKS = [
-  { label: "Productos", href: "#" },
-  { label: "Notebooks", href: "#" },
-  { label: "Procesadores", href: "#" },
-  { label: "Tarjetas Gráficas", href: "#" },
-  { label: "Periféricos", href: "#" },
+  { label: "Productos", href: "/productos" },
+  { label: "Notebooks", href: "/productos" },
+  { label: "Procesadores", href: "/productos" },
+  { label: "Tarjetas Gráficas", href: "/productos" },
+  { label: "Periféricos", href: "/productos" },
   { label: "Ayuda", href: "#" },
 ];
 
@@ -17,16 +18,18 @@ export function Header() {
   const [cartCount] = useState(1);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const { user, isLoading, logout } = useAuth();
 
   return (
     <>
       <header className="fixed top-0 w-full z-50 shadow-xs border-b border-border/50">
         {/* ── TOP BAR ──────────────────────────────────────────── */}
         <div className="h-16 flex items-center bg-surface border-b border-border/30">
-          <nav className="relative flex items-center justify-between px-4 sm:px-6 w-full max-w-7xl mx-auto gap-4 sm:gap-8">
+          <nav className="relative flex items-center justify-between px-4 sm:px-6 w-full max-w-7xl mx-auto gap-4 sm:gap-6">
 
-            {/* Left: Hamburger + Logo */}
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Left: Hamburger + Logo (Ancho simétrico en desktop) */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0 sm:w-48">
               <button
                 className="sm:hidden p-2 text-ink-secondary hover:text-primary transition-colors rounded-xl hover:bg-primary-tint/60 cursor-pointer shrink-0"
                 aria-label="Abrir menú"
@@ -43,8 +46,8 @@ export function Header() {
               </a>
             </div>
 
-            {/* Search Bar — only desktop */}
-            <div className="hidden sm:flex flex-grow max-w-2xl items-center bg-primary-tint/50 px-4 py-1.5 rounded-lg border border-border/60 focus-within:border-primary focus-within:bg-surface transition-all">
+            {/* Search Bar — Centrada siempre matemáticamente */}
+            <div className="hidden sm:flex flex-1 max-w-xl mx-auto items-center bg-primary-tint/50 px-4 py-1.5 rounded-lg border border-border/60 focus-within:border-primary focus-within:bg-surface transition-all">
               <Search className="w-4 h-4 text-ink-secondary shrink-0" />
               <input
                 type="text"
@@ -55,8 +58,8 @@ export function Header() {
               />
             </div>
 
-            {/* Right icons */}
-            <div className="flex items-center gap-1 sm:gap-4 shrink-0">
+            {/* Right icons (Ancho simétrico en desktop alineado a la derecha) */}
+            <div className="flex items-center justify-end gap-1 sm:gap-3 shrink-0 sm:w-48">
               {/* Search icon — mobile only */}
               <button
                 className="sm:hidden p-2 text-ink-secondary hover:text-primary transition-colors rounded-xl hover:bg-primary-tint/60 cursor-pointer"
@@ -77,18 +80,74 @@ export function Header() {
                 )}
               </button>
 
-              {/* User — visible on all sizes */}
-              <button
-                className="p-2 sm:p-2.5 text-ink-secondary hover:text-primary transition-colors rounded-xl hover:bg-primary-tint/60 cursor-pointer"
-                aria-label="Cuenta de Usuario"
-              >
-                <User className="w-6 h-6" />
-              </button>
+              {/* User Icon & Dropdown Condicional */}
+              {isLoading ? (
+                <div className="p-2 sm:p-2.5 text-primary shrink-0 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" />
+                </div>
+              ) : user ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setUserDropdownOpen((v) => !v)}
+                    className="p-2 sm:p-2.5 text-ink-secondary hover:text-primary transition-colors rounded-xl hover:bg-primary-tint/60 cursor-pointer flex items-center gap-1.5"
+                    aria-label="Cuenta de Usuario"
+                  >
+                    <User className="w-6 h-6 text-primary" />
+                    <span className="hidden lg:inline text-xs font-bold text-ink max-w-[90px] truncate">
+                      {user.nombre}
+                    </span>
+                    <ChevronDown className="w-3.5 h-3.5 text-ink-secondary hidden sm:inline" />
+                  </button>
+
+                  {/* Dropdown Menu Flotante (Con Borde Azul Principal Solido) */}
+                  {userDropdownOpen && (
+                    <>
+                      {/* Fondo transparente para cerrar al hacer clic afuera */}
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setUserDropdownOpen(false)}
+                      />
+
+                      <div className="absolute right-0 mt-2 w-56 bg-surface rounded-2xl border-2 border-primary shadow-xl z-50 p-2 animate-fade-in space-y-1.5">
+                        {/* Opciones */}
+                        <a
+                          href="/perfil"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-extrabold text-ink hover:bg-primary-tint/50 hover:text-primary transition-colors"
+                        >
+                          <User className="w-5 h-5 text-primary" />
+                          <span>Mi Cuenta</span>
+                        </a>
+
+                        <button
+                          onClick={() => {
+                            setUserDropdownOpen(false);
+                            logout();
+                          }}
+                          className="flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl text-sm font-extrabold text-red-600 hover:bg-red-500/10 transition-colors cursor-pointer"
+                        >
+                          <LogOut className="w-5 h-5 text-red-600" />
+                          <span>Cerrar sesión</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <a
+                  href="/login"
+                  className="p-2 sm:p-2.5 text-ink-secondary hover:text-primary transition-colors rounded-xl hover:bg-primary-tint/60 cursor-pointer flex items-center gap-1.5"
+                  aria-label="Iniciar Sesión"
+                >
+                  <User className="w-6 h-6" />
+                  <span className="hidden lg:inline text-xs font-bold text-ink">Ingresar</span>
+                </a>
+              )}
             </div>
           </nav>
         </div>
 
-        {/* Mobile search bar (expands below header) */}
+        {/* Mobile search bar */}
         {searchOpen && (
           <div className="sm:hidden bg-surface border-b border-border/30 px-4 py-2 flex items-center gap-2">
             <Search className="w-4 h-4 text-ink-secondary shrink-0" />
@@ -120,7 +179,6 @@ export function Header() {
       </header>
 
       {/* ── MOBILE DRAWER ───────────────────────────────────────── */}
-      {/* Backdrop */}
       <div
         className={`fixed inset-0 z-[60] bg-ink/50 backdrop-blur-sm transition-opacity duration-300 sm:hidden ${
           menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
@@ -128,7 +186,6 @@ export function Header() {
         onClick={() => setMenuOpen(false)}
       />
 
-      {/* Slide-in panel */}
       <aside
         className={`fixed top-0 left-0 h-full w-72 z-[70] bg-surface shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out sm:hidden ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
@@ -165,12 +222,44 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Drawer footer */}
-        <div className="px-4 py-4 border-t border-border/30 shrink-0">
-          <button className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-primary-tint/50 text-ink-secondary hover:text-primary transition-colors cursor-pointer">
-            <User className="w-5 h-5" />
-            <span className="text-sm font-semibold">Mi cuenta</span>
-          </button>
+        {/* Drawer footer condicional */}
+        <div className="px-4 py-4 border-t border-border/30 shrink-0 space-y-2">
+          {isLoading ? (
+            <div className="flex items-center justify-center p-3 text-primary">
+              <Loader2 className="w-5 h-5 animate-spin" />
+            </div>
+          ) : user ? (
+            <>
+              <a
+                href="/perfil"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-primary-tint/50 text-ink hover:text-primary transition-colors cursor-pointer"
+              >
+                <User className="w-5 h-5 text-primary" />
+                <span className="text-sm font-bold truncate">Mi cuenta ({user.nombre})</span>
+              </a>
+
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  logout();
+                }}
+                className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-red-500/10 text-red-600 transition-colors cursor-pointer text-left"
+              >
+                <LogOut className="w-5 h-5 text-red-600" />
+                <span className="text-sm font-bold">Cerrar sesión</span>
+              </button>
+            </>
+          ) : (
+            <a
+              href="/login"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-primary-tint/50 text-ink-secondary hover:text-primary transition-colors cursor-pointer"
+            >
+              <User className="w-5 h-5" />
+              <span className="text-sm font-semibold">Iniciar Sesión</span>
+            </a>
+          )}
         </div>
       </aside>
     </>
