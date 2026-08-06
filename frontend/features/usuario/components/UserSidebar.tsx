@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { User, Package, Shield, LogOut } from "lucide-react";
+import { useAuth } from "@/features/auth/context/auth-context";
 
 interface UserSidebarProps {
   activeTab?: "mis-datos" | "mis-compras" | "cambiar-contraseña" | string;
@@ -9,6 +10,8 @@ interface UserSidebarProps {
 }
 
 export function UserSidebar({ activeTab = "mis-datos", onTabChange }: UserSidebarProps) {
+  const { logout } = useAuth();
+
   const menuItems = [
     {
       id: "mis-datos",
@@ -29,6 +32,11 @@ export function UserSidebar({ activeTab = "mis-datos", onTabChange }: UserSideba
       icon: Shield,
     },
   ];
+
+  const handleLogout = async () => {
+    onTabChange?.("logout");
+    await logout();
+  };
 
   return (
     <aside className="w-full lg:w-64 shrink-0">
@@ -63,10 +71,10 @@ export function UserSidebar({ activeTab = "mis-datos", onTabChange }: UserSideba
             );
           })}
 
-          {/* Botón de Cerrar Sesión */}
+          {/* Botón de Cerrar Sesión Real */}
           <div className="pt-4 border-t border-border/60">
             <button
-              onClick={() => onTabChange?.("logout")}
+              onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-600 hover:bg-red-500/10 transition-all text-left cursor-pointer"
             >
               <LogOut className="w-4 h-4 text-red-600" />
