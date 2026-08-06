@@ -1,3 +1,4 @@
+"use client";
 import { useRouter } from "next/navigation";
 import { getPerfil, logout as logoutApi } from "../api/auth";
 import { AuthContextType, Usuario } from "../types/auth";
