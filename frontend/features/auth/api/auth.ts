@@ -1,5 +1,4 @@
 import { LoginInput, RegisterInput } from "@/features/auth/schemas/auth.schema";
-import { Usuario } from "../types/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -47,13 +46,5 @@ export async function logout() {
     throw new Error(error.message);
   }
 
-  return response.json();
-}
-
-export async function getPerfil(): Promise<Usuario | null> {
-  const response = await fetch(`${API_URL}/usuarios/perfil`, {
-    credentials: "include"
-  })
-  if(!response.ok) return null
   return response.json();
 }

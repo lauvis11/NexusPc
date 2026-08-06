@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { getPerfil, logout as logoutApi } from "../api/auth";
+import { logout as logoutApi } from "../api/auth";
+import { getPerfil } from "@/features/usuario/api/usuarios";
 import { AuthContextType, Usuario } from "../types/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 

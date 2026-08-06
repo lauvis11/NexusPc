@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Header } from "@/shared/components/layout/Header";
 import { Footer } from "@/shared/components/layout/Footer";
-import { UserSidebar } from "@/features/auth/components/UserSidebar";
-import { MisDatosForm } from "@/features/auth/components/MisDatosForm";
-import { MisCompras } from "@/features/auth/components/MisCompras";
-import { CambiarPasswordForm } from "@/features/auth/components/CambiarPasswordForm";
+import { UserSidebar } from "@/features/usuario/components/UserSidebar";
+import { MisDatosForm } from "@/features/usuario/components/MisDatosForm";
+import { MisCompras } from "@/features/usuario/components/MisCompras";
+import { CambiarPasswordForm } from "@/features/usuario/components/CambiarPasswordForm";
 
 export default function PerfilPage() {
   const [activeTab, setActiveTab] = useState<
