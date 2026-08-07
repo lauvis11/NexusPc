@@ -15,4 +15,5 @@ export interface AuthContextType{
     user: Usuario | null
     isLoading: boolean
     logout: () => Promise<void>
+    refreshUser: () => Promise<void>
 }

@@ -12,6 +12,11 @@ export function AuthProvider({children}: {children: React.ReactNode}){
     const [isLoading, setIsLoading] = useState(true)
     const router = useRouter()
     
+    async function refreshUser(){
+        const data = await getPerfil()
+        setUser(data)
+    }
+
     useEffect(() => {
         async function verifySession(){
             const data = await getPerfil()
@@ -27,7 +32,11 @@ export function AuthProvider({children}: {children: React.ReactNode}){
         router.push('/')
     }
 
-    return <AuthContext.Provider value={{user, isLoading, logout}}>{children}</AuthContext.Provider>
+    return (
+        <AuthContext.Provider value={{user, isLoading, logout, refreshUser}}>
+            {children}
+        </AuthContext.Provider>
+    )
 
 }
 
