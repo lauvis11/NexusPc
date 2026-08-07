@@ -38,7 +38,7 @@ export function MisDatosForm() {
   // Indica si ya tiene datos de facturación creados
   const tieneDatosFacturacion = user?.nombre_completo !== null && user?.nombre_completo !== undefined;
 
-  // Estado de inputs editables y DNI
+  // Estado de inputs editables
   const [editableData, setEditableData] = useState({
     nombreCompleto: "",
     dni: "",
@@ -48,6 +48,7 @@ export function MisDatosForm() {
     codigoPostal: "",
   });
 
+  const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -66,11 +67,36 @@ export function MisDatosForm() {
     }
   }, [user]);
 
+  const handleChange = (field: string, value: string) => {
+    setEditableData((prev) => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => ({ ...prev, [field]: false }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError(null);
     setSavedSuccess(false);
+
+    // Validar campos requeridos
+    const errors: Record<string, boolean> = {};
+
+    if (!editableData.nombreCompleto.trim()) errors.nombreCompleto = true;
+    if (!tieneDatosFacturacion && !editableData.dni.trim()) errors.dni = true;
+    if (!editableData.provincia.trim()) errors.provincia = true;
+    if (!editableData.direccion.trim()) errors.direccion = true;
+    if (!editableData.ciudad.trim()) errors.ciudad = true;
+    if (!editableData.codigoPostal.trim()) errors.codigoPostal = true;
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError("Por favor completa todos los campos obligatorios.");
+      return;
+    }
+
+    setFieldErrors({});
+    setIsSubmitting(true);
 
     try {
       if (!tieneDatosFacturacion) {
@@ -102,6 +128,16 @@ export function MisDatosForm() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const getInputStyle = (fieldName: string, isDisabled: boolean = false) => {
+    if (isDisabled) {
+      return "bg-surface-alt border border-border/70 font-medium text-ink-secondary cursor-not-allowed select-none opacity-75";
+    }
+    if (fieldErrors[fieldName]) {
+      return "bg-red-500/5 border-2 border-red-500 text-ink font-semibold focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none";
+    }
+    return "bg-surface border border-border font-semibold text-ink focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none";
   };
 
   // Skeleton de Carga
@@ -182,7 +218,7 @@ export function MisDatosForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         {/* ── BLOQUE DE INPUTS ──────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* 1. Nombre (Bloqueado Siempre) */}
@@ -198,31 +234,28 @@ export function MisDatosForm() {
                 disabled
                 readOnly
                 placeholder="Nombre del usuario"
-                className="w-full pl-10 pr-4 py-3 bg-surface-alt border border-border/70 rounded-xl text-sm font-medium text-ink-secondary cursor-not-allowed select-none opacity-75"
+                className={getInputStyle("nombre", true)}
               />
             </div>
           </div>
 
-          {/* 2. DNI / Documento (Permitido solo si user.nombre_completo es null) */}
+          {/* 2. DNI / Documento */}
           <div className="space-y-1.5">
             <label htmlFor="dniInput" className="block text-xs sm:text-sm font-bold text-ink">
-              DNI / Documento
+              DNI / Documento {!tieneDatosFacturacion && <span className="text-red-500">*</span>}
             </label>
             <div className="relative">
-              <IdCard className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${tieneDatosFacturacion ? "text-ink-secondary/60" : "text-ink-secondary"}`} />
+              <IdCard className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${tieneDatosFacturacion ? "text-ink-secondary/60" : fieldErrors.dni ? "text-red-500" : "text-ink-secondary"}`} />
               <input
                 id="dniInput"
                 type="text"
                 value={editableData.dni}
-                onChange={(e) => setEditableData({ ...editableData, dni: e.target.value })}
+                onChange={(e) => handleChange("dni", e.target.value)}
                 disabled={tieneDatosFacturacion}
                 readOnly={tieneDatosFacturacion}
+                required={!tieneDatosFacturacion}
                 placeholder="Ingresa tu DNI"
-                className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm transition-all ${
-                  tieneDatosFacturacion
-                    ? "bg-surface-alt border border-border/70 font-medium text-ink-secondary cursor-not-allowed select-none opacity-75"
-                    : "bg-surface border border-border font-semibold text-ink focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                }`}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm transition-all ${getInputStyle("dni", tieneDatosFacturacion)}`}
               />
             </div>
           </div>
@@ -240,7 +273,7 @@ export function MisDatosForm() {
                 disabled
                 readOnly
                 placeholder="email@ejemplo.com"
-                className="w-full pl-10 pr-4 py-3 bg-surface-alt border border-border/70 rounded-xl text-sm font-medium text-ink-secondary cursor-not-allowed select-none opacity-75"
+                className={getInputStyle("email", true)}
               />
             </div>
           </div>
@@ -248,16 +281,17 @@ export function MisDatosForm() {
           {/* 4. Nombre Completo */}
           <div className="space-y-1.5 sm:col-span-2">
             <label htmlFor="nombreCompleto" className="block text-xs sm:text-sm font-bold text-ink">
-              Nombre Completo
+              Nombre Completo <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-secondary" />
+              <User className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${fieldErrors.nombreCompleto ? "text-red-500" : "text-ink-secondary"}`} />
               <input
                 id="nombreCompleto"
                 type="text"
+                required
                 value={editableData.nombreCompleto}
-                onChange={(e) => setEditableData({ ...editableData, nombreCompleto: e.target.value })}
-                className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-sm font-semibold text-ink focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                onChange={(e) => handleChange("nombreCompleto", e.target.value)}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm transition-all ${getInputStyle("nombreCompleto")}`}
                 placeholder="Tu nombre y apellido completo"
               />
             </div>
@@ -266,15 +300,16 @@ export function MisDatosForm() {
           {/* 5. Provincia */}
           <div className="space-y-1.5 sm:col-span-2">
             <label htmlFor="provincia" className="block text-xs sm:text-sm font-bold text-ink">
-              Provincia
+              Provincia <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-secondary" />
+              <MapPin className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${fieldErrors.provincia ? "text-red-500" : "text-ink-secondary"}`} />
               <select
                 id="provincia"
+                required
                 value={editableData.provincia}
-                onChange={(e) => setEditableData({ ...editableData, provincia: e.target.value })}
-                className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-sm font-semibold text-ink focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer"
+                onChange={(e) => handleChange("provincia", e.target.value)}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm transition-all cursor-pointer ${getInputStyle("provincia")}`}
               >
                 <option value="">Selecciona tu provincia</option>
                 {PROVINCIAS_ARGENTINA.map((prov) => (
@@ -289,16 +324,17 @@ export function MisDatosForm() {
           {/* 6. Dirección */}
           <div className="space-y-1.5 sm:col-span-2">
             <label htmlFor="direccion" className="block text-xs sm:text-sm font-bold text-ink">
-              Dirección
+              Dirección <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <Home className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-secondary" />
+              <Home className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${fieldErrors.direccion ? "text-red-500" : "text-ink-secondary"}`} />
               <input
                 id="direccion"
                 type="text"
+                required
                 value={editableData.direccion}
-                onChange={(e) => setEditableData({ ...editableData, direccion: e.target.value })}
-                className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-sm font-semibold text-ink focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                onChange={(e) => handleChange("direccion", e.target.value)}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm transition-all ${getInputStyle("direccion")}`}
                 placeholder="Ej: Av. Corrientes 1234, Piso 4 B"
               />
             </div>
@@ -307,16 +343,17 @@ export function MisDatosForm() {
           {/* 7. Ciudad */}
           <div className="space-y-1.5">
             <label htmlFor="ciudad" className="block text-xs sm:text-sm font-bold text-ink">
-              Ciudad
+              Ciudad <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-secondary" />
+              <Building className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${fieldErrors.ciudad ? "text-red-500" : "text-ink-secondary"}`} />
               <input
                 id="ciudad"
                 type="text"
+                required
                 value={editableData.ciudad}
-                onChange={(e) => setEditableData({ ...editableData, ciudad: e.target.value })}
-                className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-sm font-semibold text-ink focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                onChange={(e) => handleChange("ciudad", e.target.value)}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm transition-all ${getInputStyle("ciudad")}`}
                 placeholder="Tu ciudad"
               />
             </div>
@@ -325,16 +362,17 @@ export function MisDatosForm() {
           {/* 8. Código Postal */}
           <div className="space-y-1.5">
             <label htmlFor="codigoPostal" className="block text-xs sm:text-sm font-bold text-ink">
-              Código Postal
+              Código Postal <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-secondary" />
+              <Hash className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${fieldErrors.codigoPostal ? "text-red-500" : "text-ink-secondary"}`} />
               <input
                 id="codigoPostal"
                 type="text"
+                required
                 value={editableData.codigoPostal}
-                onChange={(e) => setEditableData({ ...editableData, codigoPostal: e.target.value })}
-                className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-sm font-semibold text-ink focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                onChange={(e) => handleChange("codigoPostal", e.target.value)}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm transition-all ${getInputStyle("codigoPostal")}`}
                 placeholder="Ej: C1043"
               />
             </div>
