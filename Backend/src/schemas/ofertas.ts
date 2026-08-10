@@ -9,7 +9,12 @@ export const OfertaSchema = z.object({
 })
 
 export type OfertaInput = z.infer<typeof OfertaSchema>
+export type OfertaInputPartial = z.infer<typeof OfertaSchema.partial>
 
 export function ValidateOferta(data: unknown) {
     return OfertaSchema.safeParse(data)
+}
+
+export function ValidatePartialOferta(data: unknown){
+    return OfertaSchema.partial().safeParse(data)
 }
