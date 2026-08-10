@@ -28,8 +28,23 @@ export class OfertasController{
         }
 
         try{
-            const productoEnOferta = await OfertasModel.update({id: validId.data, data: result.data})
+            const productoEnOferta = await OfertasModel.update({id: validId.data, input: result.data})
             return res.status(200).json(productoEnOferta)
+        }catch(err){
+            return next(err)
+        }
+    }
+
+    static async delete(req: Request, res: Response, next: NextFunction){
+        const { id } = req.params as {id: string}
+        const validId = ValidateId(id)
+        if(!validId.success){
+            return res.status(400).json({message: "Datos invalidos"})
+        }
+
+        try{
+            await OfertasModel.delete(validId.data)
+            return res.status(200).json({message: "Oferta eliminada exitosamente"})
         }catch(err){
             return next(err)
         }
