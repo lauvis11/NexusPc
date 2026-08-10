@@ -64,6 +64,10 @@ export class ProductosModel{
             FROM producto
             JOIN categoria ON categoria.id = producto.categoria_id
             LEFT JOIN subcategoria ON subcategoria.id = producto.subcategoria_id
+            LEFT JOIN oferta ON oferta.producto_id = producto.id
+                AND oferta.activo = true
+                AND oferta.fecha_inicio <= NOW()
+                AND oferta.fecha_fin >= NOW()
             ${whereClause}
         `
         const countResult = await pool.query(countQuery, values)
@@ -92,13 +96,27 @@ export class ProductosModel{
                         'clave', caracteristica_producto.clave,
                         'valor', caracteristica_producto.valor
                     )
-                ) AS caracteristicas
+                ) AS caracteristicas,
+                CASE 
+                    WHEN oferta.id IS NOT NULL THEN
+                        CASE oferta.tipo
+                            WHEN 'porcentaje' THEN ROUND(producto.precio - (producto.precio * oferta.valor / 100), 2)
+                            WHEN 'monto_fijo' THEN ROUND(producto.precio - oferta.valor, 2)
+                        END
+                    ELSE NULL
+                END AS precio_oferta,
+                oferta.tipo AS oferta_tipo,
+                oferta.valor AS oferta_valor
             FROM producto
             JOIN categoria ON categoria.id = producto.categoria_id
             LEFT JOIN subcategoria ON subcategoria.id = producto.subcategoria_id
             LEFT JOIN caracteristica_producto ON caracteristica_producto.producto_id = producto.id
+            LEFT JOIN oferta ON oferta.producto_id = producto.id
+                AND oferta.activo = true
+                AND oferta.fecha_inicio <= NOW()
+                AND oferta.fecha_fin >= NOW()
             ${whereClause}
-            GROUP BY producto.id, categoria.nombre, subcategoria.nombre
+            GROUP BY producto.id, categoria.nombre, subcategoria.nombre, oferta.id
             ORDER BY producto.created_at DESC, producto.id DESC
             LIMIT $${limitParamIndex} OFFSET $${offsetParamIndex}
         `
