@@ -117,7 +117,23 @@ export class OrdenesModel{
 
             for (const item of productosOrdenados) {
                 const productoResult = await client.query(
-                    `SELECT precio, stock FROM producto WHERE id = $1 FOR UPDATE`,
+                    `SELECT 
+                        producto.precio,
+                        producto.stock,
+                        CASE 
+                            WHEN oferta.id IS NOT NULL THEN
+                                CASE oferta.tipo
+                                    WHEN 'porcentaje' THEN ROUND(producto.precio - (producto.precio * oferta.valor / 100), 2)
+                                    WHEN 'monto_fijo' THEN ROUND(producto.precio - oferta.valor, 2)
+                                END
+                            ELSE NULL
+                        END AS precio_oferta
+                    FROM producto
+                    LEFT JOIN oferta ON oferta.producto_id = producto.id
+                        AND oferta.activo = true
+                        AND oferta.fecha_inicio <= NOW()
+                        AND oferta.fecha_fin >= NOW()
+                    WHERE producto.id = $1 FOR UPDATE`,
                     [item.id]
                 )
 
@@ -125,18 +141,21 @@ export class OrdenesModel{
                     throw new Error(`Producto ${item.id} no encontrado`)
                 }
 
-                const { precio, stock } = productoResult.rows[0]
+                const { precio, stock, precio_oferta } = productoResult.rows[0]
 
                 if (stock < item.cantidad) {
                     throw new Error(`Stock insuficiente para el producto ${item.id}`)
                 }
 
-                total += Number(precio) * item.cantidad
+                // Usar precio_oferta si hay oferta activa, de lo contrario el precio original
+                const precioFinal = precio_oferta !== null ? Number(precio_oferta) : Number(precio)
+
+                total += precioFinal * item.cantidad
 
                 itemsValidados.push({
                     producto_id: item.id,
                     cantidad: item.cantidad,
-                    precio_unitario: Number(precio),
+                    precio_unitario: precioFinal,
                 })
             }
 
