@@ -194,4 +194,23 @@ Content-Type: image/jpeg
 ### Crear preferencia de pago
 POST http://localhost:4000/ordenes/507171c5-2c52-4b79-ba68-e0565d4d3ceb/pago
 
+### Para poner productos en oferta (solo ADMIN)
+POST http://localhost:4000/ofertas
+Content-Type: application/json
+
+{
+    "producto_id": "uuid",
+    "tipo": "porcentaje",
+    "valor": 20,
+    "fecha_inicio": "2026-08-01T00:00:00Z",
+    "fecha_fin": "2026-08-31T23:59:59Z"
+}
+
+### Para actualizar la oferta de un producto
+PATCH http://localhost:4000/ofertas/1
+Content-Type: application/json
+
+{
+    "valor": 20
+}
 
