@@ -13,6 +13,7 @@ import { uploadRouter } from "./routes/upload.js";
 import { webhookRouter } from "./routes/webhooks.js";
 import { env } from "./config/env.js";
 import helmet from "helmet";
+import { ofertasRouter } from "./routes/ofertas.js";
 
 const app = express();
 const PORT = 4000;
@@ -40,6 +41,7 @@ app.use('/auth', authRouter)
 app.use('/usuarios', usuariosRouter)
 app.use('/ordenes', ordenesRouter)
 app.use('/admin/upload', uploadRouter)
+app.use('/ofertas', ofertasRouter)
 app.use('/webhooks', webhookRouter)
 
 app.use(errorHandler)

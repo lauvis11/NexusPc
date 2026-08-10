@@ -214,3 +214,6 @@ Content-Type: application/json
     "valor": 20
 }
 
+### Para eliminar la oferta de un producto
+DELETE http://localhost:4000/ofertas/id
+
