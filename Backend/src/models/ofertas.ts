@@ -11,6 +11,17 @@ export class OfertasModel{
             fecha_fin
         } = input
 
+        if (tipo === 'monto_fijo') {
+            const productoResult = await pool.query(
+                'SELECT precio FROM producto WHERE id = $1', [producto_id]
+            )
+            if (productoResult.rows.length === 0) throw new Error('El producto no existe')
+            const precioProducto = Number(productoResult.rows[0].precio)
+            if (valor >= precioProducto) {
+                throw new Error('El valor del descuento no puede ser mayor o igual al precio del producto')
+            }
+        }
+
         const productoEnOferta = await pool.query(
             `INSERT INTO oferta(producto_id, tipo, valor, fecha_inicio, fecha_fin)
             VALUES($1, $2, $3, $4, $5) RETURNING *
@@ -20,7 +31,7 @@ export class OfertasModel{
     }
 
     static async update({id, input}: {id: string, input: OfertaInputPartial}){
-        const DATOS_PERMITIDOS = new Set(["producto_id", "tipo", "valor", "fecha_inicio", "fecha_fin"])
+        const DATOS_PERMITIDOS = new Set(["producto_id", "tipo", "valor", "fecha_inicio", "fecha_fin", "activo"])
 
         const entries = Object.entries(input as Record<string, unknown>).filter(
             ([key]) => DATOS_PERMITIDOS.has(key)
@@ -29,7 +40,7 @@ export class OfertasModel{
         if (entries.length === 0) return null
 
         const existe = await pool.query(
-            'SELECT id FROM producto WHERE id = $1', [id]
+            'SELECT id FROM oferta WHERE id = $1', [id]
         )
         if(existe.rows.length === 0) return null
 
@@ -38,11 +49,11 @@ export class OfertasModel{
 
         const updateDatos = await pool.query(
             `UPDATE oferta SET ${setClauses.join(', ')} WHERE id = $${values.length + 1}
-            RETURNING producto_id, tipo, valor, fecha_inicio, fecha_fin`,
+            RETURNING producto_id, tipo, valor, fecha_inicio, fecha_fin, activo`,
             [...values, id]
         )
 
-        return updateDatos.rows[0]
+        return updateDatos.rows[0] ?? null
     }
     static async delete(id: string){
         const existe = await pool.query(

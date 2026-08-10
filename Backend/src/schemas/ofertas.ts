@@ -6,6 +6,7 @@ export const OfertaSchema = z.object({
     valor: z.number().positive(),
     fecha_inicio: z.iso.datetime(),
     fecha_fin: z.iso.datetime(),
+    activo: z.boolean().optional().default(true)
 })
 
 export type OfertaInput = z.infer<typeof OfertaSchema>
