@@ -13,7 +13,7 @@ export async function proxy(request: NextRequest) {
   const isProtectedRoute = pathname.startsWith("/perfil");
 
   // Rutas de autenticación pública (login/registro)
-  const isAuthRoute = pathname === "/login" || pathname === "/register";
+  const isAuthRoute = pathname === "/login" || pathname === "/registro";
 
   // Si intenta acceder a ruta protegida sin cookie de sesión
   if (isProtectedRoute && !hasSession) {
@@ -31,5 +31,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/perfil/:path*", "/login", "/register"],
+  matcher: ["/perfil/:path*", "/login", "/registro"],
 };
