@@ -199,7 +199,7 @@ POST http://localhost:4000/ofertas
 Content-Type: application/json
 
 {
-    "producto_id": "uuid",
+    "producto_id": "b10425ea-fd3f-4fff-b580-4c6361f48770",
     "tipo": "porcentaje",
     "valor": 20,
     "fecha_inicio": "2026-08-01T00:00:00Z",
@@ -207,13 +207,13 @@ Content-Type: application/json
 }
 
 ### Para actualizar la oferta de un producto
-PATCH http://localhost:4000/ofertas/1
+PATCH http://localhost:4000/ofertas/b10425ea-fd3f-4fff-b580-4c6361f48770
 Content-Type: application/json
 
 {
-    "valor": 20
+    "activo": false
 }
 
 ### Para eliminar la oferta de un producto
-DELETE http://localhost:4000/ofertas/id
+DELETE http://localhost:4000/ofertas/1
 
