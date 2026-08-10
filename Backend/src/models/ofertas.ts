@@ -44,5 +44,16 @@ export class OfertasModel{
 
         return updateDatos.rows[0]
     }
-    static async delete(id: string){}
+    static async delete(id: string){
+        const existe = await pool.query(
+            'SELECT id FROM oferta WHERE id = $1', [id]
+        )
+        if(existe.rows.length === 0) return null
+
+        await pool.query(
+            'DELETE FROM oferta WHERE id = $1',
+            [id]
+        )
+        return true
+    }
 }
