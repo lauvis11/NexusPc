@@ -47,6 +47,9 @@ export class ProductosController{
             ? req.query.busqueda.trim() || undefined
             : undefined
 
+        // destacado=true filtra solo productos destacados; cualquier otro valor se ignora
+        const destacado = req.query.destacado === 'true' ? true : undefined
+
         // --- Paginación ---
         const rawPage = Number(req.query.page)
         const rawLimit = Number(req.query.limit)
@@ -62,6 +65,7 @@ export class ProductosController{
                 precio_max,
                 en_stock,
                 busqueda,
+                destacado,
                 page,
                 limit
             })

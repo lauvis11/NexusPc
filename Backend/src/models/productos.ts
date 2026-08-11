@@ -9,6 +9,7 @@ export class ProductosModel{
         precio_max,
         en_stock,
         busqueda,
+        destacado,
         page = 1,
         limit = 20
     }: {
@@ -18,6 +19,7 @@ export class ProductosModel{
         precio_max?: number
         en_stock?: boolean
         busqueda?: string
+        destacado?: boolean
         page?: number
         limit?: number
     }) {
@@ -56,6 +58,10 @@ export class ProductosModel{
             conditions.push(`producto.nombre ILIKE $${values.length}`)
         }
 
+        if (destacado === true) {
+            conditions.push(`producto.destacado = true`)
+        }
+
         const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
 
         // 1. Obtener total de productos filtrados (con los mismos filtros)
@@ -88,6 +94,7 @@ export class ProductosModel{
                 img_url, 
                 public_id, 
                 producto.created_at, 
+                producto.destacado,
                 categoria.nombre as categoria,
                 subcategoria.nombre as subcategoria,
                 producto.subcategoria_id,
@@ -142,6 +149,7 @@ export class ProductosModel{
                 img_url, 
                 public_id, 
                 producto.created_at, 
+                producto.destacado,
                 categoria.nombre as categoria,
                 subcategoria.nombre as subcategoria,
                 producto.subcategoria_id,
@@ -250,7 +258,7 @@ export class ProductosModel{
     }
 
     static async update({ id, input}: { id: string; input: Omit<Partial<ProductoNuevo>, 'caracteristicas'>  }){
-        const DATOS_PERMITIDOS = new Set(["nombre", "descripcion", "precio", "stock", "img_url", "public_id", "categoria_id", "subcategoria_id"])
+        const DATOS_PERMITIDOS = new Set(["nombre", "descripcion", "precio", "stock", "img_url", "public_id", "categoria_id", "subcategoria_id", "destacado"])
 
         // Validar subcategoría si se proporciona
         if (input.subcategoria_id !== undefined && input.subcategoria_id !== null) {
