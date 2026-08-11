@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import type { Producto } from "../types/types";
-import { estaEnOferta } from "../utils/ofertaUtils";
+import { estaEnOferta, calcularDescuento } from "../utils/ofertaUtils";
 
 interface ProductoCardProps {
   producto: Producto;
@@ -19,8 +19,8 @@ const formatearPrecio = (valor: number) =>
 
 export function ProductoCard({ producto, onAddToCart }: ProductoCardProps) {
   const enOferta = estaEnOferta(producto);
-  const descuento = enOferta
-    ? producto.precio - producto.precioOferta!
+  const pctDescuento = enOferta
+    ? calcularDescuento(producto.precio, producto.precio_oferta!)
     : 0;
 
   // Obtener marca en mayúsculas (subcategoría o primera palabra del nombre)
@@ -36,7 +36,7 @@ export function ProductoCard({ producto, onAddToCart }: ProductoCardProps) {
       {enOferta && (
         <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 flex items-center gap-1">
           <span className="bg-primary text-white text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-full shadow-md">
-            Ahorras {formatearPrecio(descuento)}
+            -{pctDescuento}%
           </span>
         </div>
       )}
@@ -72,7 +72,7 @@ export function ProductoCard({ producto, onAddToCart }: ProductoCardProps) {
                 </span>
                 {/* Precio de oferta destacado */}
                 <span className="text-xs sm:text-lg font-extrabold text-primary tracking-tight truncate">
-                  {formatearPrecio(producto.precioOferta!)}
+                  {formatearPrecio(producto.precio_oferta!)}
                 </span>
                 <span className="text-[8px] sm:text-[10px] text-ink-secondary/70 uppercase font-semibold tracking-wider mt-0.5">
                   Precio oferta
