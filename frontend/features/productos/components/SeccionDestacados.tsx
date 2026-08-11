@@ -5,6 +5,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductoCard } from "./ProductoCard";
 import type { Producto } from "../types/types";
 
+import { getProductos } from "../api/productos";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
 interface SeccionDestacadosProps {
   onAddToCart?: (producto: Producto) => void;
 }
@@ -21,12 +25,11 @@ export function SeccionDestacados({ onAddToCart }: SeccionDestacadosProps) {
   useEffect(() => {
     const fetchDestacados = async () => {
       try {
-        const res = await fetch(
-          "/api/productos?destacado=true&en_stock=true&limit=12"
+        const response = await getProductos(
+          `${API_URL}/productos?destacado=true&en_stock=true&limit=12`,
+          60
         );
-        if (!res.ok) return;
-        const json = await res.json();
-        setProductos(json.data ?? []);
+        setProductos(response.data ?? []);
       } catch {
         // en caso de error simplemente no se muestra la sección
       } finally {
