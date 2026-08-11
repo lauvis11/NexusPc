@@ -3,7 +3,6 @@ export interface Producto{
     nombre: string
     descripcion: string
     precio: number
-    precioOferta?: number | null
     stock: number
     img_url: string
     public_id: string
@@ -15,6 +14,10 @@ export interface Producto{
         clave: string
         valor: string
     }>
+    destacado: boolean
+    precio_oferta: number | null
+    oferta_tipo: 'porcentaje' | 'monto_fijo' | null
+    oferta_valor: number | null
 }
 
 export interface ProductosResponse{
