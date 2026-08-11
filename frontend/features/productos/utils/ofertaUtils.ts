@@ -6,8 +6,8 @@ import type { Producto } from "../types/types";
  */
 export function estaEnOferta(producto: Producto): boolean {
   return (
-    producto.precioOferta != null &&
-    producto.precioOferta < producto.precio
+    producto.precio_oferta != null &&
+    producto.precio_oferta < producto.precio
   );
 }
 
