@@ -47,8 +47,12 @@ export class ProductosController{
             ? req.query.busqueda.trim() || undefined
             : undefined
 
-        // destacado=true filtra solo productos destacados; cualquier otro valor se ignora
-        const destacado = req.query.destacado === 'true' ? true : undefined
+        // destacado=true filtra productos destacados; destacado=false filtra productos no destacados
+        const destacado = req.query.destacado === 'true'
+            ? true
+            : req.query.destacado === 'false'
+                ? false
+                : undefined
 
         // en_oferta=true filtra productos en oferta activa; en_oferta=false filtra productos sin oferta
         const en_oferta = req.query.en_oferta === 'true'

@@ -62,6 +62,8 @@ export class ProductosModel{
 
         if (destacado === true) {
             conditions.push(`producto.destacado = true`)
+        } else if (destacado === false) {
+            conditions.push(`producto.destacado = false`)
         }
 
         if (en_oferta === true) {
@@ -208,6 +210,7 @@ export class ProductosModel{
             public_id,
             categoria_id,
             subcategoria_id,
+            destacado,
             caracteristicas
         } = input
 
@@ -233,10 +236,10 @@ export class ProductosModel{
             )
 
             const result = await client.query(
-                `INSERT INTO producto(nombre, descripcion, precio, stock, img_url, public_id, categoria_id, subcategoria_id)
-                VALUES($1, $2, $3, $4, $5, $6, $7, $8)
+                `INSERT INTO producto(nombre, descripcion, precio, stock, img_url, public_id, categoria_id, subcategoria_id, destacado)
+                VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 RETURNING id
-                `, [nombre, descripcion, precio, stock, img_url, public_id, categoria_id, subcategoria_id ?? null] 
+                `, [nombre, descripcion, precio, stock, img_url, public_id, categoria_id, subcategoria_id ?? null, destacado] 
             ) 
 
             const productoId = result.rows[0].id
