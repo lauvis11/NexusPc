@@ -50,6 +50,13 @@ export class ProductosController{
         // destacado=true filtra solo productos destacados; cualquier otro valor se ignora
         const destacado = req.query.destacado === 'true' ? true : undefined
 
+        // en_oferta=true filtra productos en oferta activa; en_oferta=false filtra productos sin oferta
+        const en_oferta = req.query.en_oferta === 'true'
+            ? true
+            : req.query.en_oferta === 'false'
+                ? false
+                : undefined
+
         // --- Paginación ---
         const rawPage = Number(req.query.page)
         const rawLimit = Number(req.query.limit)
@@ -66,6 +73,7 @@ export class ProductosController{
                 en_stock,
                 busqueda,
                 destacado,
+                en_oferta,
                 page,
                 limit
             })

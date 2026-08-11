@@ -10,6 +10,7 @@ export class ProductosModel{
         en_stock,
         busqueda,
         destacado,
+        en_oferta,
         page = 1,
         limit = 20
     }: {
@@ -20,6 +21,7 @@ export class ProductosModel{
         en_stock?: boolean
         busqueda?: string
         destacado?: boolean
+        en_oferta?: boolean
         page?: number
         limit?: number
     }) {
@@ -60,6 +62,12 @@ export class ProductosModel{
 
         if (destacado === true) {
             conditions.push(`producto.destacado = true`)
+        }
+
+        if (en_oferta === true) {
+            conditions.push(`oferta.id IS NOT NULL`)
+        } else if (en_oferta === false) {
+            conditions.push(`oferta.id IS NULL`)
         }
 
         const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
