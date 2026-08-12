@@ -19,12 +19,15 @@ interface ProductoPricingProps {
   onAddToCart?: (producto: Producto, cantidad: number) => void;
 }
 
-const formatearPrecio = (valor: number) =>
-  new Intl.NumberFormat("es-AR", {
+const formatearPrecio = (valor: number | string) => {
+  const num = Number(valor);
+  if (isNaN(num)) return "$0";
+  return new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
     maximumFractionDigits: 0,
-  }).format(valor);
+  }).format(num);
+};
 
 export function ProductoPricing({
   producto,
@@ -44,7 +47,7 @@ export function ProductoPricing({
 
   const enOferta = estaEnOferta(producto);
   const descuento = enOferta
-    ? producto.precio - producto.precioOferta!
+    ? Number(producto.precio) - Number(producto.precio_oferta!)
     : 0;
 
   const marca = (
@@ -142,7 +145,7 @@ export function ProductoPricing({
                 </span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl sm:text-4xl font-extrabold text-primary tracking-tight">
-                    {formatearPrecio(producto.precioOferta!)}
+                    {formatearPrecio(producto.precio_oferta!)}
                   </span>
                   <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
                     Precio oferta

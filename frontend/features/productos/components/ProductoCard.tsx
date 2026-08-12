@@ -31,7 +31,10 @@ export function ProductoCard({ producto, onAddToCart }: ProductoCardProps) {
   ).toUpperCase();
 
   return (
-    <div className="group bg-surface border border-border p-3 sm:p-5 rounded-xl sm:rounded-2xl hover:shadow-xl hover:border-primary/30 transition-all flex flex-col h-full relative cursor-pointer select-none">
+    <Link
+      href={`/productos/${producto.id}`}
+      className="group bg-surface border border-border p-3 sm:p-5 rounded-xl sm:rounded-2xl hover:shadow-xl hover:border-primary/30 transition-all flex flex-col h-full relative cursor-pointer select-none"
+    >
       {/* Badge de Oferta sobre la imagen */}
       {enOferta && (
         <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 flex items-center gap-1">
@@ -92,24 +95,22 @@ export function ProductoCard({ producto, onAddToCart }: ProductoCardProps) {
 
           <button
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onAddToCart && onAddToCart(producto);
             }}
             aria-label={`Agregar ${producto.nombre} al carrito`}
-            className="w-8 h-8 sm:w-11 sm:h-11 bg-primary text-surface rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all shadow-sm shrink-0 cursor-pointer"
+            className="w-8 h-8 sm:w-11 sm:h-11 bg-primary text-surface rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all shadow-sm shrink-0 cursor-pointer relative z-20"
           >
             <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
-        <Link
-          href={`/productos/${producto.id}`}
-          className="w-full py-1.5 sm:py-2.5 px-2 sm:px-4 border border-border rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold text-ink-secondary group-hover:bg-primary group-hover:text-surface group-hover:border-primary transition-all text-center block"
-        >
+        <span className="w-full py-1.5 sm:py-2.5 px-2 sm:px-4 border border-border rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold text-ink-secondary group-hover:bg-primary group-hover:text-surface group-hover:border-primary transition-all text-center block">
           Ver más
-        </Link>
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }
 

@@ -145,8 +145,8 @@ export function ProductosCarrito({
       <div className="divide-y divide-border/50">
         {items.map(({ producto, cantidad }) => {
           const enOferta = estaEnOferta(producto);
-          const precioUnitario = enOferta ? producto.precioOferta! : producto.precio;
-          const descuento = enOferta ? producto.precio - producto.precioOferta! : 0;
+          const precioUnitario = enOferta ? Number(producto.precio_oferta!) : Number(producto.precio);
+          const descuento = enOferta ? Number(producto.precio) - Number(producto.precio_oferta!) : 0;
           const subtotal = precioUnitario * cantidad;
 
           return (
@@ -203,7 +203,7 @@ export function ProductosCarrito({
                       {formatearPrecio(producto.precio)}
                     </span>
                     <span className="text-primary font-black text-sm sm:text-base">
-                      {formatearPrecio(producto.precioOferta!)}
+                      {formatearPrecio(producto.precio_oferta!)}
                     </span>
                   </div>
                 ) : (
