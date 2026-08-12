@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, AlertCircle, RotateCcw } from "lucide-react";
 import { ProductoCard } from "./ProductoCard";
+import { SeccionSkeleton } from "./SeccionSkeleton";
 import type { Producto } from "../types/types";
 import { getProductos } from "../api/productos";
 
@@ -83,26 +84,10 @@ export function SeccionDestacados({ onAddToCart }: SeccionDestacadosProps) {
     touchStartX.current = null;
   };
 
-  // Skeleton placeholders durante la carga
+  // Estado de Carga con SeccionSkeleton
   if (loading) {
     return (
-      <section className="w-full py-8 sm:py-16 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="flex justify-between items-center mb-6 sm:mb-8 gap-4">
-          <div className="h-8 w-56 bg-surface rounded-lg animate-pulse" />
-          <div className="flex gap-2">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-surface animate-pulse" />
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-surface animate-pulse" />
-          </div>
-        </div>
-        <div className="flex gap-3 sm:gap-6">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="w-[calc((100%-12px)/2.25)] sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3*1.5rem)/4)] shrink-0 h-72 sm:h-96 bg-surface rounded-xl animate-pulse"
-            />
-          ))}
-        </div>
-      </section>
+      <SeccionSkeleton titulo="Productos" subtituloHighlight="destacados" />
     );
   }
 
