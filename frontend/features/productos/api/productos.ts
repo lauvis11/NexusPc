@@ -7,13 +7,19 @@ export async function getProductos(url: string, revalidate: number): Promise<Pro
     return productos
 }
 
-export async function getProductoIndividual(id: string): Promise<Producto> {
-    const url = `${process.env.NEXT_API_URL}/api/v1/productos/${id}`
-    const res = await fetch(url, {
-        next: {tags: [`producto-${id}`]}
-    })
-    if(!res.ok) throw new Error('Error al obtener el producto')
-    const producto: Producto = await res.json()
-    return producto
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+export async function getProductoIndividual(id: string): Promise<Producto | null> {
+    try {
+        const url = `${API_URL}/productos/${id}`
+        const res = await fetch(url, {
+            next: { revalidate: 60, tags: [`producto-${id}`] }
+        })
+        if (!res.ok) return null
+        const producto: Producto = await res.json()
+        return producto
+    } catch {
+        return null
+    }
 }
 
