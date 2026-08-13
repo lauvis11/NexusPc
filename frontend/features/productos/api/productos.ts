@@ -1,4 +1,4 @@
-import type { Producto, ProductosResponse } from "../types/types"
+import type { Categoria, Producto, ProductosResponse, SubCategoria } from "../types/types"
 
 export async function getProductos(url: string, revalidate: number): Promise<ProductosResponse> {
     const res = await fetch(url, { next: { revalidate: revalidate } })
@@ -21,5 +21,17 @@ export async function getProductoIndividual(id: string): Promise<Producto | null
     } catch {
         return null
     }
+}
+
+export async function getCategorias(): Promise<Categoria[]> {
+    const res = await fetch(`${API_URL}/categorias`, { next: { revalidate: 60 } })
+    if (!res.ok) throw new Error('Error al obtener las categorias')
+    return res.json()
+}
+
+export async function getSubCategorias(): Promise<SubCategoria[]> {
+    const res = await fetch(`${API_URL}/subcategorias`, { next: { revalidate: 60 } })
+    if (!res.ok) throw new Error('Error al obtener las subcategorias')
+    return res.json()
 }
 

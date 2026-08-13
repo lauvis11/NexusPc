@@ -29,3 +29,14 @@ export interface ProductosResponse{
     totalPages: number
     }
 }
+
+export interface Categoria{
+    id: number, 
+    nombre: string 
+}
+
+export interface SubCategoria{
+    id: number, 
+    nombre: string,
+    categoria_id: number
+}
