@@ -26,12 +26,14 @@ export async function getProductoIndividual(id: string): Promise<Producto | null
 export async function getCategorias(): Promise<Categoria[]> {
     const res = await fetch(`${API_URL}/categorias`, { next: { revalidate: 60 } })
     if (!res.ok) throw new Error('Error al obtener las categorias')
-    return res.json()
+    const data = await res.json()
+    return data.categorias ?? data
 }
 
 export async function getSubCategorias(): Promise<SubCategoria[]> {
     const res = await fetch(`${API_URL}/subcategorias`, { next: { revalidate: 60 } })
     if (!res.ok) throw new Error('Error al obtener las subcategorias')
-    return res.json()
+    const data = await res.json()
+    return data.value ?? data
 }
 
