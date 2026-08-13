@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import {
   Layers,
   ChevronDown,
-  ChevronUp,
   Check,
   ArrowLeft,
   SlidersHorizontal,
@@ -258,52 +257,59 @@ export function FiltroCategorias({
             const hasSub = !!cat.subcategorias?.length;
 
             return (
-              <div key={cat.id} className="rounded-xl overflow-hidden">
-                {/* Fila Categoría Principal */}
+              <div key={cat.id} className="rounded-xl">
+                {/* Fila Categoría Principal — solo abre/cierra acordeón */}
                 <div
-                  className="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all cursor-pointer text-ink hover:bg-surface-alt hover:text-primary font-semibold"
-                  onClick={() => {
-                    handleSelectCategory(cat);
-                  }}
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 cursor-pointer font-semibold ${
+                    isOpen
+                      ? "bg-primary-tint/50 text-primary"
+                      : "text-ink hover:bg-surface-alt hover:text-primary"
+                  }`}
+                  onClick={() => toggleAccordion(cat.id)}
                 >
                   <span className="text-xs sm:text-sm">{cat.nombre}</span>
-
-                  {hasSub && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleAccordion(cat.id);
-                      }}
-                      className="p-1 text-ink-secondary hover:text-primary transition-transform cursor-pointer rounded-lg hover:bg-surface"
-                      aria-label="Desplegar subcategorías"
-                    >
-                      {isOpen ? (
-                        <ChevronUp className="w-4 h-4 text-primary" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-ink-secondary" />
-                      )}
-                    </button>
-                  )}
+                  <div
+                    className={`p-1 transition-transform duration-300 ease-in-out ${
+                      isOpen ? "rotate-180" : "rotate-0"
+                    }`}
+                  >
+                    <ChevronDown className={`w-4 h-4 ${isOpen ? "text-primary" : "text-ink-secondary"}`} />
+                  </div>
                 </div>
 
-                {/* Subcategorías Desplegables */}
-                {hasSub && isOpen && (
-                  <div className="pl-4 pr-1 py-1 space-y-0.5 border-l-2 border-primary/20 ml-3 my-1">
-                    {cat.subcategorias!.map((sub) => (
-                      <div
-                        key={sub.id}
-                        onClick={() => {
-                          handleSelectCategory(cat);
-                          handleSelectSubcategoria(sub.id);
-                        }}
-                        className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer text-ink-secondary hover:text-primary hover:bg-primary-tint/40 font-medium"
-                      >
-                        <span>{sub.nombre}</span>
-                      </div>
-                    ))}
+                {/* Contenido Desplegable con animación */}
+                <div
+                  className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+                  style={{
+                    gridTemplateRows: isOpen ? "1fr" : "0fr",
+                  }}
+                >
+                  <div className="overflow-hidden">
+                    <div className="pl-4 pr-1 py-1 space-y-0.5 border-l-2 border-primary/20 ml-3 my-1">
+                      {hasSub ? (
+                        cat.subcategorias!.map((sub) => (
+                          <div
+                            key={sub.id}
+                            onClick={() => {
+                              handleSelectCategory(cat);
+                              handleSelectSubcategoria(sub.id);
+                            }}
+                            className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer text-ink-secondary hover:text-primary hover:bg-primary-tint/40 font-medium"
+                          >
+                            <span>{sub.nombre}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div
+                          onClick={() => handleSelectCategory(cat)}
+                          className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer text-ink-secondary hover:text-primary hover:bg-primary-tint/40 font-medium"
+                        >
+                          <span>{cat.nombre}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             );
           })}
