@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Layers,
   ChevronDown,
@@ -11,6 +11,7 @@ import {
   RotateCcw,
   Tag,
 } from "lucide-react";
+import { getCategorias, getSubCategorias } from "../api/productos";
 
 export interface SubcategoriaItem {
   id: number;
@@ -23,7 +24,7 @@ export interface CategoriaItem {
   subcategorias?: SubcategoriaItem[];
 }
 
-// Muestra de Categorías y Subcategorías (con IDs numéricos para la API)
+// Fallback por defecto en caso de no poder conectar con la API
 export const CATEGORIAS_TREE_DEFAULT: CategoriaItem[] = [
   {
     id: "placas-de-video",
@@ -129,17 +130,58 @@ interface FiltroCategoriasProps {
 }
 
 export function FiltroCategorias({
-  categoriasTree = CATEGORIAS_TREE_DEFAULT,
+  categoriasTree: propCategoriasTree,
   filtros,
   onChangeFiltros,
   showHeader = true,
 }: FiltroCategoriasProps) {
-  // Estado local para acordeón desplegable en vista de categorías
+  const [categoriasTree, setCategoriasTree] = useState<CategoriaItem[]>(
+    propCategoriasTree ?? []
+  );
+  const [loading, setLoading] = useState(!propCategoriasTree);
   const [openCategoryId, setOpenCategoryId] = useState<string | null>(null);
 
+  // Fetch dinámico de Categorías y Subcategorías desde la API
+  useEffect(() => {
+    if (propCategoriasTree) return;
+
+    async function fetchCategoriasYSubcategorias() {
+      setLoading(true);
+      try {
+        const [cats, subs] = await Promise.all([
+          getCategorias(),
+          getSubCategorias(),
+        ]);
+
+        const tree: CategoriaItem[] = cats.map((cat) => ({
+          id: String(cat.id),
+          nombre: cat.nombre,
+          subcategorias: subs
+            .filter((sub) => sub.categoria_id === cat.id)
+            .map((sub) => ({
+              id: sub.id,
+              nombre: sub.nombre,
+            })),
+        }));
+
+        setCategoriasTree(tree.length > 0 ? tree : CATEGORIAS_TREE_DEFAULT);
+      } catch {
+        setCategoriasTree(CATEGORIAS_TREE_DEFAULT);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCategoriasYSubcategorias();
+  }, [propCategoriasTree]);
+
+  const treeToUse = categoriasTree.length > 0 ? categoriasTree : CATEGORIAS_TREE_DEFAULT;
+
   // Buscar objeto de categoría activa si existe
-  const activeCategoryObj = categoriasTree.find(
-    (c) => c.nombre.toLowerCase() === filtros.categoria?.toLowerCase() || c.id === filtros.categoria
+  const activeCategoryObj = treeToUse.find(
+    (c) =>
+      c.nombre.toLowerCase() === filtros.categoria?.toLowerCase() ||
+      c.id === filtros.categoria
   );
 
   const toggleAccordion = (catId: string) => {
@@ -179,6 +221,24 @@ export function FiltroCategorias({
     });
   };
 
+  // Skeleton Loader mientras consulta la API
+  if (loading) {
+    return (
+      <div className="space-y-4 animate-pulse">
+        {showHeader && (
+          <div className="border-b border-border/50 pb-3">
+            <div className="h-5 w-32 bg-slate-200 rounded" />
+          </div>
+        )}
+        <div className="space-y-2">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div key={i} className="h-9 w-full bg-slate-200 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   // ── MODO 1: SIN CATEGORÍA SELECCIONADA → MOSTRAR ÁRBOL DE CATEGORÍAS ──────
   if (!filtros.categoria) {
     return (
@@ -193,7 +253,7 @@ export function FiltroCategorias({
         )}
 
         <div className="space-y-1">
-          {categoriasTree.map((cat) => {
+          {treeToUse.map((cat) => {
             const isOpen = openCategoryId === cat.id;
             const hasSub = !!cat.subcategorias?.length;
 
