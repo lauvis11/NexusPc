@@ -1,32 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Tag } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Tag, ShieldCheck } from "lucide-react";
+import { useCarritoStore } from "../store/store";
+import { useAuth } from "@/features/auth/context/auth-context";
 
-interface ResumenCompraProps {
-  subtotal?: number;
-  costoEnvio?: number;
-  descuento?: number;
-  onProceedToCheckout?: () => void;
-}
-
-const formatearPrecio = (valor: number) =>
-  new Intl.NumberFormat("es-AR", {
+const formatearPrecio = (valor: number | string) => {
+  const num = Number(valor);
+  if (isNaN(num)) return "$0";
+  return new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
     maximumFractionDigits: 0,
-  }).format(valor);
+  }).format(num);
+};
 
-export function ResumenCompra({
-  subtotal = 2836000,
-  costoEnvio = 0,
-  descuento = 0,
-  onProceedToCheckout,
-}: ResumenCompraProps) {
+export function ResumenCompra() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const { items, total, totalItems } = useCarritoStore();
+
   const [codigoCupon, setCodigoCupon] = useState("");
   const [cuponAplicado, setCuponAplicado] = useState(false);
 
-  const total = Math.max(0, subtotal + costoEnvio - descuento);
+  // Calcular precio original sin descuentos y ahorro total
+  const totalOriginal = items.reduce((acc, item) => acc + Number(item.precio) * item.cantidad, 0);
+  const totalAhorro = Math.max(0, totalOriginal - total);
+  const costoEnvio = 0; // Envío gratis o calculado posteriormente
 
   const handleAplicarCupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,18 +36,42 @@ export function ResumenCompra({
     }
   };
 
+  const handleProceedToCheckout = () => {
+    if (items.length === 0) return;
+
+    if (!user) {
+      router.push("/login?redirect=/checkout");
+    } else {
+      router.push("/checkout");
+    }
+  };
+
   return (
-    <div className="bg-primary-tint/50 border border-primary/20 rounded-2xl p-6 sm:p-8 space-y-6 shadow-2xs">
-      <h2 className="text-xl font-extrabold text-ink tracking-tight border-b border-primary/20 pb-4">
-        Resumen de Compra
-      </h2>
+    <div className="bg-primary-tint/50 border border-primary/20 rounded-2xl p-6 sm:p-8 space-y-6 shadow-2xs sticky top-28">
+      <div className="flex justify-between items-center border-b border-primary/20 pb-4">
+        <h2 className="text-xl font-extrabold text-ink tracking-tight">
+          Resumen de Compra
+        </h2>
+        <span className="text-xs font-bold text-ink-secondary bg-surface px-2.5 py-1 rounded-full border border-border">
+          {totalItems} {totalItems === 1 ? "unidad" : "unidades"}
+        </span>
+      </div>
 
       {/* Desglose de Precios */}
       <div className="space-y-3 text-sm">
         <div className="flex justify-between text-ink-secondary">
           <span>Subtotal</span>
-          <span className="font-bold text-ink">{formatearPrecio(subtotal)}</span>
+          <span className="font-bold text-ink">{formatearPrecio(totalOriginal)}</span>
         </div>
+
+        {totalAhorro > 0 && (
+          <div className="flex justify-between text-ink-secondary">
+            <span>Ahorro en ofertas</span>
+            <span className="font-bold text-emerald-600">
+              -{formatearPrecio(totalAhorro)}
+            </span>
+          </div>
+        )}
 
         <div className="flex justify-between text-ink-secondary">
           <span>Envío estimado</span>
@@ -54,15 +79,6 @@ export function ResumenCompra({
             {costoEnvio === 0 ? "Gratis" : formatearPrecio(costoEnvio)}
           </span>
         </div>
-
-        {descuento > 0 && (
-          <div className="flex justify-between text-ink-secondary">
-            <span>Descuentos</span>
-            <span className="font-bold text-emerald-600">
-              -{formatearPrecio(descuento)}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Código de Descuento */}
@@ -96,7 +112,7 @@ export function ResumenCompra({
       </form>
 
       {/* Total de la Compra */}
-      <div className="border-t border-border/80 pt-4 space-y-1">
+      <div className="border-t border-primary/20 pt-4 space-y-1">
         <div className="flex justify-between items-baseline">
           <span className="font-extrabold text-base sm:text-lg text-ink">Total</span>
           <div className="text-right">
@@ -110,14 +126,21 @@ export function ResumenCompra({
         </div>
       </div>
 
-      {/* Botón Finalizar Compra */}
+      {/* Botón Ir a Checkout */}
       <button
-        onClick={onProceedToCheckout}
-        className="w-full py-4 px-6 bg-primary text-surface font-extrabold text-sm sm:text-base rounded-xl hover:bg-primary-hover active:scale-98 transition-all shadow-md flex items-center justify-center gap-2.5 cursor-pointer"
+        onClick={handleProceedToCheckout}
+        disabled={items.length === 0}
+        className="w-full py-4 px-6 bg-primary text-surface font-extrabold text-sm sm:text-base rounded-xl hover:bg-primary-hover active:scale-98 transition-all shadow-md flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <span>Finalizar Compra</span>
+        <span>Ir a Checkout</span>
         <ArrowRight className="w-5 h-5" />
       </button>
+
+      {/* Garantía y Seguridad */}
+      <div className="pt-2 flex items-center justify-center gap-2 text-xs text-ink-secondary font-medium">
+        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+        <span>Compra 100% segura y garantizada</span>
+      </div>
     </div>
   );
 }
