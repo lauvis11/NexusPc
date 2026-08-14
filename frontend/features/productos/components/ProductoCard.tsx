@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import type { Producto } from "../types/types";
 import { estaEnOferta, calcularDescuento } from "../utils/ofertaUtils";
+import { useCarritoStore } from "@/features/carrito/store/store";
 
 interface ProductoCardProps {
   producto: Producto;
@@ -18,6 +19,8 @@ const formatearPrecio = (valor: number) =>
   }).format(valor);
 
 export function ProductoCard({ producto, onAddToCart }: ProductoCardProps) {
+  const agregarProducto = useCarritoStore((state) => state.agregarProducto);
+
   const enOferta = estaEnOferta(producto);
   const pctDescuento = enOferta
     ? calcularDescuento(producto.precio, producto.precio_oferta!)
@@ -97,6 +100,7 @@ export function ProductoCard({ producto, onAddToCart }: ProductoCardProps) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              agregarProducto(producto, 1);
               onAddToCart && onAddToCart(producto);
             }}
             aria-label={`Agregar ${producto.nombre} al carrito`}
