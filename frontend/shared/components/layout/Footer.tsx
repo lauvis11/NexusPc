@@ -85,16 +85,16 @@ export function Footer() {
             <h4 className="text-sm font-semibold tracking-wider text-ink uppercase">Soporte</h4>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <a href="#" className="text-ink-secondary hover:text-primary transition-colors">Centro de Ayuda</a>
+                <a href="/ayuda" className="text-ink-secondary hover:text-primary transition-colors">Centro de Ayuda</a>
               </li>
               <li>
-                <a href="#" className="text-ink-secondary hover:text-primary transition-colors">Garantías y RMA</a>
+                <a href="/ayuda" className="text-ink-secondary hover:text-primary transition-colors">Garantías y RMA</a>
               </li>
               <li>
-                <a href="#" className="text-ink-secondary hover:text-primary transition-colors">Seguimiento de Envío</a>
+                <a href="/ayuda" className="text-ink-secondary hover:text-primary transition-colors">Seguimiento de Envío</a>
               </li>
               <li>
-                <a href="#" className="text-ink-secondary hover:text-primary transition-colors">Preguntas Frecuentes</a>
+                <a href="/ayuda" className="text-ink-secondary hover:text-primary transition-colors">Preguntas Frecuentes</a>
               </li>
             </ul>
           </div>
