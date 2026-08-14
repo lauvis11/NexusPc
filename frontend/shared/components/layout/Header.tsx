@@ -86,7 +86,7 @@ export function Header() {
               >
                 <ShoppingCart className="w-6 h-6" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-primary text-surface text-[10px] font-black rounded-full flex items-center justify-center shadow-xs">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-danger text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-xs">
                     {cartCount > 99 ? "+99" : cartCount}
                   </span>
                 )}
