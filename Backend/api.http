@@ -28,6 +28,9 @@ GET http://localhost:4000/productos?busqueda=RTX&precio_max=800&en_stock=true
 ### Para ver solo productos en oferta
 GET http://localhost:4000/productos?en_oferta=true
 
+### Para ver solo productos destacados
+GET http://localhost:4000/productos?destacado=true
+
 ### Para ver un producto por su id
 GET http://localhost:4000/productos/3e27aaeb-a7ca-417b-bc63-562f772e3406
 
@@ -37,27 +40,30 @@ POST http://localhost:4000/productos
 Content-Type: application/json
 
 {
-    "nombre": "RTX 5060",
-    "descripcion": "Tarjeta gráfica NVIDIA RTX 5060 8GB GDDR7",
-    "precio": 420.00,
-    "stock": 15,
-    "img_url": "https://fakestoreapi.com/img/81fAn9+IfdL._AC_UY879_.jpg",
-    "public_id": "temp",
-    "categoria_id": 4,
-    "subcategoria_id": 1,
-    "caracteristicas": [
-        { "clave": "VRAM", "valor": "8GB" },
-        { "clave": "Memoria", "valor": "GDDR7" },
-        { "clave": "Bus", "valor": "128-bit" }
-    ]
+  "nombre": "AMD Radeon RX 7600",
+  "descripcion": "Placa de video gama media AMD con 8GB GDDR6 ideal para gaming 1080p a precio accesible",
+  "precio": 320000,
+  "stock": 11,
+  "img_url": "https://fakestoreapi.com/img/81fAn9+IfdL._AC_UY879_.jpg",
+  "public_id": "temp",
+  "categoria_id": 4,
+  "subcategoria_id": 2,
+  "destacado": false,
+  "caracteristicas": [
+    { "clave": "VRAM", "valor": "8GB" },
+    { "clave": "Memoria", "valor": "GDDR6" },
+    { "clave": "Bus", "valor": "128-bit" },
+    { "clave": "Stream Processors", "valor": "2048" },
+    { "clave": "TDP", "valor": "165W" },
+    { "clave": "Conectores", "valor": "1x 8-pin" }
+  ]
 }
-
 ### Para editar un producto
-PATCH http://localhost:4000/productos/b10425ea-fd3f-4fff-b580-4c6361f48770
+PATCH http://localhost:4000/productos/ce865fbb-3946-44fe-974a-9f57e0c1c979
 Content-Type: application/json
 
 {
-    "stock": 20
+    "destacado": true
 }
 
 ### Para eliminar un producto
@@ -110,8 +116,8 @@ POST http://localhost:4000/auth/login
 Content-Type: application/json
 
 {
-    "email": "gabriel@gmail.com",
-    "password": "87654321"
+    "email": "admin@nexuspc.com",
+    "password": "Admin123456"
 }
 
 ### Para cerrar sesion
@@ -202,11 +208,11 @@ POST http://localhost:4000/ofertas
 Content-Type: application/json
 
 {
-    "producto_id": "b10425ea-fd3f-4fff-b580-4c6361f48770",
-    "tipo": "porcentaje",
-    "valor": 20,
-    "fecha_inicio": "2026-08-01T00:00:00Z",
-    "fecha_fin": "2026-08-31T23:59:59Z"
+  "producto_id": "f475ee05-4363-4e76-a1a8-f8788bf6dbf3",
+  "tipo": "porcentaje",
+  "valor": 25,
+  "fecha_inicio": "2026-08-01T00:00:00Z",
+  "fecha_fin": "2026-08-31T23:59:59Z"
 }
 
 ### Para actualizar la oferta de un producto
