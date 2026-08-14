@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { ProductoCard } from "./ProductoCard";
 import {
   FiltroCategorias,
@@ -42,16 +43,30 @@ function buildQueryString(
 }
 
 export function Catalogo() {
+  const searchParams = useSearchParams();
+  const categoriaFromUrl = searchParams.get("categoria");
+  const subcategoriaFromUrl = searchParams.get("subcategoria_id");
+
   const [filtros, setFiltros] = useState<FiltrosState>({
-    categoria: null,
-    subcategoria_id: null,
-    precio_min: "",
-    precio_max: "",
-    en_stock: false,
+    categoria: categoriaFromUrl || null,
+    subcategoria_id: subcategoriaFromUrl ? Number(subcategoriaFromUrl) : null,
+    precio_min: searchParams.get("precio_min") || "",
+    precio_max: searchParams.get("precio_max") || "",
+    en_stock: searchParams.get("en_stock") === "true",
   });
   const [orden, setOrden] = useState<OrdenOption>("relevancia");
   const [page, setPage] = useState(1);
   const limit = 12;
+
+  // Sincronizar filtros si cambia la URL (al navegar desde el Navbar o enlaces)
+  useEffect(() => {
+    setFiltros((prev) => ({
+      ...prev,
+      categoria: categoriaFromUrl || null,
+      subcategoria_id: subcategoriaFromUrl ? Number(subcategoriaFromUrl) : null,
+    }));
+    setPage(1);
+  }, [categoriaFromUrl, subcategoriaFromUrl]);
 
   const [productos, setProductos] = useState<Producto[]>([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });

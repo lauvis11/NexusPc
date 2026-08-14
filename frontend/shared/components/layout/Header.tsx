@@ -8,11 +8,11 @@ import { useCarritoStore } from "@/features/carrito/store/store";
 
 const NAV_LINKS = [
   { label: "Productos", href: "/productos" },
-  { label: "Notebooks", href: "/productos" },
-  { label: "Procesadores", href: "/productos" },
-  { label: "Tarjetas Gráficas", href: "/productos" },
-  { label: "Periféricos", href: "/productos" },
-  { label: "Ayuda", href: "#" },
+  { label: "Notebooks", href: "/productos?categoria=Notebooks" },
+  { label: "Procesadores", href: "/productos?categoria=Procesadores" },
+  { label: "Tarjetas Gráficas", href: "/productos?categoria=Placas+de+Video" },
+  { label: "Periféricos", href: "/productos?categoria=Perifericos" },
+  { label: "Ayuda", href: "/ayuda" },
 ];
 
 export function Header() {
@@ -178,13 +178,13 @@ export function Header() {
         <div className="hidden sm:flex h-13 items-center bg-primary text-surface">
           <nav className="flex gap-8 lg:gap-11 px-6 w-full max-w-7xl mx-auto justify-center text-sm lg:text-base font-semibold">
             {NAV_LINKS.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 className="text-primary-tint hover:text-surface transition-colors py-1 border-b-2 border-transparent hover:border-surface whitespace-nowrap"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
         </div>
@@ -223,14 +223,14 @@ export function Header() {
         {/* Drawer nav links */}
         <nav className="flex flex-col py-4 flex-grow overflow-y-auto">
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.label}
               href={link.href}
               onClick={() => setMenuOpen(false)}
               className="px-6 py-3.5 text-sm font-semibold text-ink hover:text-primary hover:bg-primary-tint/50 transition-colors border-b border-border/20 last:border-none"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
