@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Search, ShoppingCart, User, Cpu, Menu, X, LogOut, ChevronDown, Loader2 } from "lucide-react";
 import { useAuth } from "@/features/auth/context/auth-context";
+import { useCarritoStore } from "@/features/carrito/store/store";
 
 const NAV_LINKS = [
   { label: "Productos", href: "/productos" },
@@ -15,11 +17,18 @@ const NAV_LINKS = [
 
 export function Header() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [cartCount] = useState(1);
+  const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const { user, isLoading, logout } = useAuth();
+  const totalItems = useCarritoStore((state) => state.totalItems);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const cartCount = mounted ? totalItems : 0;
 
   return (
     <>
@@ -70,15 +79,18 @@ export function Header() {
               </button>
 
               {/* Cart */}
-              <button
+              <Link
+                href="/carrito"
                 className="p-2 sm:p-2.5 text-ink-secondary hover:text-primary transition-colors relative rounded-xl hover:bg-primary-tint/60 cursor-pointer"
                 aria-label="Carrito de Compras"
               >
                 <ShoppingCart className="w-6 h-6" />
                 {cartCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-danger rounded-full ring-2 ring-surface" />
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-primary text-surface text-[10px] font-black rounded-full flex items-center justify-center shadow-xs">
+                    {cartCount > 99 ? "+99" : cartCount}
+                  </span>
                 )}
-              </button>
+              </Link>
 
               {/* User Icon & Dropdown Condicional */}
               {isLoading ? (
