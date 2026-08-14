@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ChevronRight,
   ShoppingCart,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import type { Producto } from "../types/types";
 import { estaEnOferta } from "../utils/ofertaUtils";
+import { useCarritoStore } from "@/features/carrito/store/store";
 
 interface ProductoPricingProps {
   producto: Producto;
@@ -33,6 +35,8 @@ export function ProductoPricing({
   producto,
   onAddToCart,
 }: ProductoPricingProps) {
+  const router = useRouter();
+  const agregarProducto = useCarritoStore((state) => state.agregarProducto);
   const [cantidad, setCantidad] = useState(1);
 
   // Galería de imágenes (usa img_url principal + miniaturas de muestra)
@@ -221,17 +225,28 @@ export function ProductoPricing({
           {/* Botones de Acción */}
           <div className="space-y-3 pt-1">
             <button
-              onClick={() => onAddToCart && onAddToCart(producto, cantidad)}
+              onClick={() => {
+                if (producto.stock > 0) {
+                  agregarProducto(producto, cantidad);
+                  onAddToCart && onAddToCart(producto, cantidad);
+                }
+              }}
               disabled={producto.stock <= 0}
-              className="w-full py-3.5 px-6 bg-primary text-surface font-extrabold text-sm sm:text-base rounded-xl hover:bg-primary-hover active:scale-98 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-3.5 px-6 bg-primary text-surface font-extrabold text-sm sm:text-base rounded-xl hover:bg-primary-hover active:scale-98 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ShoppingCart className="w-5 h-5" />
               <span>Agregar al Carrito</span>
             </button>
 
             <button
+              onClick={() => {
+                if (producto.stock > 0) {
+                  agregarProducto(producto, cantidad);
+                  router.push("/carrito");
+                }
+              }}
               disabled={producto.stock <= 0}
-              className="w-full py-3 px-6 bg-primary-tint text-primary border border-primary/30 font-bold text-xs sm:text-sm rounded-xl hover:bg-primary hover:text-surface transition-all active:scale-98 cursor-pointer disabled:opacity-50"
+              className="w-full py-3 px-6 bg-primary-tint text-primary border border-primary/30 font-bold text-xs sm:text-sm rounded-xl hover:bg-primary hover:text-surface transition-all active:scale-98 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-center block"
             >
               Comprar Ahora
             </button>
