@@ -18,8 +18,7 @@ import {
   RotateCcw,
   SearchX,
 } from "lucide-react";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { API_URL } from "@/lib/constants";
 
 type OrdenOption = "relevancia" | "precio_asc" | "precio_desc" | "recientes";
 

@@ -6,8 +6,7 @@ import { ProductoCard } from "./ProductoCard";
 import { SeccionSkeleton } from "./SeccionSkeleton";
 import type { Producto } from "../types/types";
 import { getProductos } from "../api/productos";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { API_URL } from "@/lib/constants";
 
 interface SeccionDestacadosProps {
   onAddToCart?: (producto: Producto) => void;

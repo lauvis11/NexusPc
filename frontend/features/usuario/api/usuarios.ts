@@ -1,7 +1,6 @@
 import { Usuario } from "@/features/auth/types/auth";
 import { DatosFacturacion } from "../types/usuarios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { API_URL } from "@/lib/constants";
 
 export async function getPerfil(): Promise<Usuario | null> {
     const response = await fetch(`${API_URL}/usuarios/perfil`, {

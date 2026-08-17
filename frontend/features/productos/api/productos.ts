@@ -1,4 +1,5 @@
 import type { Categoria, Producto, ProductosResponse, SubCategoria } from "../types/types"
+import { API_URL } from "@/lib/constants";
 
 export async function getProductos(url: string, revalidate: number): Promise<ProductosResponse> {
     const res = await fetch(url, { next: { revalidate: revalidate } })
@@ -6,8 +7,6 @@ export async function getProductos(url: string, revalidate: number): Promise<Pro
     const productos: ProductosResponse = await res.json()
     return productos
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export async function getProductoIndividual(id: string): Promise<Producto | null> {
     try {

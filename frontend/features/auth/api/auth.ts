@@ -1,6 +1,5 @@
 import { LoginInput, RegisterInput } from "@/features/auth/schemas/auth.schema";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { API_URL } from "@/lib/constants";
 
 export async function login(data: LoginInput) {
   const response = await fetch(`${API_URL}/auth/login`, {
