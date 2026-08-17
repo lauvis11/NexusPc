@@ -234,7 +234,7 @@ export function MisDatosForm() {
                 disabled
                 readOnly
                 placeholder="Nombre del usuario"
-                className={getInputStyle("nombre", true)}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm transition-all ${getInputStyle("nombre", true)}`}
               />
             </div>
           </div>
@@ -260,8 +260,8 @@ export function MisDatosForm() {
             </div>
           </div>
 
-          {/* 3. Gmail (Bloqueado Siempre - Ancho Completo) */}
-          <div className="space-y-1.5 sm:col-span-2">
+          {/* 3. Gmail (Bloqueado Siempre) */}
+          <div className="space-y-1.5">
             <label className="block text-xs sm:text-sm font-bold text-ink">
               Gmail / Email
             </label>
@@ -273,7 +273,7 @@ export function MisDatosForm() {
                 disabled
                 readOnly
                 placeholder="email@ejemplo.com"
-                className={getInputStyle("email", true)}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl text-xs sm:text-sm transition-all ${getInputStyle("email", true)}`}
               />
             </div>
           </div>
@@ -298,7 +298,7 @@ export function MisDatosForm() {
           </div>
 
           {/* 5. Provincia */}
-          <div className="space-y-1.5 sm:col-span-2">
+          <div className="space-y-1.5">
             <label htmlFor="provincia" className="block text-xs sm:text-sm font-bold text-ink">
               Provincia <span className="text-red-500">*</span>
             </label>
@@ -322,7 +322,7 @@ export function MisDatosForm() {
           </div>
 
           {/* 6. Dirección */}
-          <div className="space-y-1.5 sm:col-span-2">
+          <div className="space-y-1.5">
             <label htmlFor="direccion" className="block text-xs sm:text-sm font-bold text-ink">
               Dirección <span className="text-red-500">*</span>
             </label>
