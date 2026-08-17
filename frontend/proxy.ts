@@ -10,7 +10,9 @@ export async function proxy(request: NextRequest) {
   const hasSession = !!accessToken || !!refreshToken;
 
   // Rutas que requieren autenticación
-  const isProtectedRoute = pathname.startsWith("/perfil");
+  const isProtectedRoute = 
+  pathname.startsWith("/perfil") || 
+  pathname.startsWith("/checkout")
 
   // Rutas de autenticación pública (login/registro)
   const isAuthRoute = pathname === "/login" || pathname === "/registro";
