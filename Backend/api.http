@@ -208,11 +208,11 @@ POST http://localhost:4000/ofertas
 Content-Type: application/json
 
 {
-  "producto_id": "f475ee05-4363-4e76-a1a8-f8788bf6dbf3",
-  "tipo": "porcentaje",
-  "valor": 25,
-  "fecha_inicio": "2026-08-01T00:00:00Z",
-  "fecha_fin": "2026-08-31T23:59:59Z"
+    "producto_id": "f475ee05-4363-4e76-a1a8-f8788bf6dbf3",
+    "tipo": "porcentaje",
+    "valor": 25,
+    "fecha_inicio": "2026-08-01T00:00:00Z",
+    "fecha_fin": "2026-08-31T23:59:59Z"
 }
 
 ### Para actualizar la oferta de un producto
