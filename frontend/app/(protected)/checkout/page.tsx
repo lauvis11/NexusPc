@@ -6,18 +6,56 @@ import { Header } from "@/shared/components/layout/Header";
 import { Footer } from "@/shared/components/layout/Footer";
 import { useCarritoStore } from "@/features/carrito/store/store";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/features/auth/context/auth-context";
+import { DatosFacturacion } from "@/features/usuario/types/usuarios";
+import { crearDatosFacturacion, actualizarDatos } from "@/features/usuario/api/usuarios";
+import { crearOrden, CrearPreferenciaPago } from "@/features/ordenes/api/ordenes";
 import { DatosFacturacionOrden } from "@/features/ordenes/components/DatosFacturacionOrden";
 import { ResumenCheckout } from "@/features/ordenes/components/ResumenCheckout";
 
 export default function CheckoutPage() {
   const [mounted, setMounted] = useState(false);
   const [showModalVolver, setShowModalVolver] = useState(false);
-  const { items } = useCarritoStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [guardarEnPerfil, setGuardarEnPerfil] = useState(true);
+
+  const { user, refreshUser } = useAuth();
+  const { items, limpiarCarrito } = useCarritoStore();
   const router = useRouter();
+
+  // Indica si el usuario ya tiene datos de facturación en la base de datos
+  const tieneDatosFacturacion = Boolean(user?.nombre_completo && user?.direccion);
+
+  // Estado del formulario de facturación
+  const [formData, setFormData] = useState<DatosFacturacion>({
+    nombre_completo: "",
+    dni: "",
+    direccion: "",
+    ciudad: "",
+    provincia: "",
+    codigo_postal: "",
+  });
+
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof DatosFacturacion, boolean>>>({});
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Precargar datos del usuario cuando estén disponibles
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        nombre_completo: user.nombre_completo ?? "",
+        dni: user.dni ?? "",
+        direccion: user.direccion ?? "",
+        ciudad: user.ciudad ?? "",
+        provincia: user.provincia ?? "",
+        codigo_postal: user.codigo_postal ?? "",
+      });
+    }
+  }, [user]);
 
   // Redirigir a /carrito solo después de que se cargue el store si el carrito sigue vacío
   useEffect(() => {
@@ -25,6 +63,83 @@ export default function CheckoutPage() {
       router.push("/carrito");
     }
   }, [mounted, items, router]);
+
+  const handleFieldChange = (field: keyof DatosFacturacion, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => ({ ...prev, [field]: false }));
+    }
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
+  };
+
+  const handlePagar = async () => {
+    setErrorMessage(null);
+
+    // 1. Validar campos requeridos
+    const errors: Partial<Record<keyof DatosFacturacion, boolean>> = {};
+    if (!formData.nombre_completo.trim()) errors.nombre_completo = true;
+    if (!tieneDatosFacturacion && !formData.dni.trim()) errors.dni = true;
+    if (!formData.direccion.trim()) errors.direccion = true;
+    if (!formData.ciudad.trim()) errors.ciudad = true;
+    if (!formData.provincia.trim()) errors.provincia = true;
+    if (!formData.codigo_postal.trim()) errors.codigo_postal = true;
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setErrorMessage("Por favor completá todos los campos obligatorios marcados en rojo.");
+      return;
+    }
+
+    if (items.length === 0) {
+      setErrorMessage("El carrito está vacío.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // 2. Guardar o actualizar datos de facturación si corresponde
+      if (!tieneDatosFacturacion) {
+        await crearDatosFacturacion(formData);
+        await refreshUser();
+      } else if (guardarEnPerfil) {
+        await actualizarDatos({
+          nombre_completo: formData.nombre_completo,
+          direccion: formData.direccion,
+          ciudad: formData.ciudad,
+          provincia: formData.provincia,
+          codigo_postal: formData.codigo_postal,
+        });
+        await refreshUser();
+      }
+
+      // 3. Crear la orden en el backend
+      const orden = await crearOrden({
+        productos: items.map((item) => ({
+          id: item.id,
+          cantidad: item.cantidad,
+        })),
+      });
+
+      // 4. Crear la preferencia de pago de Mercado Pago
+      const pagoResponse = await CrearPreferenciaPago(orden.id);
+
+      // 5. Vaciar el carrito y redirigir a Mercado Pago
+      limpiarCarrito();
+
+      if (pagoResponse?.init_point) {
+        window.location.href = pagoResponse.init_point;
+      } else {
+        throw new Error("No se pudo obtener el enlace de pago de Mercado Pago.");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Ocurrió un error al procesar el pago.";
+      setErrorMessage(msg);
+      setIsSubmitting(false);
+    }
+  };
 
   if (!mounted) {
     return null;
@@ -48,11 +163,26 @@ export default function CheckoutPage() {
           </p>
         </div>
 
+        {/* Mensaje de Error General */}
+        {errorMessage && (
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 text-xs sm:text-sm font-bold flex items-center gap-2.5 animate-in fade-in">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
         {/* Layout en 2 Columnas */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Columna Izquierda: Datos de Facturación (7 columnas) */}
           <div className="lg:col-span-7 space-y-6">
-            <DatosFacturacionOrden />
+            <DatosFacturacionOrden
+              formData={formData}
+              onChange={handleFieldChange}
+              fieldErrors={fieldErrors}
+              tieneDatosFacturacion={tieneDatosFacturacion}
+              guardarEnPerfil={guardarEnPerfil}
+              onToggleGuardarEnPerfil={setGuardarEnPerfil}
+            />
 
             {/* Botón Anterior */}
             <div className="flex items-center justify-start">
@@ -69,7 +199,11 @@ export default function CheckoutPage() {
 
           {/* Columna Derecha: Resumen de Compra Sticky (5 columnas) */}
           <div className="lg:col-span-5">
-            <ResumenCheckout />
+            <ResumenCheckout
+              onPagar={handlePagar}
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            />
           </div>
         </div>
       </main>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { useCarritoStore } from "@/features/carrito/store/store";
+import type { ResumenCheckoutProps } from "../types/ordenes";
 
 const formatearPrecio = (valor: number | string) => {
   const num = Number(valor);
@@ -13,12 +14,6 @@ const formatearPrecio = (valor: number | string) => {
     maximumFractionDigits: 0,
   }).format(num);
 };
-
-interface ResumenCheckoutProps {
-  onPagar?: () => void;
-  loading?: boolean;
-  disabled?: boolean;
-}
 
 export function ResumenCheckout({ onPagar, loading = false, disabled = false }: ResumenCheckoutProps) {
   const { items, total, totalItems } = useCarritoStore();
