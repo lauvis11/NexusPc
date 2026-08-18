@@ -88,40 +88,40 @@ function ContenidoPagoExito() {
           </p>
         </div>
 
-        {/* Tira Plana de Metadatos de la Transacción (3 Detalles Centrados) */}
-        <div className="bg-surface-alt/60 rounded-2xl p-5 sm:p-7 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center max-w-3xl mx-auto">
+        {/* Tira Plana de Metadatos de la Transacción (Siempre 3 Columnas en Mobile y Desktop) */}
+        <div className="bg-surface-alt/60 rounded-2xl p-3.5 sm:p-7 grid grid-cols-3 gap-2 sm:gap-6 text-center max-w-3xl mx-auto">
           {/* 1. ID de Orden */}
-          <div className="flex flex-col items-center justify-center space-y-1.5">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-ink-secondary block">
-              Número de Orden
+          <div className="flex flex-col items-center justify-center space-y-1 sm:space-y-1.5 min-w-0">
+            <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-ink-secondary block leading-tight truncate">
+              Nº de Orden
             </span>
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-sm sm:text-base font-black text-ink">{externalReference}</span>
+            <div className="flex items-center justify-center gap-1 sm:gap-2 max-w-full">
+              <span className="text-xs sm:text-base font-black text-ink truncate">{externalReference}</span>
               <button
                 type="button"
                 onClick={copiarOrden}
                 title="Copiar ID de Orden"
-                className="p-1 rounded-md text-ink-secondary hover:text-primary transition-colors cursor-pointer"
+                className="p-0.5 sm:p-1 rounded-md text-ink-secondary hover:text-primary transition-colors cursor-pointer shrink-0"
               >
-                {copiado ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                {copiado ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               </button>
             </div>
           </div>
 
           {/* 2. ID Transacción MP */}
-          <div className="flex flex-col items-center justify-center space-y-1.5">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-ink-secondary block">
+          <div className="flex flex-col items-center justify-center space-y-1 sm:space-y-1.5 min-w-0">
+            <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-ink-secondary block leading-tight truncate">
               Transacción MP
             </span>
-            <span className="text-sm sm:text-base font-black text-ink block">{paymentId}</span>
+            <span className="text-xs sm:text-base font-black text-ink block truncate">{paymentId}</span>
           </div>
 
           {/* 3. Estado */}
-          <div className="flex flex-col items-center justify-center space-y-1.5">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-ink-secondary block">
+          <div className="flex flex-col items-center justify-center space-y-1 sm:space-y-1.5 min-w-0">
+            <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-ink-secondary block leading-tight truncate">
               Estado
             </span>
-            <span className="text-sm sm:text-base font-black text-emerald-500 block">
+            <span className="text-xs sm:text-base font-black text-emerald-500 block truncate">
               Aprobado
             </span>
           </div>
@@ -140,49 +140,65 @@ function ContenidoPagoExito() {
           </span>
         </div>
 
-        {/* Tracker Horizontal de 4 Pasos */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        {/* Tracker Horizontal de 4 Pasos (Siempre en 1 Fila en Mobile y Desktop) */}
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-3 md:gap-6">
           {/* Paso 1: Pago Confirmado */}
-          <div className="flex flex-col items-center text-center space-y-2 p-3.5 rounded-2xl bg-emerald-500/5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-400 text-white flex items-center justify-center font-bold">
-              <Check className="w-5 h-5 stroke-[2.5]" />
+          <div className="flex flex-col items-center text-center space-y-1 sm:space-y-2 p-2 sm:p-3.5 rounded-xl sm:rounded-2xl bg-emerald-500/5">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-400 text-white flex items-center justify-center font-bold shrink-0">
+              <Check className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
             </div>
-            <div>
-              <span className="text-xs sm:text-sm font-black text-ink block">1. Pago Aprobado</span>
-              <span className="text-[11px] text-emerald-600 font-bold">Completado</span>
+            <div className="w-full">
+              <span className="text-[10px] sm:text-xs md:text-sm font-black text-ink block leading-tight truncate">
+                1. Pago
+              </span>
+              <span className="text-[9px] sm:text-[11px] text-emerald-600 font-bold block truncate">
+                Completado
+              </span>
             </div>
           </div>
 
-          {/* Paso 2: Preparando Pedido (Activo) */}
-          <div className="flex flex-col items-center text-center space-y-2 p-3.5 rounded-2xl bg-primary-tint/50">
-            <div className="w-10 h-10 rounded-xl bg-primary text-surface flex items-center justify-center font-bold shadow-xs animate-pulse">
-              <Package className="w-5 h-5" />
+          {/* Paso 2: Armado (Activo) */}
+          <div className="flex flex-col items-center text-center space-y-1 sm:space-y-2 p-2 sm:p-3.5 rounded-xl sm:rounded-2xl bg-primary-tint/50">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary text-surface flex items-center justify-center font-bold shadow-xs animate-pulse shrink-0">
+              <Package className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <span className="text-xs sm:text-sm font-black text-ink block">2. Armado</span>
-              <span className="text-[11px] text-primary font-bold">En Proceso</span>
+            <div className="w-full">
+              <span className="text-[10px] sm:text-xs md:text-sm font-black text-ink block leading-tight truncate">
+                2. Armado
+              </span>
+              <span className="text-[9px] sm:text-[11px] text-primary font-bold block truncate">
+                En Proceso
+              </span>
             </div>
           </div>
 
           {/* Paso 3: Despachado */}
-          <div className="flex flex-col items-center text-center space-y-2 p-3.5 rounded-2xl bg-surface-alt/30 opacity-60">
-            <div className="w-10 h-10 rounded-xl bg-surface-alt text-ink-secondary flex items-center justify-center font-bold">
-              <Truck className="w-5 h-5" />
+          <div className="flex flex-col items-center text-center space-y-1 sm:space-y-2 p-2 sm:p-3.5 rounded-xl sm:rounded-2xl bg-surface-alt/30 opacity-60">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-surface-alt text-ink-secondary flex items-center justify-center font-bold shrink-0">
+              <Truck className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <span className="text-xs sm:text-sm font-bold text-ink block">3. Despachado</span>
-              <span className="text-[11px] text-ink-secondary">Próximo paso</span>
+            <div className="w-full">
+              <span className="text-[10px] sm:text-xs md:text-sm font-bold text-ink block leading-tight truncate">
+                3. Envío
+              </span>
+              <span className="text-[9px] sm:text-[11px] text-ink-secondary block truncate">
+                Pendiente
+              </span>
             </div>
           </div>
 
           {/* Paso 4: Entregado */}
-          <div className="flex flex-col items-center text-center space-y-2 p-3.5 rounded-2xl bg-surface-alt/30 opacity-60">
-            <div className="w-10 h-10 rounded-xl bg-surface-alt text-ink-secondary flex items-center justify-center font-bold">
-              <Home className="w-5 h-5" />
+          <div className="flex flex-col items-center text-center space-y-1 sm:space-y-2 p-2 sm:p-3.5 rounded-xl sm:rounded-2xl bg-surface-alt/30 opacity-60">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-surface-alt text-ink-secondary flex items-center justify-center font-bold shrink-0">
+              <Home className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <span className="text-xs sm:text-sm font-bold text-ink block">4. Entregado</span>
-              <span className="text-[11px] text-ink-secondary">Paso final</span>
+            <div className="w-full">
+              <span className="text-[10px] sm:text-xs md:text-sm font-bold text-ink block leading-tight truncate">
+                4. Entrega
+              </span>
+              <span className="text-[9px] sm:text-[11px] text-ink-secondary block truncate">
+                Final
+              </span>
             </div>
           </div>
         </div>
