@@ -147,7 +147,7 @@ function ContenidoPagoPendiente() {
         <section className="flex flex-col items-center gap-4 pt-4 pb-6 border-t border-border/50">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
             <Link
-              href="/mi-perfil"
+              href="/perfil"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 bg-primary hover:bg-primary-hover text-surface font-extrabold text-xs sm:text-sm rounded-xl shadow-sm transition-all active:scale-98 cursor-pointer text-center"
             >
               <FileCheck2 className="w-4 h-4" />

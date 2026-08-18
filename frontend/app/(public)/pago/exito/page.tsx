@@ -215,7 +215,7 @@ function ContenidoPagoExito() {
         </Link>
 
         <Link
-          href="/mi-perfil"
+          href="/perfil"
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-surface-alt hover:bg-surface-alt/80 text-ink font-bold text-xs sm:text-sm rounded-xl transition-all text-center cursor-pointer"
         >
           <FileCheck2 className="w-4 h-4 text-ink-secondary" />

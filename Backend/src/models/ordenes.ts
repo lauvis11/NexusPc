@@ -289,9 +289,9 @@ export class OrdenesModel{
                 auto_return: 'approved',
                 // URLs del frontend a las que MercadoPago redirige al usuario según el resultado del pago
                 back_urls: {
-                    success: 'http://localhost:4000/pago/exito',
-                    failure: 'http://localhost:4000/pago/error',
-                    pending: 'http://localhost:4000/pago/pendiente'
+                    success: `${env.FRONTEND_URL}/pago/exito`,
+                    failure: `${env.FRONTEND_URL}/pago/error`,
+                    pending: `${env.FRONTEND_URL}/pago/pendiente`
                 },
                 notification_url: env.WEBHOOK_URL
             }
