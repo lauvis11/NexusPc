@@ -1,6 +1,52 @@
-import { User, FileText, MapPin, Building, Globe, Mailbox } from "lucide-react";
+"use client";
 
-export function DatosFacturacionOrden() {
+import { User, FileText, MapPin, Building, Globe, Mailbox, CheckCircle2, AlertCircle } from "lucide-react";
+import { DatosFacturacion } from "@/features/usuario/types/usuarios";
+import type { DatosFacturacionOrdenProps } from "../types/ordenes";
+
+export const PROVINCIAS_ARGENTINA = [
+  "Buenos Aires",
+  "Ciudad Autónoma de Buenos Aires (CABA)",
+  "Catamarca",
+  "Chaco",
+  "Chubut",
+  "Córdoba",
+  "Corrientes",
+  "Entre Ríos",
+  "Formosa",
+  "Jujuy",
+  "La Pampa",
+  "La Rioja",
+  "Mendoza",
+  "Misiones",
+  "Neuquén",
+  "Río Negro",
+  "Salta",
+  "San Juan",
+  "San Luis",
+  "Santa Cruz",
+  "Santa Fe",
+  "Santiago del Estero",
+  "Tierra del Fuego",
+  "Tucumán",
+];
+
+export function DatosFacturacionOrden({
+  formData,
+  onChange,
+  fieldErrors = {},
+  tieneDatosFacturacion = false,
+  guardarEnPerfil = true,
+  onToggleGuardarEnPerfil,
+}: DatosFacturacionOrdenProps) {
+  const getInputClass = (fieldName: keyof DatosFacturacion) => {
+    const base = "w-full pl-10 pr-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all outline-none";
+    if (fieldErrors[fieldName]) {
+      return `${base} bg-red-500/5 border-2 border-red-500 text-ink focus:border-red-500 focus:ring-2 focus:ring-red-500/20`;
+    }
+    return `${base} bg-surface-alt/50 border border-border text-ink focus:border-primary focus:bg-surface focus:ring-2 focus:ring-primary/20`;
+  };
+
   return (
     <section className="bg-surface border border-border rounded-2xl p-5 sm:p-7 space-y-6 shadow-2xs">
       {/* ── HEADER DEL PASO 1 ───────────────────────────────────── */}
@@ -18,15 +64,24 @@ export function DatosFacturacionOrden() {
         </div>
       </div>
 
-      {/* ── BANNER INFORMATIVO (MOCKUP) ─────────────────────────── */}
-      <div className="flex items-center gap-2.5 p-3 sm:p-3.5 bg-primary-tint/50 border border-primary/20 rounded-xl text-xs text-ink">
-        <MapPin className="w-4 h-4 text-primary shrink-0" />
-        <span>
-          Tus datos se utilizarán para la entrega a domicilio y facturación electrónica.
-        </span>
-      </div>
+      {/* ── BANNER INFORMATIVO / ESTADO ─────────────────────────── */}
+      {tieneDatosFacturacion ? (
+        <div className="flex items-center gap-2.5 p-3 sm:p-3.5 bg-emerald-500/10 border border-emerald-500/25 rounded-xl text-xs text-ink">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>
+            Datos precargados automáticamente desde tu perfil. Podés modificarlos si lo necesitás para esta entrega.
+          </span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2.5 p-3 sm:p-3.5 bg-primary-tint/50 border border-primary/20 rounded-xl text-xs text-ink">
+          <MapPin className="w-4 h-4 text-primary shrink-0" />
+          <span>
+            Ingresá tus datos para el envío a domicilio y la facturación electrónica de tu pedido.
+          </span>
+        </div>
+      )}
 
-      {/* ── FORMULARIO GRID DE INPUTS (MOCKUP) ──────────────────── */}
+      {/* ── FORMULARIO GRID DE INPUTS ───────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Nombre Completo */}
         <div className="space-y-1.5 sm:col-span-1">
@@ -34,13 +89,13 @@ export function DatosFacturacionOrden() {
             Nombre y Apellido <span className="text-danger">*</span>
           </label>
           <div className="relative">
-            <User className="w-4 h-4 text-ink-secondary absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <User className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${fieldErrors.nombre_completo ? "text-red-500" : "text-ink-secondary"}`} />
             <input
               type="text"
               name="nombre_completo"
-              placeholder="Ej: Juan Pérez"
-              defaultValue="Juan Pérez"
-              className="w-full pl-10 pr-3.5 py-2.5 bg-surface-alt/50 border border-border rounded-xl text-xs sm:text-sm font-semibold text-ink placeholder:text-ink-secondary/60 focus:border-primary focus:bg-surface focus:outline-none transition-all"
+              value={formData.nombre_completo}
+              onChange={(e) => onChange("nombre_completo", e.target.value)}
+              className={getInputClass("nombre_completo")}
             />
           </div>
         </div>
@@ -51,47 +106,15 @@ export function DatosFacturacionOrden() {
             DNI o CUIT <span className="text-danger">*</span>
           </label>
           <div className="relative">
-            <FileText className="w-4 h-4 text-ink-secondary absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <FileText className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${fieldErrors.dni ? "text-red-500" : "text-ink-secondary"}`} />
             <input
               type="text"
               name="dni"
-              placeholder="Ej: 38123456"
-              defaultValue="38123456"
-              className="w-full pl-10 pr-3.5 py-2.5 bg-surface-alt/50 border border-border rounded-xl text-xs sm:text-sm font-semibold text-ink placeholder:text-ink-secondary/60 focus:border-primary focus:bg-surface focus:outline-none transition-all"
-            />
-          </div>
-        </div>
-
-        {/* Dirección de Entrega (Full width) */}
-        <div className="space-y-1.5 sm:col-span-2">
-          <label className="text-xs font-bold text-ink uppercase tracking-wider block">
-            Dirección de Entrega (Calle, Número, Piso/Depto) <span className="text-danger">*</span>
-          </label>
-          <div className="relative">
-            <MapPin className="w-4 h-4 text-ink-secondary absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              name="direccion"
-              placeholder="Ej: Av. Corrientes 1234, Piso 4 B"
-              defaultValue="Av. Corrientes 1234, Piso 4 B"
-              className="w-full pl-10 pr-3.5 py-2.5 bg-surface-alt/50 border border-border rounded-xl text-xs sm:text-sm font-semibold text-ink placeholder:text-ink-secondary/60 focus:border-primary focus:bg-surface focus:outline-none transition-all"
-            />
-          </div>
-        </div>
-
-        {/* Ciudad */}
-        <div className="space-y-1.5 sm:col-span-1">
-          <label className="text-xs font-bold text-ink uppercase tracking-wider block">
-            Ciudad / Localidad <span className="text-danger">*</span>
-          </label>
-          <div className="relative">
-            <Building className="w-4 h-4 text-ink-secondary absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              name="ciudad"
-              placeholder="Ej: CABA"
-              defaultValue="Ciudad Autónoma de Buenos Aires"
-              className="w-full pl-10 pr-3.5 py-2.5 bg-surface-alt/50 border border-border rounded-xl text-xs sm:text-sm font-semibold text-ink placeholder:text-ink-secondary/60 focus:border-primary focus:bg-surface focus:outline-none transition-all"
+              value={formData.dni}
+              onChange={(e) => onChange("dni", e.target.value)}
+              disabled={tieneDatosFacturacion}
+              readOnly={tieneDatosFacturacion}
+              className={`${getInputClass("dni")} ${tieneDatosFacturacion ? "bg-surface-alt cursor-not-allowed opacity-75 select-none" : ""}`}
             />
           </div>
         </div>
@@ -102,13 +125,53 @@ export function DatosFacturacionOrden() {
             Provincia <span className="text-danger">*</span>
           </label>
           <div className="relative">
-            <Globe className="w-4 h-4 text-ink-secondary absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Globe className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${fieldErrors.provincia ? "text-red-500" : "text-ink-secondary"}`} />
+            <select
+              name="provincia"
+              value={formData.provincia}
+              onChange={(e) => onChange("provincia", e.target.value)}
+              className={`${getInputClass("provincia")} cursor-pointer`}
+            >
+              <option value="">Selecciona tu provincia</option>
+              {PROVINCIAS_ARGENTINA.map((prov) => (
+                <option key={prov} value={prov}>
+                  {prov}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Dirección de Entrega */}
+        <div className="space-y-1.5 sm:col-span-1">
+          <label className="text-xs font-bold text-ink uppercase tracking-wider block">
+            Dirección (Calle y Altura) <span className="text-danger">*</span>
+          </label>
+          <div className="relative">
+            <MapPin className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${fieldErrors.direccion ? "text-red-500" : "text-ink-secondary"}`} />
             <input
               type="text"
-              name="provincia"
-              placeholder="Ej: Buenos Aires"
-              defaultValue="Buenos Aires"
-              className="w-full pl-10 pr-3.5 py-2.5 bg-surface-alt/50 border border-border rounded-xl text-xs sm:text-sm font-semibold text-ink placeholder:text-ink-secondary/60 focus:border-primary focus:bg-surface focus:outline-none transition-all"
+              name="direccion"
+              value={formData.direccion}
+              onChange={(e) => onChange("direccion", e.target.value)}
+              className={getInputClass("direccion")}
+            />
+          </div>
+        </div>
+
+        {/* Ciudad */}
+        <div className="space-y-1.5 sm:col-span-1">
+          <label className="text-xs font-bold text-ink uppercase tracking-wider block">
+            Ciudad / Localidad <span className="text-danger">*</span>
+          </label>
+          <div className="relative">
+            <Building className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${fieldErrors.ciudad ? "text-red-500" : "text-ink-secondary"}`} />
+            <input
+              type="text"
+              name="ciudad"
+              value={formData.ciudad}
+              onChange={(e) => onChange("ciudad", e.target.value)}
+              className={getInputClass("ciudad")}
             />
           </div>
         </div>
@@ -119,29 +182,32 @@ export function DatosFacturacionOrden() {
             Código Postal <span className="text-danger">*</span>
           </label>
           <div className="relative">
-            <Mailbox className="w-4 h-4 text-ink-secondary absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Mailbox className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${fieldErrors.codigo_postal ? "text-red-500" : "text-ink-secondary"}`} />
             <input
               type="text"
               name="codigo_postal"
-              placeholder="Ej: C1043"
-              defaultValue="C1043"
-              className="w-full pl-10 pr-3.5 py-2.5 bg-surface-alt/50 border border-border rounded-xl text-xs sm:text-sm font-semibold text-ink placeholder:text-ink-secondary/60 focus:border-primary focus:bg-surface focus:outline-none transition-all"
+              value={formData.codigo_postal}
+              onChange={(e) => onChange("codigo_postal", e.target.value)}
+              className={getInputClass("codigo_postal")}
             />
           </div>
         </div>
       </div>
 
       {/* Checkbox guardar datos */}
-      <div className="pt-2">
-        <label className="flex items-center gap-2.5 text-xs sm:text-sm text-ink-secondary cursor-pointer select-none">
-          <input
-            type="checkbox"
-            defaultChecked
-            className="w-4 h-4 text-primary rounded border-border focus:ring-primary accent-primary cursor-pointer"
-          />
-          <span>Guardar o actualizar estos datos en mi perfil para futuras compras</span>
-        </label>
-      </div>
+      {onToggleGuardarEnPerfil && (
+        <div className="pt-2">
+          <label className="flex items-center gap-2.5 text-xs sm:text-sm text-ink-secondary cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={guardarEnPerfil}
+              onChange={(e) => onToggleGuardarEnPerfil(e.target.checked)}
+              className="w-4 h-4 text-primary rounded border-border focus:ring-primary accent-primary cursor-pointer"
+            />
+            <span>Guardar o actualizar estos datos en mi perfil para futuras compras</span>
+          </label>
+        </div>
+      )}
     </section>
   );
 }
