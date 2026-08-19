@@ -38,7 +38,7 @@ export function ResumenCheckout({ onPagar, loading = false, disabled = false }: 
       {/* ── LISTA MINIATURA DE PRODUCTOS ─────────────────────────── */}
       <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
         {items.map((item) => {
-          const imagenUrl = item.imagenes?.[0] || item.imagen || "/placeholder-product.png";
+          const imagenUrl = item.img_url || "/placeholder-product.svg";
           const precioOriginalItem = Number(item.precio) * item.cantidad;
 
           return (
@@ -49,6 +49,7 @@ export function ResumenCheckout({ onPagar, loading = false, disabled = false }: 
                   alt={item.nombre}
                   width={48}
                   height={48}
+                  unoptimized
                   className="w-full h-full object-contain"
                 />
               </div>
