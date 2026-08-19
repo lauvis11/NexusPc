@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/context/auth-context";
 import { DatosFacturacion } from "@/features/usuario/types/usuarios";
 import { crearDatosFacturacion, actualizarDatos } from "@/features/usuario/api/usuarios";
-import { crearOrden, CrearPreferenciaPago } from "@/features/ordenes/api/ordenes";
+import { crearOrden, crearPreferenciaPago } from "@/features/ordenes/api/ordenes";
 import { DatosFacturacionOrden } from "@/features/ordenes/components/DatosFacturacionOrden";
 import { ResumenCheckout } from "@/features/ordenes/components/ResumenCheckout";
 
@@ -20,9 +20,16 @@ export default function CheckoutPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [guardarEnPerfil, setGuardarEnPerfil] = useState(true);
 
-  const { user, refreshUser } = useAuth();
+  const { user, isLoading, refreshUser } = useAuth();
   const { items, limpiarCarrito } = useCarritoStore();
   const router = useRouter();
+
+  // Protección si no está autenticado
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace("/login?redirect=/checkout");
+    }
+  }, [user, isLoading, router]);
 
   // Indica si el usuario ya tiene datos de facturación en la base de datos
   const tieneDatosFacturacion = Boolean(user?.nombre_completo && user?.direccion);
@@ -124,7 +131,7 @@ export default function CheckoutPage() {
       });
 
       // 4. Crear la preferencia de pago de Mercado Pago
-      const pagoResponse = await CrearPreferenciaPago(orden.id);
+      const pagoResponse = await crearPreferenciaPago(orden.id);
 
       // 5. Vaciar el carrito y redirigir a Mercado Pago
       limpiarCarrito();

@@ -133,7 +133,7 @@ export class OrdenesModel{
                         AND oferta.activo = true
                         AND oferta.fecha_inicio <= NOW()
                         AND oferta.fecha_fin >= NOW()
-                    WHERE producto.id = $1 FOR UPDATE`,
+                    WHERE producto.id = $1 FOR UPDATE OF producto`,
                     [item.id]
                 )
 
@@ -280,13 +280,15 @@ export class OrdenesModel{
 
         // Iniciamos una instancia de preference de mercadopago e utilizamos el cliente de la configuracion 
         const preference = new Preference(client)
+        const isLocalhost = env.FRONTEND_URL.includes("localhost") || env.FRONTEND_URL.includes("127.0.0.1");
+
         // Llama a la instancia para crear una "preferencia de pago", un objeto que describe QUÉ se va a cobrar y CÓMO manejar el resultado
         const resultado = await preference.create({
             body: {
                 items,
                 external_reference: orden_id,
-                // Redirige automáticamente al comprador de vuelta al sitio tras un pago aprobado
-                auto_return: 'approved',
+                // auto_return solo es válido en Mercado Pago con URLs públicas / HTTPS (no en localhost)
+                ...(!isLocalhost ? { auto_return: 'approved' } : {}),
                 // URLs del frontend a las que MercadoPago redirige al usuario según el resultado del pago
                 back_urls: {
                     success: `${env.FRONTEND_URL}/pago/exito`,

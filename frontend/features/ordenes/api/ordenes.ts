@@ -32,3 +32,5 @@ export async function crearPreferenciaPago(ordenId: string): Promise<InitPoint>{
 
   return response.json();
 }
+
+export { crearPreferenciaPago as CrearPreferenciaPago };
