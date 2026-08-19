@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Clock,
   ShoppingBag,
@@ -17,9 +17,31 @@ import { Footer } from "@/shared/components/layout/Footer";
 
 function ContenidoPagoPendiente() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [copiado, setCopiado] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
+
+  useEffect(() => {
+    const status = (
+      searchParams.get("status") ||
+      searchParams.get("collection_status") ||
+      ""
+    ).toLowerCase();
+
+    const pId = searchParams.get("payment_id") || searchParams.get("collection_id") || "";
+    const extRef = searchParams.get("external_reference") || "";
+
+    if (status === "approved" || status === "success") {
+      router.replace(`/pago/exito?payment_id=${pId}&external_reference=${extRef}`);
+      return;
+    }
+
+    if (status === "rejected" || status === "failure" || status === "null") {
+      router.replace(`/pago/error?payment_id=${pId}&external_reference=${extRef}`);
+      return;
+    }
+  }, [searchParams, router]);
 
   useEffect(() => {
     // A los 900ms comienza la transición suave de salida
