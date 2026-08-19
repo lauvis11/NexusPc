@@ -251,15 +251,19 @@ export class OrdenesModel{
 
     // Creamos el metodo para manejar los pagos, recibe orden_id y usuario_id como parametro
     static async crearPreferenciaPago({orden_id, usuario_id}: {orden_id: string, usuario_id: number}){
-        // Buscamos la orden por su id
+        // Buscamos la orden y los datos del usuario comprador
         const orden = await pool.query(
-            `SELECT usuario_id, estado FROM orden
-            WHERE id = $1`, [orden_id] // Traemos usuario_id y estado
+            `SELECT o.usuario_id, o.estado, u.nombre, u.email 
+            FROM orden o
+            JOIN usuario u ON u.id = o.usuario_id
+            WHERE o.id = $1`, [orden_id]
         )
         // Si la query no trae datos o si el usuario_id no corresponde con el del parametro tiramos un error
         if(orden.rows.length === 0 || orden.rows[0].usuario_id !== usuario_id) throw new Error('La orden no existe')
         // Si el estado de la orden es diferente a PENDIENTE tiramos un error
         if(orden.rows[0].estado !== 'PENDIENTE') throw new Error('La orden no está pendiente de pago')
+
+        const usuarioComprador = orden.rows[0];
 
         // Buscamos los detalle de la orden
         const detalleOrden = await pool.query(
@@ -286,6 +290,10 @@ export class OrdenesModel{
         const resultado = await preference.create({
             body: {
                 items,
+                payer: {
+                    name: usuarioComprador.nombre,
+                    email: usuarioComprador.email,
+                },
                 external_reference: orden_id,
                 // auto_return solo es válido en Mercado Pago con URLs públicas / HTTPS (no en localhost)
                 ...(!isLocalhost ? { auto_return: 'approved' } : {}),
