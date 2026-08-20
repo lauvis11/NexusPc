@@ -3,11 +3,15 @@ import { DatosFacturacion } from "../types/usuarios";
 import { API_URL } from "@/lib/constants";
 
 export async function getPerfil(): Promise<Usuario | null> {
-    const response = await fetch(`${API_URL}/usuarios/perfil`, {
-        credentials: "include"
-    })
-    if (!response.ok) return null
-    return response.json();
+    try {
+        const response = await fetch(`${API_URL}/usuarios/perfil`, {
+            credentials: "include"
+        })
+        if (!response.ok) return null
+        return response.json();
+    } catch {
+        return null;
+    }
 }
 
 export async function crearDatosFacturacion(formData: DatosFacturacion){

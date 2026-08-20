@@ -13,23 +13,37 @@ export function AuthProvider({children}: {children: React.ReactNode}){
     const router = useRouter()
     
     async function refreshUser(){
-        const data = await getPerfil()
-        setUser(data)
+        try {
+            const data = await getPerfil()
+            setUser(data)
+        } catch {
+            setUser(null)
+        }
     }
 
     useEffect(() => {
         async function verifySession(){
-            const data = await getPerfil()
-            setUser(data)
-            setIsLoading(false)
+            try {
+                const data = await getPerfil()
+                setUser(data)
+            } catch {
+                setUser(null)
+            } finally {
+                setIsLoading(false)
+            }
         }
         verifySession()
     }, [])
 
     async function logout(){
-        await logoutApi()
-        setUser(null)
-        router.push('/')
+        try {
+            await logoutApi()
+        } catch {
+            // Ignorar error de red en logout
+        } finally {
+            setUser(null)
+            router.push('/')
+        }
     }
 
     return (
