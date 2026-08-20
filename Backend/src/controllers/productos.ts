@@ -42,9 +42,10 @@ export class ProductosController{
         // en_stock=true filtra solo productos disponibles; cualquier otro valor se ignora
         const en_stock = req.query.en_stock === 'true' ? true : undefined
 
-        // busqueda: se acepta solo si es string no vacío (el % lo agrega el modelo)
-        const busqueda = typeof req.query.busqueda === 'string'
-            ? req.query.busqueda.trim() || undefined
+        // busqueda: se acepta por busqueda, q o search
+        const rawBusqueda = req.query.busqueda ?? req.query.q ?? req.query.search
+        const busqueda = typeof rawBusqueda === 'string'
+            ? rawBusqueda.trim() || undefined
             : undefined
 
         // destacado=true filtra productos destacados; destacado=false filtra productos no destacados
