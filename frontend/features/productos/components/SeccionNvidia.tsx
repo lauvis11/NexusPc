@@ -1,52 +1,58 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, AlertCircle, RotateCcw } from "lucide-react";
 import { ProductoCard } from "./ProductoCard";
 import type { Producto } from "../types/types";
-
-// Productos hardcodeados de NVIDIA
-const PRODUCTOS_NVIDIA: Producto[] = [
-  {
-    id: "nvidia-1",
-    nombre: "NVIDIA GeForce RTX 4080 Super 16GB",
-    descripcion: "Arquitectura Ada Lovelace con DLSS 3.5 y rendimiento masivo en 4K.",
-    precio: 1799000,
-    precioOferta: 1549000,
-    stock: 5,
-    img_url: "https://lh3.googleusercontent.com/aida/AP1WRLso3VI_k7IKPgRBtOJZY3YZR_MUSfjsUJMo-T8YMkOp11HLhjV26CFP6-07ONXaWJgknmYiKTri5RXbMvj79ZtCcSMHJY4oiBYHtslSjIo81AeAm8zPGn-hRxJuqwx-6n88rV-Jw0zN-Uan2A6GwZTjlm4oXaVxAOKfeCGLrJ0Fv-XGIwqNiSzWtfN7NoVIPs9zvJ8JCfkfvBBdzi1i1Xowzml-69xUq1XfhQOYuuC0atyvpEO_Nz46WqU",
-    public_id: "rtx-4080-super",
-    created_at: new Date().toISOString(),
-    categoria: "Tarjetas Gráficas",
-    subcategoria: "NVIDIA",
-    subcategoria_id: 1,
-    caracteristicas: [{ clave: "VRAM", valor: "16GB GDDR6X" }],
-  },
-  {
-    id: "nvidia-2",
-    nombre: "NVIDIA GeForce RTX 4060 Ti 8GB OC",
-    descripcion: "Framerates ultra altos en 1080p y 1440p con trazado de rayos de 3ª generación.",
-    precio: 689000,
-    precioOferta: 599000,
-    stock: 9,
-    img_url: "https://lh3.googleusercontent.com/aida/AP1WRLsaEkeyXelf8RhLVH8XKr7cOUNjF5c1fkE-rN2ot28pAN_wac3aZr4OgrZUK_Any9yMbJE1y-z8t7Ke9wxODOo6WDOx4eP7OxNin4cJZkB1AVLe9bBC1acLhS66HDCgz-15VrOdnJuQWL9El5iXfdfyyXgu8XFMFShmegM6oeOyn3AQniQJnPSb0inVYLeKSnUujgLX2EqoVk5XLVOhotDjONlmfypPCd0lBJjb9ZEovX3oaDl3frXJYRc",
-    public_id: "rtx-4060-ti",
-    created_at: new Date().toISOString(),
-    categoria: "Tarjetas Gráficas",
-    subcategoria: "NVIDIA",
-    subcategoria_id: 1,
-    caracteristicas: [{ clave: "VRAM", valor: "8GB GDDR6" }],
-  },
-];
+import { getProductos } from "../api/productos";
+import { API_URL } from "@/lib/constants";
 
 interface SeccionNvidiaProps {
   onAddToCart?: (producto: Producto) => void;
 }
 
 export function SeccionNvidia({ onAddToCart }: SeccionNvidiaProps) {
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const fetchNvidia = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      // 1. Intentar buscar por RTX / GeForce con getProductos de la API
+      let data = await getProductos(`${API_URL}/productos?busqueda=RTX&limit=2`, 60);
+
+      // 2. Si no hay resultados, buscar por categoría Placas de Video
+      if (!data.data || data.data.length === 0) {
+        data = await getProductos(`${API_URL}/productos?categoria=Placas+de+Video&limit=2`, 60);
+      }
+
+      // 3. Si aún no hay, buscar por NVIDIA
+      if (!data.data || data.data.length === 0) {
+        data = await getProductos(`${API_URL}/productos?busqueda=NVIDIA&limit=2`, 60);
+      }
+
+      setProductos(data.data?.slice(0, 2) ?? []);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNvidia();
+  }, []);
+
+  if (!loading && !error && productos.length === 0) {
+    return null;
+  }
+
   return (
     <section className="w-full py-8 sm:py-12">
-      {/* Contenedor ancho 100% de la pantalla con más altura */}
+      {/* Contenedor ancho 100% de la pantalla */}
       <div className="relative w-full min-h-[480px] sm:min-h-[560px] lg:min-h-[620px] overflow-hidden border-y border-border/60 shadow-2xl bg-slate-950 flex items-center">
         {/* Imagen de fondo full-bleed */}
         <div
@@ -60,7 +66,6 @@ export function SeccionNvidia({ onAddToCart }: SeccionNvidiaProps) {
 
         {/* Contenido Grid dentro de container centrado */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-14 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          
           {/* Marca / Texto explicativo */}
           <div className="lg:col-span-5 text-surface space-y-4 sm:space-y-6">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
@@ -68,12 +73,12 @@ export function SeccionNvidia({ onAddToCart }: SeccionNvidiaProps) {
             </h2>
 
             <p className="text-sm sm:text-base text-slate-300 font-normal leading-relaxed max-w-md">
-              Arquitectura Ada Lovelace para una eficiencia sin precedentes en IA, Ray Tracing realista y DLSS 3.5.
+              Arquitectura Ada Lovelace para una eficiencia sin precedentes en IA, Ray Tracing ultra realista y DLSS 3.5.
             </p>
 
             <div>
               <Link
-                href="/productos?categoria=placas-de-video"
+                href="/productos?categoria=Placas+de+Video"
                 className="inline-flex items-center gap-2.5 px-5 py-3 sm:px-6 sm:py-3.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs sm:text-sm hover:bg-emerald-400 active:scale-95 transition-all shadow-lg shadow-emerald-500/25"
               >
                 <span>Ver Colección GeForce</span>
@@ -82,17 +87,53 @@ export function SeccionNvidia({ onAddToCart }: SeccionNvidiaProps) {
             </div>
           </div>
 
-          {/* Grilla de productos (2 por fila en mobile y desktop) */}
+          {/* Grilla de productos (2 por fila) */}
           <div className="lg:col-span-7 grid grid-cols-2 gap-3 sm:gap-6">
-            {PRODUCTOS_NVIDIA.map((prod) => (
-              <ProductoCard
-                key={prod.id}
-                producto={prod}
-                onAddToCart={onAddToCart}
-              />
-            ))}
+            {loading ? (
+              // Skeletons de carga
+              Array.from({ length: 2 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="bg-surface/90 backdrop-blur-md border border-border/80 p-3 sm:p-5 rounded-xl sm:rounded-2xl animate-pulse flex flex-col h-72 sm:h-96"
+                >
+                  <div className="h-36 sm:h-56 w-full bg-slate-200/80 rounded-lg sm:rounded-xl mb-3" />
+                  <div className="space-y-2">
+                    <div className="h-3 w-16 bg-slate-200/80 rounded" />
+                    <div className="h-4 w-3/4 bg-slate-200/80 rounded" />
+                  </div>
+                  <div className="mt-auto pt-2 flex justify-between items-center">
+                    <div className="space-y-1.5">
+                      <div className="h-5 w-24 bg-slate-200/80 rounded" />
+                      <div className="h-3 w-14 bg-slate-200/80 rounded" />
+                    </div>
+                    <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-slate-200/80 shrink-0" />
+                  </div>
+                </div>
+              ))
+            ) : error ? (
+              <div className="col-span-2 p-6 bg-surface/80 rounded-2xl border border-border text-center space-y-3">
+                <AlertCircle className="w-8 h-8 text-red-500 mx-auto" />
+                <p className="text-xs sm:text-sm font-bold text-ink">
+                  No se pudieron cargar los productos de NVIDIA
+                </p>
+                <button
+                  onClick={fetchNvidia}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-surface text-xs font-bold rounded-xl"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reintentar</span>
+                </button>
+              </div>
+            ) : (
+              productos.map((prod) => (
+                <ProductoCard
+                  key={prod.id}
+                  producto={prod}
+                  onAddToCart={onAddToCart}
+                />
+              ))
+            )}
           </div>
-
         </div>
       </div>
     </section>
