@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
 import { registerSchema, type RegisterInput } from "../schemas/auth.schema";
 import { register } from "../api/auth";
+import { useAuth } from "../context/auth-context";
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState<RegisterInput>({
@@ -18,6 +19,7 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { refreshUser } = useAuth();
 
   const handleChange = (field: keyof RegisterInput, value: string) => {
     const nextData = { ...formData, [field]: value };
@@ -55,7 +57,9 @@ export default function RegisterForm() {
 
     try {
       await register(result.data);
+      await refreshUser();
       router.push("/");
+      router.refresh();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al registrarse";
       if (message.includes("Failed to fetch") || message.includes("NetworkError")) {

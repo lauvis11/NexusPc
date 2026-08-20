@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
 import { loginSchema, type LoginInput } from "../schemas/auth.schema";
 import { login } from "../api/auth";
+import { useAuth } from "../context/auth-context";
 
 export default function LoginForm() {
   const [formData, setFormData] = useState<LoginInput>({
@@ -17,6 +18,8 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { refreshUser } = useAuth();
 
   const handleChange = (field: keyof LoginInput, value: string) => {
     const nextData = { ...formData, [field]: value };
@@ -53,7 +56,10 @@ export default function LoginForm() {
 
     try {
       await login(result.data);
-      router.push("/");
+      await refreshUser();
+      const redirectUrl = searchParams.get("redirect") || "/";
+      router.push(redirectUrl);
+      router.refresh();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al iniciar sesión";
       if (message.includes("Failed to fetch") || message.includes("NetworkError")) {
