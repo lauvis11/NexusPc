@@ -2,7 +2,18 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, User, Cpu, Menu, X, LogOut, ChevronDown, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Search,
+  ShoppingCart,
+  User,
+  Cpu,
+  Menu,
+  X,
+  LogOut,
+  ChevronDown,
+  Loader2,
+} from "lucide-react";
 import { useAuth } from "@/features/auth/context/auth-context";
 import { useCarritoStore } from "@/features/carrito/store/store";
 
@@ -16,17 +27,30 @@ const NAV_LINKS = [
 ];
 
 export function Header() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+
   const { user, isLoading, logout } = useAuth();
   const totalItems = useCarritoStore((state) => state.totalItems);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const term = searchTerm.trim();
+    setSearchOpen(false);
+    if (term) {
+      router.push(`/productos?busqueda=${encodeURIComponent(term)}`);
+    } else {
+      router.push("/productos");
+    }
+  };
 
   const cartCount = mounted ? totalItems : 0;
 
@@ -36,8 +60,7 @@ export function Header() {
         {/* ── TOP BAR ──────────────────────────────────────────── */}
         <div className="h-16 flex items-center bg-surface border-b border-border/30">
           <nav className="relative flex items-center justify-between px-4 sm:px-6 w-full max-w-7xl mx-auto gap-4 sm:gap-6">
-
-            {/* Left: Hamburger + Logo (Ancho simétrico en desktop) */}
+            {/* Left: Hamburger + Logo */}
             <div className="flex items-center gap-2 sm:gap-3 shrink-0 sm:w-48">
               <button
                 className="sm:hidden p-2 text-ink-secondary hover:text-primary transition-colors rounded-xl hover:bg-primary-tint/60 cursor-pointer shrink-0"
@@ -55,19 +78,41 @@ export function Header() {
               </a>
             </div>
 
-            {/* Search Bar — Centrada siempre matemáticamente */}
-            <div className="hidden sm:flex flex-1 max-w-xl mx-auto items-center bg-primary-tint/50 px-4 py-1.5 rounded-lg border border-border/60 focus-within:border-primary focus-within:bg-surface transition-all">
-              <Search className="w-4 h-4 text-ink-secondary shrink-0" />
-              <input
-                type="text"
-                placeholder="Buscar componentes, periféricos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-sm w-full ml-2.5 text-ink placeholder:text-ink-secondary/70"
-              />
+            {/* Search Bar — Desktop (Búsqueda al presionar Enter o botón) */}
+            <div className="hidden sm:block flex-1 max-w-xl mx-auto">
+              <form
+                onSubmit={handleSearchSubmit}
+                className="flex items-center bg-primary-tint/50 px-4 py-1.5 rounded-xl border border-border/60 focus-within:border-primary focus-within:bg-surface focus-within:ring-2 focus-within:ring-primary/20 transition-all"
+              >
+                <button
+                  type="submit"
+                  className="text-ink-secondary hover:text-primary transition-colors cursor-pointer shrink-0"
+                  title="Buscar"
+                  aria-label="Buscar"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+                <input
+                  type="text"
+                  placeholder="Buscar componentes, periféricos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-sm w-full ml-2.5 text-ink placeholder:text-ink-secondary/70"
+                />
+                {searchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchTerm("")}
+                    className="text-ink-secondary hover:text-ink transition-colors cursor-pointer p-0.5"
+                    title="Borrar"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </form>
             </div>
 
-            {/* Right icons (Ancho simétrico en desktop alineado a la derecha) */}
+            {/* Right icons */}
             <div className="flex items-center justify-end gap-1 sm:gap-3 shrink-0 sm:w-48">
               {/* Search icon — mobile only */}
               <button
@@ -111,17 +156,15 @@ export function Header() {
                     <ChevronDown className="w-3.5 h-3.5 text-ink-secondary hidden sm:inline" />
                   </button>
 
-                  {/* Dropdown Menu Flotante (Con Borde Azul Principal Solido) */}
+                  {/* Dropdown Menu Flotante */}
                   {userDropdownOpen && (
                     <>
-                      {/* Fondo transparente para cerrar al hacer clic afuera */}
                       <div
                         className="fixed inset-0 z-40"
                         onClick={() => setUserDropdownOpen(false)}
                       />
 
                       <div className="absolute right-0 mt-2 w-56 bg-surface rounded-2xl border-2 border-primary shadow-xl z-50 p-2 animate-fade-in space-y-1.5">
-                        {/* Opciones */}
                         <a
                           href="/perfil"
                           onClick={() => setUserDropdownOpen(false)}
@@ -161,16 +204,27 @@ export function Header() {
 
         {/* Mobile search bar */}
         {searchOpen && (
-          <div className="sm:hidden bg-surface border-b border-border/30 px-4 py-2 flex items-center gap-2">
-            <Search className="w-4 h-4 text-ink-secondary shrink-0" />
-            <input
-              type="text"
-              placeholder="Buscar componentes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              autoFocus
-              className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-sm w-full text-ink placeholder:text-ink-secondary/70"
-            />
+          <div className="sm:hidden bg-surface border-b border-border/30 px-4 py-2">
+            <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
+              <Search className="w-4 h-4 text-ink-secondary shrink-0" />
+              <input
+                type="text"
+                placeholder="Buscar componentes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                autoFocus
+                className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-sm w-full text-ink placeholder:text-ink-secondary/70"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm("")}
+                  className="text-ink-secondary p-1 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </form>
           </div>
         )}
 

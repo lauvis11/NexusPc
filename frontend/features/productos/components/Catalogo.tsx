@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { ProductoCard } from "./ProductoCard";
 import {
   FiltroCategorias,
@@ -17,6 +18,7 @@ import {
   AlertCircle,
   RotateCcw,
   SearchX,
+  Search,
 } from "lucide-react";
 import { API_URL } from "@/lib/constants";
 
@@ -25,10 +27,12 @@ type OrdenOption = "relevancia" | "precio_asc" | "precio_desc" | "recientes";
 function buildQueryString(
   filtros: FiltrosState,
   page: number,
-  limit: number
+  limit: number,
+  busqueda?: string | null
 ): string {
   const params = new URLSearchParams();
 
+  if (busqueda && busqueda.trim()) params.set("busqueda", busqueda.trim());
   if (filtros.categoria) params.set("categoria", filtros.categoria);
   if (filtros.subcategoria_id != null) params.set("subcategoria_id", String(filtros.subcategoria_id));
   if (filtros.precio_min) params.set("precio_min", filtros.precio_min);
@@ -43,6 +47,7 @@ function buildQueryString(
 
 export function Catalogo() {
   const searchParams = useSearchParams();
+  const busquedaFromUrl = searchParams.get("busqueda") || searchParams.get("q") || searchParams.get("search") || null;
   const categoriaFromUrl = searchParams.get("categoria");
   const subcategoriaFromUrl = searchParams.get("subcategoria_id");
 
@@ -65,7 +70,7 @@ export function Catalogo() {
       subcategoria_id: subcategoriaFromUrl ? Number(subcategoriaFromUrl) : null,
     }));
     setPage(1);
-  }, [categoriaFromUrl, subcategoriaFromUrl]);
+  }, [categoriaFromUrl, subcategoriaFromUrl, busquedaFromUrl]);
 
   const [productos, setProductos] = useState<Producto[]>([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
@@ -77,7 +82,7 @@ export function Catalogo() {
     setLoading(true);
     setError(false);
     try {
-      const qs = buildQueryString(filtros, page, limit);
+      const qs = buildQueryString(filtros, page, limit, busquedaFromUrl);
       const res = await fetch(`${API_URL}/productos?${qs}`);
       if (!res.ok) throw new Error("Error al obtener productos");
       const data: ProductosResponse = await res.json();
@@ -88,7 +93,7 @@ export function Catalogo() {
     } finally {
       setLoading(false);
     }
-  }, [filtros, page, orden]);
+  }, [filtros, page, orden, busquedaFromUrl]);
 
   useEffect(() => {
     fetchProductos();
@@ -205,6 +210,25 @@ export function Catalogo() {
 
         {/* ── CANVAS PRINCIPAL: Grilla de Productos ───────────── */}
         <section className="flex-1">
+          {/* Banner de Búsqueda Activa */}
+          {busquedaFromUrl && (
+            <div className="flex items-center justify-between gap-3 mb-5 p-3.5 bg-primary-tint/50 border border-primary/20 rounded-2xl animate-fade-in">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Search className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-xs sm:text-sm text-ink truncate">
+                  Resultados para: <strong className="text-primary font-extrabold font-mono">"{busquedaFromUrl}"</strong>
+                </span>
+              </div>
+              <Link
+                href="/productos"
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface hover:bg-surface-alt border border-border text-xs font-bold text-ink-secondary hover:text-red-500 rounded-xl transition-all shadow-2xs shrink-0 cursor-pointer"
+                title="Quitar filtro de búsqueda"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Limpiar búsqueda</span>
+              </Link>
+            </div>
+          )}
 
           {/* Estado de Carga */}
           {loading && <SkeletonGrid />}
