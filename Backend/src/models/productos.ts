@@ -54,10 +54,24 @@ export class ProductosModel{
             conditions.push(`producto.stock > 0`)
         }
 
-        if (busqueda) {
-            // El patrón % se construye en TypeScript y se pasa como valor parametrizado
-            values.push(`%${busqueda}%`)
-            conditions.push(`producto.nombre ILIKE $${values.length}`)
+        if (busqueda && busqueda.trim() !== '') {
+            // Dividir por espacios para permitir búsquedas flexibles y no sensibles (ej: "ryzen 5600", "rtx 4060")
+            const palabras = busqueda.trim().split(/\s+/).filter(Boolean)
+            
+            if (palabras.length > 0) {
+                const wordConditions: string[] = []
+                for (const palabra of palabras) {
+                    values.push(`%${palabra}%`)
+                    const idx = values.length
+                    wordConditions.push(`(
+                        producto.nombre ILIKE $${idx} OR 
+                        COALESCE(producto.descripcion, '') ILIKE $${idx} OR 
+                        COALESCE(subcategoria.nombre, '') ILIKE $${idx} OR 
+                        COALESCE(categoria.nombre, '') ILIKE $${idx}
+                    )`)
+                }
+                conditions.push(`(${wordConditions.join(' AND ')})`)
+            }
         }
 
         if (destacado === true) {
