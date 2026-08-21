@@ -29,7 +29,7 @@ export function ResumenCompra() {
   const totalAhorro = Math.max(0, totalOriginal - total);
   const costoEnvio = 0; // Envío gratis o calculado posteriormente
 
-  const handleAplicarCupon = (e: React.FormEvent) => {
+  const handleAplicarCupon = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (codigoCupon.trim()) {
       setCuponAplicado(true);

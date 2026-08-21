@@ -41,7 +41,7 @@ export function Header() {
     setMounted(true);
   }, []);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     const term = searchTerm.trim();
     setSearchOpen(false);
