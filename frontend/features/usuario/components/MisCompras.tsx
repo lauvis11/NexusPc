@@ -70,16 +70,16 @@ export function MisCompras() {
       case "ENTREGADO":
       case "COMPLETADA":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-xs font-extrabold">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1.5 text-emerald-600 text-xs font-extrabold">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>Entregado</span>
           </span>
         );
       case "APROBADO":
       case "PAGADO":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-xs font-extrabold">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1.5 text-emerald-600 text-xs font-extrabold">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>Pagado</span>
           </span>
         );
@@ -87,8 +87,8 @@ export function MisCompras() {
       case "ENVIADO":
       case "EN CAMINO":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/20 text-xs font-extrabold">
-            <Truck className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1.5 text-blue-600 text-xs font-extrabold">
+            <Truck className="w-4 h-4 shrink-0" />
             <span>En camino</span>
           </span>
         );
@@ -96,16 +96,16 @@ export function MisCompras() {
       case "CANCELADA":
       case "RECHAZADO":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20 text-xs font-extrabold">
-            <XCircle className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1.5 text-rose-600 text-xs font-extrabold">
+            <XCircle className="w-4 h-4 shrink-0" />
             <span>Cancelado</span>
           </span>
         );
       case "PENDIENTE":
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20 text-xs font-extrabold">
-            <Clock className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1.5 text-amber-600 text-xs font-extrabold">
+            <Clock className="w-4 h-4 shrink-0" />
             <span>Pendiente</span>
           </span>
         );
