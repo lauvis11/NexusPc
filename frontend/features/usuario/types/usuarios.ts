@@ -6,3 +6,8 @@ export interface DatosFacturacion {
   provincia: string
   codigo_postal: string
 }
+
+export interface ContraseñasForm{
+  contraseña_actual: string
+  nueva_contraseña: string
+}
