@@ -11,26 +11,39 @@ export async function crearOrden(data: OrdenInput): Promise<Orden> {
     body: JSON.stringify(data),
   });
 
-  if(!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Error al crear la orden")
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || "Error al crear la orden");
   }
 
   return response.json();
 }
 
-export async function crearPreferenciaPago(ordenId: string): Promise<InitPoint>{
+export async function crearPreferenciaPago(ordenId: string): Promise<InitPoint> {
   const response = await fetch(`${API_URL}/ordenes/${ordenId}/pago`, {
     method: "POST",
     credentials: "include",
-  })
+  });
 
-  if(!response.ok){
-    const error = await response.json();
-    throw new Error(error.message || "Error al crear la preferencia de pago")
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || "Error al crear la preferencia de pago");
   }
 
   return response.json();
 }
 
-export { crearPreferenciaPago as CrearPreferenciaPago };
+export async function getMisOrdenes(): Promise<Orden[]> {
+  const response = await fetch(`${API_URL}/ordenes`, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || "Error al obtener las órdenes");
+  }
+
+  return response.json();
+}
+
+export { crearPreferenciaPago as CrearPreferenciaPago };
