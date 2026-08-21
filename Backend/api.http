@@ -124,7 +124,7 @@ Content-Type: application/json
 POST http://localhost:4000/auth/logout
 
 ### Para recuperar la contraseña
-POST http://localhost:4000/auth/update-password
+POST http://localhost:4000/usuarios/update-password
 Content-Type: application/json
 
 {
