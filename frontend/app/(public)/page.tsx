@@ -8,6 +8,8 @@ import { Categorias } from "@/shared/components/home/Categorias";
 import { SeccionDestacados } from "@/features/productos/components/SeccionDestacados";
 import { SeccionOfertas } from "@/features/productos/components/SeccionOfertas";
 import { SeccionNvidia } from "@/features/productos/components/SeccionNvidia";
+import { JsonLd } from "@/shared/components/seo/JsonLd";
+import { SITE_URL } from "@/lib/constants";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Banners del Hero Carousel
@@ -16,21 +18,48 @@ const HERO_BANNERS = [
     id: 1,
     title: "NVIDIA GeForce RTX 40 Series - Potencia Absoluta",
     image: "/banners/hero1.png",
-    link: "#productos",
+    link: "/productos?categoria=Placas+de+Video",
   },
   {
     id: 2,
     title: "Procesadores AMD Ryzen 7000 - Rendimiento Next-Gen",
     image: "/banners/hero2.png",
-    link: "#productos",
+    link: "/productos?busqueda=Ryzen",
   },
   {
     id: 3,
     title: "Armá tu PC Gamer a Medida con Garantía Oficial",
     image: "/banners/hero3.png",
-    link: "#arma-tu-pc",
+    link: "/productos",
   },
 ];
+
+const homeStructuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "NexusPC",
+      url: SITE_URL,
+      logo: `${SITE_URL}/banners/hero1.png`,
+      description:
+        "Tienda líder en hardware gamer, componentes de computación y PCs armadas con el mejor precio y garantía en Argentina.",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: "NexusPC",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/productos?busqueda={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
+};
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -54,6 +83,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-surface-alt text-ink font-sans flex flex-col selection:bg-primary-tint selection:text-primary">
+      {/* Datos Estructurados Schema.org */}
+      <JsonLd data={homeStructuredData} />
+
       {/* Header Modular */}
       <Header />
 
@@ -117,7 +149,7 @@ export default function Home() {
       {/* PRODUCTOS EN OFERTA */}
       <SeccionOfertas />
 
-      {/* CATEGORÍAS (Usando el JSON de tu API) */}
+      {/* CATEGORÍAS */}
       <Categorias
         selectedCategoryId={selectedCategory}
         onSelectCategory={(id) => setSelectedCategory(id)}

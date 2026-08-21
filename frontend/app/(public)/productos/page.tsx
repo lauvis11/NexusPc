@@ -1,7 +1,24 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Header } from "@/shared/components/layout/Header";
 import { Footer } from "@/shared/components/layout/Footer";
 import { Catalogo } from "@/features/productos/components/Catalogo";
+import { SITE_URL } from "@/lib/constants";
+
+export const metadata: Metadata = {
+  title: "Catálogo de Hardware y Computación",
+  description:
+    "Explorá nuestro catálogo de placas de video, procesadores, memorias RAM, fuentes y periféricos al mejor precio de Argentina en NexusPC.",
+  alternates: {
+    canonical: `${SITE_URL}/productos`,
+  },
+  openGraph: {
+    title: "Catálogo de Hardware Gamer | NexusPC",
+    description:
+      "Explorá nuestro catálogo completo de componentes y periféricos para armar tu PC Gamer con garantía oficial.",
+    url: `${SITE_URL}/productos`,
+  },
+};
 
 export default function ProductosPage() {
   return (
