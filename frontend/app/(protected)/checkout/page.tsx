@@ -8,6 +8,7 @@ import { useCarritoStore } from "@/features/carrito/store/store";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/context/auth-context";
 import { DatosFacturacion } from "@/features/usuario/types/usuarios";
+import { datosFacturacionSchema, actualizarDatosFacturacionSchema } from "@/features/usuario/schemas/facturacion.schema";
 import { crearDatosFacturacion, actualizarDatos } from "@/features/usuario/api/usuarios";
 import { crearOrden, crearPreferenciaPago } from "@/features/ordenes/api/ordenes";
 import { DatosFacturacionOrden } from "@/features/ordenes/components/DatosFacturacionOrden";
@@ -85,66 +86,101 @@ export default function CheckoutPage() {
   const handlePagar = async () => {
     setErrorMessage(null);
 
-    // 1. Validar campos requeridos
-    const errors: Partial<Record<keyof DatosFacturacion, boolean>> = {};
-    if (!formData.nombre_completo.trim()) errors.nombre_completo = true;
-    if (!tieneDatosFacturacion && !formData.dni.trim()) errors.dni = true;
-    if (!formData.direccion.trim()) errors.direccion = true;
-    if (!formData.ciudad.trim()) errors.ciudad = true;
-    if (!formData.provincia.trim()) errors.provincia = true;
-    if (!formData.codigo_postal.trim()) errors.codigo_postal = true;
-
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      setErrorMessage("Por favor completá todos los campos obligatorios marcados en rojo.");
-      return;
-    }
-
     if (items.length === 0) {
       setErrorMessage("El carrito está vacío.");
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      // 2. Guardar o actualizar datos de facturación si corresponde
-      if (!tieneDatosFacturacion) {
-        await crearDatosFacturacion(formData);
-        await refreshUser();
-      } else if (guardarEnPerfil) {
-        await actualizarDatos({
-          nombre_completo: formData.nombre_completo,
-          direccion: formData.direccion,
-          ciudad: formData.ciudad,
-          provincia: formData.provincia,
-          codigo_postal: formData.codigo_postal,
+    if (!tieneDatosFacturacion) {
+      const validationResult = datosFacturacionSchema.safeParse(formData);
+      if (!validationResult.success) {
+        const errors: Partial<Record<keyof DatosFacturacion, boolean>> = {};
+        validationResult.error.issues.forEach((issue) => {
+          const field = issue.path[0] as keyof DatosFacturacion;
+          if (field) errors[field] = true;
         });
+        setFieldErrors(errors);
+        const firstErrorMessage = validationResult.error.issues[0]?.message;
+        setErrorMessage(firstErrorMessage || "Por favor completá todos los campos obligatorios.");
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      try {
+        // 2. Guardar datos de facturación por primera vez
+        await crearDatosFacturacion(validationResult.data);
         await refreshUser();
+
+        // 3. Crear la orden en el backend
+        const orden = await crearOrden({
+          productos: items.map((item) => ({
+            id: item.id,
+            cantidad: item.cantidad,
+          })),
+        });
+
+        // 4. Crear la preferencia de pago de Mercado Pago
+        const pagoResponse = await crearPreferenciaPago(orden.id);
+
+        // 5. Validar que la URL de pago provenga de un dominio oficial de Mercado Pago
+        if (pagoResponse?.init_point && isValidMercadoPagoUrl(pagoResponse.init_point)) {
+          limpiarCarrito();
+          window.location.href = pagoResponse.init_point;
+        } else {
+          throw new Error("El enlace de pago obtenido no es válido o seguro.");
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Ocurrió un error al procesar el pago.";
+        setErrorMessage(msg);
+        setIsSubmitting(false);
+      }
+    } else {
+      const validationResult = actualizarDatosFacturacionSchema.safeParse(formData);
+      if (!validationResult.success) {
+        const errors: Partial<Record<keyof DatosFacturacion, boolean>> = {};
+        validationResult.error.issues.forEach((issue) => {
+          const field = issue.path[0] as keyof DatosFacturacion;
+          if (field) errors[field] = true;
+        });
+        setFieldErrors(errors);
+        const firstErrorMessage = validationResult.error.issues[0]?.message;
+        setErrorMessage(firstErrorMessage || "Por favor completá todos los campos obligatorios.");
+        return;
       }
 
-      // 3. Crear la orden en el backend
-      const orden = await crearOrden({
-        productos: items.map((item) => ({
-          id: item.id,
-          cantidad: item.cantidad,
-        })),
-      });
+      setIsSubmitting(true);
 
-      // 4. Crear la preferencia de pago de Mercado Pago
-      const pagoResponse = await crearPreferenciaPago(orden.id);
+      try {
+        // 2. Actualizar datos si el usuario lo marcó
+        if (guardarEnPerfil) {
+          await actualizarDatos(validationResult.data);
+          await refreshUser();
+        }
 
-      // 5. Validar que la URL de pago provenga de un dominio oficial de Mercado Pago
-      if (pagoResponse?.init_point && isValidMercadoPagoUrl(pagoResponse.init_point)) {
-        limpiarCarrito();
-        window.location.href = pagoResponse.init_point;
-      } else {
-        throw new Error("El enlace de pago obtenido no es válido o seguro.");
+        // 3. Crear la orden en el backend
+        const orden = await crearOrden({
+          productos: items.map((item) => ({
+            id: item.id,
+            cantidad: item.cantidad,
+          })),
+        });
+
+        // 4. Crear la preferencia de pago de Mercado Pago
+        const pagoResponse = await crearPreferenciaPago(orden.id);
+
+        // 5. Validar que la URL de pago provenga de un dominio oficial de Mercado Pago
+        if (pagoResponse?.init_point && isValidMercadoPagoUrl(pagoResponse.init_point)) {
+          limpiarCarrito();
+          window.location.href = pagoResponse.init_point;
+        } else {
+          throw new Error("El enlace de pago obtenido no es válido o seguro.");
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Ocurrió un error al procesar el pago.";
+        setErrorMessage(msg);
+        setIsSubmitting(false);
       }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Ocurrió un error al procesar el pago.";
-      setErrorMessage(msg);
-      setIsSubmitting(false);
     }
   };
 

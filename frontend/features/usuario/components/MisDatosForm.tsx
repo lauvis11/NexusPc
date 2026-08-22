@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { User, Mail, IdCard, MapPin, Building, Home, Hash, Save, AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/features/auth/context/auth-context";
 import { crearDatosFacturacion, actualizarDatos } from "@/features/usuario/api/usuarios";
+import { datosFacturacionSchema, actualizarDatosFacturacionSchema } from "@/features/usuario/schemas/facturacion.schema";
 
 const PROVINCIAS_ARGENTINA = [
   "Buenos Aires",
@@ -79,54 +80,87 @@ export function MisDatosForm() {
     setError(null);
     setSavedSuccess(false);
 
-    // Validar campos requeridos
-    const errors: Record<string, boolean> = {};
+    // Validar con esquema Zod
+    const rawPayload = {
+      nombre_completo: editableData.nombreCompleto,
+      dni: editableData.dni,
+      provincia: editableData.provincia,
+      direccion: editableData.direccion,
+      ciudad: editableData.ciudad,
+      codigo_postal: editableData.codigoPostal,
+    };
 
-    if (!editableData.nombreCompleto.trim()) errors.nombreCompleto = true;
-    if (!tieneDatosFacturacion && !editableData.dni.trim()) errors.dni = true;
-    if (!editableData.provincia.trim()) errors.provincia = true;
-    if (!editableData.direccion.trim()) errors.direccion = true;
-    if (!editableData.ciudad.trim()) errors.ciudad = true;
-    if (!editableData.codigoPostal.trim()) errors.codigoPostal = true;
-
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      setError("Por favor completa todos los campos obligatorios.");
-      return;
-    }
-
-    setFieldErrors({});
-    setIsSubmitting(true);
-
-    try {
-      if (!tieneDatosFacturacion) {
-        // Primera vez: crear datos de facturación incluyendo el DNI
-        await crearDatosFacturacion({
-          nombre_completo: editableData.nombreCompleto,
-          dni: editableData.dni,
-          direccion: editableData.direccion,
-          ciudad: editableData.ciudad,
-          provincia: editableData.provincia,
-          codigo_postal: editableData.codigoPostal,
+    if (!tieneDatosFacturacion) {
+      const validationResult = datosFacturacionSchema.safeParse(rawPayload);
+      if (!validationResult.success) {
+        const fieldMap: Record<string, string> = {
+          nombre_completo: "nombreCompleto",
+          dni: "dni",
+          provincia: "provincia",
+          direccion: "direccion",
+          ciudad: "ciudad",
+          codigo_postal: "codigoPostal",
+        };
+        const errors: Record<string, boolean> = {};
+        validationResult.error.issues.forEach((issue) => {
+          const fieldKey = fieldMap[issue.path[0] as string];
+          if (fieldKey) errors[fieldKey] = true;
         });
-      } else {
-        // Ya existen datos: actualizar sin modificar DNI
-        await actualizarDatos({
-          nombre_completo: editableData.nombreCompleto,
-          direccion: editableData.direccion,
-          ciudad: editableData.ciudad,
-          provincia: editableData.provincia,
-          codigo_postal: editableData.codigoPostal,
-        });
+        setFieldErrors(errors);
+        const firstErrorMessage = validationResult.error.issues[0]?.message;
+        setError(firstErrorMessage || "Por favor completa todos los campos obligatorios.");
+        return;
       }
 
-      await refreshUser();
-      setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 4000);
-    } catch (err: any) {
-      setError(err.message || "Ocurrió un error inesperado al guardar los datos");
-    } finally {
-      setIsSubmitting(false);
+      setFieldErrors({});
+      setIsSubmitting(true);
+
+      try {
+        await crearDatosFacturacion(validationResult.data);
+        await refreshUser();
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 4000);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Ocurrió un error inesperado al guardar los datos";
+        setError(msg);
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      const validationResult = actualizarDatosFacturacionSchema.safeParse(rawPayload);
+      if (!validationResult.success) {
+        const fieldMap: Record<string, string> = {
+          nombre_completo: "nombreCompleto",
+          provincia: "provincia",
+          direccion: "direccion",
+          ciudad: "ciudad",
+          codigo_postal: "codigoPostal",
+        };
+        const errors: Record<string, boolean> = {};
+        validationResult.error.issues.forEach((issue) => {
+          const fieldKey = fieldMap[issue.path[0] as string];
+          if (fieldKey) errors[fieldKey] = true;
+        });
+        setFieldErrors(errors);
+        const firstErrorMessage = validationResult.error.issues[0]?.message;
+        setError(firstErrorMessage || "Por favor completa todos los campos obligatorios.");
+        return;
+      }
+
+      setFieldErrors({});
+      setIsSubmitting(true);
+
+      try {
+        await actualizarDatos(validationResult.data);
+        await refreshUser();
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 4000);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Ocurrió un error inesperado al guardar los datos";
+        setError(msg);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
