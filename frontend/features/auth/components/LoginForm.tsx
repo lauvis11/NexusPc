@@ -7,6 +7,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from "lucide-react";
 import { loginSchema, type LoginInput } from "../schemas/auth.schema";
 import { login } from "../api/auth";
 import { useAuth } from "../context/auth-context";
+import { getSafeRedirect } from "../utils/redirect";
 
 export default function LoginForm() {
   const [formData, setFormData] = useState<LoginInput>({
@@ -57,7 +58,7 @@ export default function LoginForm() {
     try {
       await login(result.data);
       await refreshUser();
-      const redirectUrl = searchParams.get("redirect") || "/";
+      const redirectUrl = getSafeRedirect(searchParams.get("redirect"));
       router.push(redirectUrl);
       router.refresh();
     } catch (error) {
