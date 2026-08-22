@@ -12,6 +12,7 @@ import { crearDatosFacturacion, actualizarDatos } from "@/features/usuario/api/u
 import { crearOrden, crearPreferenciaPago } from "@/features/ordenes/api/ordenes";
 import { DatosFacturacionOrden } from "@/features/ordenes/components/DatosFacturacionOrden";
 import { ResumenCheckout } from "@/features/ordenes/components/ResumenCheckout";
+import { isValidMercadoPagoUrl } from "@/features/ordenes/utils/mercadoPago";
 
 export default function CheckoutPage() {
   const [mounted, setMounted] = useState(false);
@@ -133,13 +134,12 @@ export default function CheckoutPage() {
       // 4. Crear la preferencia de pago de Mercado Pago
       const pagoResponse = await crearPreferenciaPago(orden.id);
 
-      // 5. Vaciar el carrito y redirigir a Mercado Pago
-      limpiarCarrito();
-
-      if (pagoResponse?.init_point) {
+      // 5. Validar que la URL de pago provenga de un dominio oficial de Mercado Pago
+      if (pagoResponse?.init_point && isValidMercadoPagoUrl(pagoResponse.init_point)) {
+        limpiarCarrito();
         window.location.href = pagoResponse.init_point;
       } else {
-        throw new Error("No se pudo obtener el enlace de pago de Mercado Pago.");
+        throw new Error("El enlace de pago obtenido no es válido o seguro.");
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Ocurrió un error al procesar el pago.";
