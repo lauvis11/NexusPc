@@ -5,18 +5,12 @@ import { ShoppingCart } from "lucide-react";
 import type { Producto } from "../types/types";
 import { estaEnOferta, calcularDescuento } from "../utils/ofertaUtils";
 import { useCarritoStore } from "@/features/carrito/store/store";
+import { formatearPrecio } from "@/shared/utils/format";
 
 interface ProductoCardProps {
   producto: Producto;
   onAddToCart?: (producto: Producto) => void;
 }
-
-const formatearPrecio = (valor: number) =>
-  new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  }).format(valor);
 
 export function ProductoCard({ producto, onAddToCart }: ProductoCardProps) {
   const agregarProducto = useCarritoStore((state) => state.agregarProducto);

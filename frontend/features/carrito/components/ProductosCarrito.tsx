@@ -3,16 +3,7 @@
 import Link from "next/link";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { useCarritoStore } from "../store/store";
-
-const formatearPrecio = (valor: number | string) => {
-  const num = Number(valor);
-  if (isNaN(num)) return "$0";
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  }).format(num);
-};
+import { formatearPrecio } from "@/shared/utils/format";
 
 export function ProductosCarrito() {
   const { items, actualizarCantidad, eliminarProducto, limpiarCarrito } = useCarritoStore();

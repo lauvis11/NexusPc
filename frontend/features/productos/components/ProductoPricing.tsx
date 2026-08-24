@@ -15,21 +15,12 @@ import {
 import type { Producto } from "../types/types";
 import { estaEnOferta } from "../utils/ofertaUtils";
 import { useCarritoStore } from "@/features/carrito/store/store";
+import { formatearPrecio } from "@/shared/utils/format";
 
 interface ProductoPricingProps {
   producto: Producto;
   onAddToCart?: (producto: Producto, cantidad: number) => void;
 }
-
-const formatearPrecio = (valor: number | string) => {
-  const num = Number(valor);
-  if (isNaN(num)) return "$0";
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  }).format(num);
-};
 
 export function ProductoPricing({
   producto,

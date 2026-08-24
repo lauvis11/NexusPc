@@ -17,16 +17,7 @@ import {
 import { DetallePedido } from "./DetallePedido";
 import { getMisOrdenes } from "@/features/ordenes/api/ordenes";
 import type { Orden } from "@/features/ordenes/types/ordenes";
-
-const formatearPrecio = (valor: number | string) => {
-  const num = Number(valor);
-  if (isNaN(num)) return "$0";
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  }).format(num);
-};
+import { formatearPrecio } from "@/shared/utils/format";
 
 const formatearFecha = (fechaStr: string) => {
   try {

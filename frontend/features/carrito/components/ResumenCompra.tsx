@@ -5,16 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Tag, ShieldCheck } from "lucide-react";
 import { useCarritoStore } from "../store/store";
 import { useAuth } from "@/features/auth/context/auth-context";
-
-const formatearPrecio = (valor: number | string) => {
-  const num = Number(valor);
-  if (isNaN(num)) return "$0";
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  }).format(num);
-};
+import { formatearPrecio } from "@/shared/utils/format";
 
 export function ResumenCompra() {
   const router = useRouter();

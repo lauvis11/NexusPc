@@ -4,16 +4,7 @@ import Image from "next/image";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { useCarritoStore } from "@/features/carrito/store/store";
 import type { ResumenCheckoutProps } from "../types/ordenes";
-
-const formatearPrecio = (valor: number | string) => {
-  const num = Number(valor);
-  if (isNaN(num)) return "$0";
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  }).format(num);
-};
+import { formatearPrecio } from "@/shared/utils/format";
 
 export function ResumenCheckout({ onPagar, loading = false, disabled = false }: ResumenCheckoutProps) {
   const { items, total, totalItems } = useCarritoStore();

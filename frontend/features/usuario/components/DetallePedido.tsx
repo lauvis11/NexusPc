@@ -2,21 +2,12 @@
 
 import { ArrowLeft } from "lucide-react";
 import type { Orden } from "@/features/ordenes/types/ordenes";
+import { formatearPrecio } from "@/shared/utils/format";
 
 interface DetallePedidoProps {
   order: Orden;
   onVolver: () => void;
 }
-
-const formatearPrecio = (valor: number | string) => {
-  const num = Number(valor);
-  if (isNaN(num)) return "$0";
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  }).format(num);
-};
 
 export function DetallePedido({ order, onVolver }: DetallePedidoProps) {
   const totalNum = Number(order.total);
