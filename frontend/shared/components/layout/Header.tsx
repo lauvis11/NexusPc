@@ -70,12 +70,12 @@ export function Header() {
                 <Menu className="w-6 h-6" />
               </button>
 
-              <a href="/" className="flex items-center gap-2 shrink-0 group">
+              <Link href="/" className="flex items-center gap-2 shrink-0 group">
                 <Cpu className="w-6 h-6 text-primary" />
                 <span className="text-xl font-bold tracking-tight text-primary">
                   Nexus<span className="text-ink">PC</span>
                 </span>
-              </a>
+              </Link>
             </div>
 
             {/* Search Bar — Desktop (Búsqueda al presionar Enter o botón) */}
@@ -259,12 +259,12 @@ export function Header() {
       >
         {/* Drawer header */}
         <div className="flex items-center justify-between px-4 h-16 border-b border-border/30 shrink-0">
-          <a href="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)}>
+          <Link href="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)}>
             <Cpu className="w-5 h-5 text-primary" />
             <span className="text-lg font-bold tracking-tight text-primary">
               Nexus<span className="text-ink">PC</span>
             </span>
-          </a>
+          </Link>
           <button
             onClick={() => setMenuOpen(false)}
             className="p-2 text-ink-secondary hover:text-primary transition-colors rounded-xl hover:bg-primary-tint/60 cursor-pointer"

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Cpu, Globe } from "lucide-react";
 
 export function Footer() {
@@ -11,12 +12,12 @@ export function Footer() {
           
           {/* Brand Column (2 Spans en todas las pantallas) */}
           <div className="col-span-2 lg:col-span-2 space-y-4">
-            <a href="/" className="inline-flex items-center gap-2">
+            <Link href="/" className="inline-flex items-center gap-2">
               <Cpu className="w-7 h-7 text-primary" />
               <span className="text-2xl font-bold tracking-tight text-primary">
                 Nexus<span className="text-ink">PC</span>
               </span>
-            </a>
+            </Link>
 
             <p className="text-sm text-ink-secondary leading-relaxed max-w-sm">
               Precision Engineered. Elevando el estándar del hardware en Latinoamérica con garantía oficial, asesoramiento profesional y ensamblado de alta precisión.
@@ -85,16 +86,16 @@ export function Footer() {
             <h4 className="text-sm font-semibold tracking-wider text-ink uppercase">Soporte</h4>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <a href="/ayuda" className="text-ink-secondary hover:text-primary transition-colors">Centro de Ayuda</a>
+                <Link href="/ayuda" className="text-ink-secondary hover:text-primary transition-colors">Centro de Ayuda</Link>
               </li>
               <li>
-                <a href="/ayuda" className="text-ink-secondary hover:text-primary transition-colors">Garantías y RMA</a>
+                <Link href="/ayuda" className="text-ink-secondary hover:text-primary transition-colors">Garantías y RMA</Link>
               </li>
               <li>
-                <a href="/ayuda" className="text-ink-secondary hover:text-primary transition-colors">Seguimiento de Envío</a>
+                <Link href="/ayuda" className="text-ink-secondary hover:text-primary transition-colors">Seguimiento de Envío</Link>
               </li>
               <li>
-                <a href="/ayuda" className="text-ink-secondary hover:text-primary transition-colors">Preguntas Frecuentes</a>
+                <Link href="/ayuda" className="text-ink-secondary hover:text-primary transition-colors">Preguntas Frecuentes</Link>
               </li>
             </ul>
           </div>
