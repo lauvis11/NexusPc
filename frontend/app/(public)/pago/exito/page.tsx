@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/shared/components/layout/Header";
 import { Footer } from "@/shared/components/layout/Footer";
+import { buildPagoUrl } from "@/features/ordenes/utils/mercadoPago";
 
 function ContenidoPagoExito() {
   const searchParams = useSearchParams();
@@ -33,12 +34,12 @@ function ContenidoPagoExito() {
     const extRef = searchParams.get("external_reference") || "";
 
     if (status === "rejected" || status === "failure" || status === "null") {
-      router.replace(`/pago/error?payment_id=${pId}&external_reference=${extRef}`);
+      router.replace(buildPagoUrl("/pago/error", pId, extRef));
       return;
     }
 
     if (status === "pending" || status === "in_process") {
-      router.replace(`/pago/pendiente?payment_id=${pId}&external_reference=${extRef}`);
+      router.replace(buildPagoUrl("/pago/pendiente", pId, extRef));
       return;
     }
   }, [searchParams, router]);

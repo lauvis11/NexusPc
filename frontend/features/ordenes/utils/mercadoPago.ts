@@ -42,3 +42,28 @@ export function isValidMercadoPagoUrl(url: string | null | undefined): boolean {
     return false;
   }
 }
+
+/**
+ * Construye de forma segura una URL interna con parámetros de pago codificados,
+ * evitando vulnerabilidades de inyección de parámetros URL (HTTP Parameter Pollution).
+ *
+ * @param basePath Ruta base interna (ej: '/pago/exito', '/pago/error', '/pago/pendiente')
+ * @param paymentId ID de pago o transacción
+ * @param externalReference Referencia externa u orden ID
+ * @returns Ruta URL sanitizada y codificada
+ */
+export function buildPagoUrl(
+  basePath: string,
+  paymentId?: string | null,
+  externalReference?: string | null
+): string {
+  const params = new URLSearchParams();
+  if (paymentId && paymentId.trim()) {
+    params.set("payment_id", paymentId.trim());
+  }
+  if (externalReference && externalReference.trim()) {
+    params.set("external_reference", externalReference.trim());
+  }
+  const queryString = params.toString();
+  return queryString ? `${basePath}?${queryString}` : basePath;
+}
