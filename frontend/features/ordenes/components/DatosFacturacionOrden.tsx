@@ -3,33 +3,7 @@
 import { User, FileText, MapPin, Building, Globe, Mailbox, CheckCircle2, AlertCircle } from "lucide-react";
 import { DatosFacturacion } from "@/features/usuario/types/usuarios";
 import type { DatosFacturacionOrdenProps } from "../types/ordenes";
-
-export const PROVINCIAS_ARGENTINA = [
-  "Buenos Aires",
-  "Ciudad Autónoma de Buenos Aires (CABA)",
-  "Catamarca",
-  "Chaco",
-  "Chubut",
-  "Córdoba",
-  "Corrientes",
-  "Entre Ríos",
-  "Formosa",
-  "Jujuy",
-  "La Pampa",
-  "La Rioja",
-  "Mendoza",
-  "Misiones",
-  "Neuquén",
-  "Río Negro",
-  "Salta",
-  "San Juan",
-  "San Luis",
-  "Santa Cruz",
-  "Santa Fe",
-  "Santiago del Estero",
-  "Tierra del Fuego",
-  "Tucumán",
-];
+import { PROVINCIAS_ARGENTINA } from "@/shared/constants/provincias";
 
 export function DatosFacturacionOrden({
   formData,

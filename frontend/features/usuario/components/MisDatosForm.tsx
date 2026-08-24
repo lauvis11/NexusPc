@@ -5,33 +5,7 @@ import { User, Mail, IdCard, MapPin, Building, Home, Hash, Save, AlertCircle, Lo
 import { useAuth } from "@/features/auth/context/auth-context";
 import { crearDatosFacturacion, actualizarDatos } from "@/features/usuario/api/usuarios";
 import { datosFacturacionSchema, actualizarDatosFacturacionSchema } from "@/features/usuario/schemas/facturacion.schema";
-
-const PROVINCIAS_ARGENTINA = [
-  "Buenos Aires",
-  "Ciudad Autónoma de Buenos Aires (CABA)",
-  "Catamarca",
-  "Chaco",
-  "Chubut",
-  "Córdoba",
-  "Corrientes",
-  "Entre Ríos",
-  "Formosa",
-  "Jujuy",
-  "La Pampa",
-  "La Rioja",
-  "Mendoza",
-  "Misiones",
-  "Neuquén",
-  "Río Negro",
-  "Salta",
-  "San Juan",
-  "San Luis",
-  "Santa Cruz",
-  "Santa Fe",
-  "Santiago del Estero",
-  "Tierra del Fuego",
-  "Tucumán",
-];
+import { PROVINCIAS_ARGENTINA } from "@/shared/constants/provincias";
 
 export function MisDatosForm() {
   const { user, isLoading, refreshUser } = useAuth();
