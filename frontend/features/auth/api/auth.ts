@@ -11,8 +11,8 @@ export async function login(data: LoginInput) {
     body: JSON.stringify(data),
   });
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message);
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || "Error al iniciar sesión");
   }
 
   return response.json();
@@ -28,8 +28,8 @@ export async function register(data: RegisterInput) {
     body: JSON.stringify(data),
   });
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message);
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || "Error al registrarse");
   }
 
   return response.json();
@@ -41,8 +41,8 @@ export async function logout() {
     credentials: "include",
   });
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message);
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || "Error al cerrar sesión");
   }
 
   return response.json();
