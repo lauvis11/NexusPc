@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 import type { Producto } from "../types/types";
 import { estaEnOferta, calcularDescuento } from "../utils/ofertaUtils";
@@ -43,10 +44,12 @@ export function ProductoCard({ producto, onAddToCart }: ProductoCardProps) {
 
       {/* Contenedor de Imagen */}
       <div className="relative mb-2.5 sm:mb-3.5 h-36 sm:h-56 w-full flex items-center justify-center p-2 sm:p-3 rounded-lg sm:rounded-xl bg-surface-alt/50 overflow-hidden shrink-0">
-        <img
+        <Image
           src={producto.img_url || "/placeholder-product.png"}
           alt={producto.nombre}
-          className="max-h-full max-w-full object-contain pointer-events-none"
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-contain p-2 pointer-events-none"
         />
       </div>
 

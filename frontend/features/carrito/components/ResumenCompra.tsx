@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Tag, ShieldCheck } from "lucide-react";
+import { Tag, ShieldCheck } from "lucide-react";
 import { useCarritoStore } from "../store/store";
 import { useAuth } from "@/features/auth/context/auth-context";
 import { formatearPrecio } from "@/shared/utils/format";

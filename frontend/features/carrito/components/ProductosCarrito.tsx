@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { useCarritoStore } from "../store/store";
 import { formatearPrecio } from "@/shared/utils/format";
@@ -57,12 +58,14 @@ export function ProductosCarrito() {
               <div className="col-span-12 md:col-span-6 flex gap-4 items-center">
                 <Link
                   href={`/productos/${item.id}`}
-                  className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-surface-alt/50 border border-border rounded-xl p-2 flex items-center justify-center overflow-hidden hover:border-primary transition-all cursor-pointer group"
+                  className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-surface-alt/50 border border-border rounded-xl p-2 flex items-center justify-center overflow-hidden hover:border-primary transition-all cursor-pointer group"
                 >
-                  <img
+                  <Image
                     src={item.img_url || "/placeholder-product.png"}
                     alt={item.nombre}
-                    className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300 pointer-events-none"
+                    fill
+                    sizes="96px"
+                    className="object-contain p-2 group-hover:scale-105 transition-transform duration-300 pointer-events-none"
                   />
                 </Link>
 

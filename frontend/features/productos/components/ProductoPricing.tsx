@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ChevronRight,
@@ -90,10 +91,13 @@ export function ProductoPricing({
                 </span>
               </div>
             )}
-            <img
-              src={imagenes[selectedImgIndex] || producto.img_url}
+            <Image
+              src={imagenes[selectedImgIndex] || producto.img_url || "/placeholder-product.png"}
               alt={producto.nombre}
-              className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-contain p-6 group-hover:scale-105 transition-transform duration-500"
             />
           </div>
 
@@ -103,16 +107,18 @@ export function ProductoPricing({
               <button
                 key={idx}
                 onClick={() => setSelectedImgIndex(idx)}
-                className={`bg-surface border-2 rounded-xl p-2 flex justify-center items-center h-20 sm:h-24 cursor-pointer transition-all ${
+                className={`relative bg-surface border-2 rounded-xl p-2 flex justify-center items-center h-20 sm:h-24 cursor-pointer transition-all overflow-hidden ${
                   selectedImgIndex === idx
                     ? "border-primary shadow-sm scale-102"
                     : "border-border hover:border-primary/50 opacity-70 hover:opacity-100"
                 }`}
               >
-                <img
-                  src={img}
+                <Image
+                  src={img || "/placeholder-product.png"}
                   alt={`Vista ${idx + 1}`}
-                  className="max-h-full max-w-full object-contain"
+                  fill
+                  sizes="100px"
+                  className="object-contain p-2"
                 />
               </button>
             ))}

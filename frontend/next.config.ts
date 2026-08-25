@@ -26,7 +26,7 @@ const cspDirectives = [
   `script-src 'self' ${isDev ? "'unsafe-eval' 'unsafe-inline'" : "'unsafe-inline'"}`,
   `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
   `font-src 'self' https://fonts.gstatic.com`,
-  `img-src 'self' data: blob: https://res.cloudinary.com https://fakestoreapi.com`,
+  `img-src 'self' data: blob: https://res.cloudinary.com https://fakestoreapi.com https://lh3.googleusercontent.com`,
   `connect-src 'self' ${backendUrl} ${isDev ? "ws://localhost:* http://localhost:*" : ""}`,
   "frame-src 'none'",
   "object-src 'none'",
@@ -39,6 +39,22 @@ const cspDirectives = [
 const ContentSecurityPolicy = cspDirectives.join("; ");
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "fakestoreapi.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+    ],
+  },
   async headers() {
     return [
       {

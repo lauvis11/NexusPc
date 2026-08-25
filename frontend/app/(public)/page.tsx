@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { Header } from "@/shared/components/layout/Header";
 import { Beneficios } from "@/shared/components/layout/Beneficios";
 import { Footer } from "@/shared/components/layout/Footer";
@@ -96,18 +98,20 @@ export default function Home() {
       <section className="relative w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-6">
         <div className="relative w-full overflow-hidden rounded-xl sm:rounded-2xl border border-border shadow-md group bg-slate-950">
           {/* Slide Link */}
-          <a
+          <Link
             href={HERO_BANNERS[currentSlide].link}
             className="relative block w-full h-[180px] xs:h-[220px] sm:h-[340px] md:h-[400px] lg:h-[460px] overflow-hidden"
           >
-            <img
+            <Image
               src={HERO_BANNERS[currentSlide].image}
               alt={HERO_BANNERS[currentSlide].title}
-              className="w-full h-full object-cover object-center"
-              loading="eager"
+              fill
+              priority
+              sizes="(max-width: 1280px) 100vw, 1280px"
+              className="object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent to-transparent"></div>
-          </a>
+          </Link>
 
           {/* Controls */}
           <button
