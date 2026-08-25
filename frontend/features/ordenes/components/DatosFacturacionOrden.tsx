@@ -185,5 +185,3 @@ export function DatosFacturacionOrden({
     </section>
   );
 }
-
-export default DatosFacturacionOrden;

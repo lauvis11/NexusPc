@@ -114,5 +114,3 @@ export function ProductoCard({ producto, onAddToCart }: ProductoCardProps) {
     </Link>
   );
 }
-
-export default ProductoCard;

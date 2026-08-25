@@ -246,5 +246,3 @@ export function MisCompras() {
     </div>
   );
 }
-
-export default MisCompras;

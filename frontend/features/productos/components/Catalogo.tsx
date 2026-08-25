@@ -379,5 +379,3 @@ export function Catalogo() {
     </>
   );
 }
-
-export default Catalogo;

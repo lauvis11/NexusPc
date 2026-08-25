@@ -255,5 +255,3 @@ export function ProductoPricing({
     </div>
   );
 }
-
-export default ProductoPricing;

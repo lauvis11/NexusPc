@@ -183,5 +183,3 @@ export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasP
     </section>
   );
 }
-
-export default Categorias;

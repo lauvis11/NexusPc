@@ -64,5 +64,3 @@ export function SeccionSkeleton({
     </section>
   );
 }
-
-export default SeccionSkeleton;

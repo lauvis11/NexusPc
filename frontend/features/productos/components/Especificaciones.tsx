@@ -115,5 +115,3 @@ export function Especificaciones({
     </section>
   );
 }
-
-export default Especificaciones;

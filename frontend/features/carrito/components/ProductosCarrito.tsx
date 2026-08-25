@@ -171,5 +171,3 @@ export function ProductosCarrito() {
     </div>
   );
 }
-
-export default ProductosCarrito;

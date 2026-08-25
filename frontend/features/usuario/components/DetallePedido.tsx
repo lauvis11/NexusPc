@@ -90,5 +90,3 @@ export function DetallePedido({ order, onVolver }: DetallePedidoProps) {
     </div>
   );
 }
-
-export default DetallePedido;

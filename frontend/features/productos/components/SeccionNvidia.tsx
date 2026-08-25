@@ -139,5 +139,3 @@ export function SeccionNvidia({ onAddToCart }: SeccionNvidiaProps) {
     </section>
   );
 }
-
-export default SeccionNvidia;

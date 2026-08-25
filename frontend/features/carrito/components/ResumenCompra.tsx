@@ -134,5 +134,3 @@ export function ResumenCompra() {
     </div>
   );
 }
-
-export default ResumenCompra;

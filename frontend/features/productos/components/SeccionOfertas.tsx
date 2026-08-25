@@ -174,5 +174,3 @@ export function SeccionOfertas({ onAddToCart }: SeccionOfertasProps) {
     </section>
   );
 }
-
-export default SeccionOfertas;

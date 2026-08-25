@@ -209,5 +209,3 @@ export function CambiarPasswordForm() {
     </div>
   );
 }
-
-export default CambiarPasswordForm;

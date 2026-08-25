@@ -137,5 +137,3 @@ export function ResumenCheckout({ onPagar, loading = false, disabled = false }: 
     </div>
   );
 }
-
-export default ResumenCheckout;

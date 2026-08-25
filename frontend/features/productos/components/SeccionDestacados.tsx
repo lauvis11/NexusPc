@@ -177,5 +177,3 @@ export function SeccionDestacados({ onAddToCart }: SeccionDestacadosProps) {
     </section>
   );
 }
-
-export default SeccionDestacados;

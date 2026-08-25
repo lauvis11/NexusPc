@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowLeft, Home } from "lucide-react";
 
-export default function Error404() {
+export function Error404() {
   return (
     <main className="min-h-screen bg-surface-alt text-ink font-sans flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center max-w-lg mx-auto space-y-6">
@@ -44,5 +44,3 @@ export default function Error404() {
     </main>
   );
 }
-
-export { Error404 as Componente404, Error404 as NotFound404 };

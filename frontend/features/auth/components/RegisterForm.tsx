@@ -8,7 +8,7 @@ import { registerSchema, type RegisterInput } from "../schemas/auth.schema";
 import { register } from "../api/auth";
 import { useAuth } from "../context/auth-context";
 
-export default function RegisterForm() {
+export function RegisterForm() {
   const [formData, setFormData] = useState<RegisterInput>({
     nombre: "",
     email: "",

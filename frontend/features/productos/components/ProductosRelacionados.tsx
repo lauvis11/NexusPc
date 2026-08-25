@@ -192,5 +192,3 @@ export function ProductosRelacionados({
     </section>
   );
 }
-
-export default ProductosRelacionados;

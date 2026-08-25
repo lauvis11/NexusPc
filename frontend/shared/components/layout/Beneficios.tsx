@@ -58,5 +58,3 @@ export function Beneficios() {
     </section>
   );
 }
-
-export default Beneficios;

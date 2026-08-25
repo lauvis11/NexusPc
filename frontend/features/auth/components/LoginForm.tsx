@@ -9,7 +9,7 @@ import { login } from "../api/auth";
 import { useAuth } from "../context/auth-context";
 import { getSafeRedirect } from "../utils/redirect";
 
-export default function LoginForm() {
+export function LoginForm() {
   const [formData, setFormData] = useState<LoginInput>({
     email: "",
     password: "",
