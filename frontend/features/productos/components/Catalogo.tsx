@@ -216,7 +216,7 @@ export function Catalogo() {
               <div className="flex items-center gap-2.5 min-w-0">
                 <Search className="w-4 h-4 text-primary shrink-0" />
                 <span className="text-xs sm:text-sm text-ink truncate">
-                  Resultados para: <strong className="text-primary font-extrabold font-mono">"{busquedaFromUrl}"</strong>
+                  Resultados para: <strong className="text-primary font-extrabold font-mono">&quot;{busquedaFromUrl}&quot;</strong>
                 </span>
               </div>
               <Link
