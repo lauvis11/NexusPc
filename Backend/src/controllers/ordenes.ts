@@ -56,10 +56,6 @@ export class OrdenesController{
     }
 
     static async updateEstado(req: Request, res: Response, next: NextFunction){
-        const usuario = req.usuario
-        if(!usuario) return res.status(401).json({message: 'Acceso no autorizado'})
-        if(usuario.rol !== 'ADMIN') return res.status(403).json({message: 'No tenés permisos para realizar esta acción'})
-
         const { id } = req.params as { id: string }
         const validId = ValidateId(id)
         if(!validId.success) return res.status(400).json({message: 'ID de orden inválido'})
