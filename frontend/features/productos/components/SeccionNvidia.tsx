@@ -8,11 +8,7 @@ import type { Producto } from "../types/types";
 import { getProductos } from "../api/productos";
 import { API_URL } from "@/lib/constants";
 
-interface SeccionNvidiaProps {
-  onAddToCart?: (producto: Producto) => void;
-}
-
-export function SeccionNvidia({ onAddToCart }: SeccionNvidiaProps) {
+export function SeccionNvidia() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -129,7 +125,6 @@ export function SeccionNvidia({ onAddToCart }: SeccionNvidiaProps) {
                 <ProductoCard
                   key={prod.id}
                   producto={prod}
-                  onAddToCart={onAddToCart}
                 />
               ))
             )}

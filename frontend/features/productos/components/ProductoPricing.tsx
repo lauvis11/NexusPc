@@ -20,12 +20,10 @@ import { formatearPrecio } from "@/shared/utils/format";
 
 interface ProductoPricingProps {
   producto: Producto;
-  onAddToCart?: (producto: Producto, cantidad: number) => void;
 }
 
 export function ProductoPricing({
   producto,
-  onAddToCart,
 }: ProductoPricingProps) {
   const router = useRouter();
   const agregarProducto = useCarritoStore((state) => state.agregarProducto);
@@ -225,7 +223,6 @@ export function ProductoPricing({
               onClick={() => {
                 if (producto.stock > 0) {
                   agregarProducto(producto, cantidad);
-                  onAddToCart && onAddToCart(producto, cantidad);
                 }
               }}
               disabled={producto.stock <= 0}

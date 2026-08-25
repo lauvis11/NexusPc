@@ -12,14 +12,12 @@ interface ProductosRelacionadosProps {
   categoria: string;
   productoIdActual?: string;
   productos?: Producto[];
-  onAddToCart?: (producto: Producto) => void;
 }
 
 export function ProductosRelacionados({
   categoria,
   productoIdActual,
   productos: propProductos,
-  onAddToCart,
 }: ProductosRelacionadosProps) {
   const [productos, setProductos] = useState<Producto[]>(propProductos ?? []);
   const [loading, setLoading] = useState(!propProductos);
@@ -184,7 +182,7 @@ export function ProductosRelacionados({
               key={producto.id}
               className="w-[calc((100%-12px)/2.25)] sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3*1.5rem)/4)] shrink-0"
             >
-              <ProductoCard producto={producto} onAddToCart={onAddToCart} />
+              <ProductoCard producto={producto} />
             </div>
           ))}
         </div>

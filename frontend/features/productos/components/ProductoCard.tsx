@@ -10,10 +10,9 @@ import { formatearPrecio } from "@/shared/utils/format";
 
 interface ProductoCardProps {
   producto: Producto;
-  onAddToCart?: (producto: Producto) => void;
 }
 
-export function ProductoCard({ producto, onAddToCart }: ProductoCardProps) {
+export function ProductoCard({ producto }: ProductoCardProps) {
   const agregarProducto = useCarritoStore((state) => state.agregarProducto);
 
   const enOferta = estaEnOferta(producto);
@@ -98,7 +97,6 @@ export function ProductoCard({ producto, onAddToCart }: ProductoCardProps) {
               e.preventDefault();
               e.stopPropagation();
               agregarProducto(producto, 1);
-              onAddToCart && onAddToCart(producto);
             }}
             aria-label={`Agregar ${producto.nombre} al carrito`}
             className="w-8 h-8 sm:w-11 sm:h-11 bg-primary text-surface rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all shadow-sm shrink-0 cursor-pointer relative z-20"

@@ -8,11 +8,7 @@ import type { Producto } from "../types/types";
 import { getProductos } from "../api/productos";
 import { API_URL } from "@/lib/constants";
 
-interface SeccionOfertasProps {
-  onAddToCart?: (producto: Producto) => void;
-}
-
-export function SeccionOfertas({ onAddToCart }: SeccionOfertasProps) {
+export function SeccionOfertas() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -166,7 +162,7 @@ export function SeccionOfertas({ onAddToCart }: SeccionOfertasProps) {
               key={producto.id}
               className="w-[calc((100%-12px)/2.25)] sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3*1.5rem)/4)] shrink-0"
             >
-              <ProductoCard producto={producto} onAddToCart={onAddToCart} />
+              <ProductoCard producto={producto} />
             </div>
           ))}
         </div>
