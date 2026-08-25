@@ -45,5 +45,3 @@ export async function getMisOrdenes(): Promise<Orden[]> {
 
   return response.json();
 }
-
-export { crearPreferenciaPago as CrearPreferenciaPago };
