@@ -50,7 +50,7 @@ export default function PerfilPage() {
             activeTab={activeTab}
             onTabChange={(tab) => {
               if (tab !== "logout") {
-                setActiveTab(tab as any);
+                setActiveTab(tab);
               }
             }}
           />

@@ -30,7 +30,7 @@ export default function LoginForm() {
     // Validar en tiempo real con Zod
     const result = loginSchema.safeParse(nextData);
     if (!result.success) {
-      const fieldError = result.error.issues.find((issue: any) => issue.path[0] === field);
+      const fieldError = result.error.issues.find((issue) => issue.path[0] === field);
       setErrors((prev) => ({
         ...prev,
         [field]: fieldError ? fieldError.message : undefined,
@@ -46,8 +46,8 @@ export default function LoginForm() {
 
     if (!result.success) {
       return setErrors({
-        email: result.error.issues.find((i: any) => i.path[0] === "email")?.message,
-        password: result.error.issues.find((i: any) => i.path[0] === "password")?.message,
+        email: result.error.issues.find((i) => i.path[0] === "email")?.message,
+        password: result.error.issues.find((i) => i.path[0] === "password")?.message,
       });
     }
 

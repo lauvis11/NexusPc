@@ -64,8 +64,9 @@ export function CambiarPasswordForm() {
       });
 
       setTimeout(() => setSuccess(false), 5000);
-    } catch (err: any) {
-      setError(err?.message || "Ocurrió un error al intentar cambiar la contraseña");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Ocurrió un error al intentar cambiar la contraseña";
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }

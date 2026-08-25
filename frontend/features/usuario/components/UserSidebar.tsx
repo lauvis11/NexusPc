@@ -1,18 +1,24 @@
 "use client";
 
-import Link from "next/link";
 import { User, Package, Shield, LogOut } from "lucide-react";
 import { useAuth } from "@/features/auth/context/auth-context";
 
+export type UserSidebarTab = "mis-datos" | "mis-compras" | "cambiar-contraseña";
+
 interface UserSidebarProps {
-  activeTab?: "mis-datos" | "mis-compras" | "cambiar-contraseña" | string;
-  onTabChange?: (tab: string) => void;
+  activeTab?: UserSidebarTab;
+  onTabChange?: (tab: UserSidebarTab | "logout") => void;
 }
 
 export function UserSidebar({ activeTab = "mis-datos", onTabChange }: UserSidebarProps) {
   const { logout } = useAuth();
 
-  const menuItems = [
+  const menuItems: Array<{
+    id: UserSidebarTab;
+    label: string;
+    href: string;
+    icon: typeof User;
+  }> = [
     {
       id: "mis-datos",
       label: "Mis Datos",

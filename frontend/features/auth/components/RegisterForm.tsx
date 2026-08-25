@@ -29,7 +29,7 @@ export default function RegisterForm() {
     // Validar en tiempo real con Zod
     const result = registerSchema.safeParse(nextData);
     if (!result.success) {
-      const fieldError = result.error.issues.find((issue: any) => issue.path[0] === field);
+      const fieldError = result.error.issues.find((issue) => issue.path[0] === field);
       setErrors((prev) => ({
         ...prev,
         [field]: fieldError ? fieldError.message : undefined,
@@ -45,9 +45,9 @@ export default function RegisterForm() {
 
     if (!result.success) {
       return setErrors({
-        nombre: result.error.issues.find((i: any) => i.path[0] === "nombre")?.message,
-        email: result.error.issues.find((i: any) => i.path[0] === "email")?.message,
-        password: result.error.issues.find((i: any) => i.path[0] === "password")?.message,
+        nombre: result.error.issues.find((i) => i.path[0] === "nombre")?.message,
+        email: result.error.issues.find((i) => i.path[0] === "email")?.message,
+        password: result.error.issues.find((i) => i.path[0] === "password")?.message,
       });
     }
 
