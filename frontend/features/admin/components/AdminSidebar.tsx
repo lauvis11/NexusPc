@@ -14,7 +14,7 @@ import {
   LogOut,
   Menu,
   X,
-  ShieldCheck,
+  Cpu,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/features/auth/context/auth-context";
@@ -62,6 +62,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const isActive = (href: string, exact?: boolean) => {
     if (exact) return pathname === href;
@@ -73,17 +74,10 @@ export function AdminSidebar() {
       {/* Brand Header */}
       <div className="h-16 px-6 flex items-center justify-between border-b border-border">
         <Link href="/admin" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center font-black text-lg shadow-sm shadow-primary/30 group-hover:bg-primary-hover transition-colors">
-            N
-          </div>
-          <div>
-            <span className="font-extrabold text-lg tracking-tight text-ink block leading-none">
-              Nexus<span className="text-primary">PC</span>
-            </span>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-primary bg-primary-tint px-1.5 py-0.5 rounded mt-0.5 inline-flex items-center gap-1">
-              <ShieldCheck className="w-2.5 h-2.5" /> Admin
-            </span>
-          </div>
+          <Cpu className="w-7 h-7 text-primary shrink-0" />
+          <span className="text-xl font-bold tracking-tight text-primary">
+            Nexus<span className="text-ink">PC</span>
+          </span>
         </Link>
 
         {/* Mobile close button */}
@@ -130,21 +124,18 @@ export function AdminSidebar() {
 
       {/* Footer / User Profile & Actions */}
       <div className="p-4 border-t border-border space-y-3 bg-surface">
+        {/* Opción Ir a la tienda */}
         <Link
           href="/"
-          className="flex items-center justify-between px-3 py-2 text-xs font-semibold text-ink-secondary hover:text-primary hover:bg-primary-tint rounded-lg transition-colors"
+          className="flex items-center gap-2.5 px-4 py-3 text-sm font-bold text-ink hover:text-primary bg-surface-alt hover:bg-primary-tint rounded-xl"
         >
-          <span className="flex items-center gap-2">
-            <ExternalLink className="w-3.5 h-3.5" />
-            Ir a la tienda
-          </span>
-          <span className="text-[10px] bg-border px-1.5 py-0.5 rounded text-ink-secondary font-bold">
-            Web
-          </span>
+          <ExternalLink className="w-4 h-4 text-primary shrink-0" />
+          <span>Ir a la tienda</span>
         </Link>
 
-        <div className="pt-2 border-t border-border flex items-center justify-between">
-          <div className="flex items-center gap-2.5 overflow-hidden">
+        {/* User Card con botón rojo sin fondo */}
+        <div className="pt-2 border-t border-border flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
             <div className="w-8 h-8 rounded-full bg-primary-tint text-primary font-bold text-xs flex items-center justify-center shrink-0">
               {user?.nombre?.[0]?.toUpperCase() || "A"}
             </div>
@@ -159,12 +150,12 @@ export function AdminSidebar() {
           </div>
 
           <button
-            onClick={logout}
+            onClick={() => setShowLogoutModal(true)}
             title="Cerrar sesión"
-            className="p-1.5 text-ink-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors shrink-0"
+            className="p-2 text-red-600 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer shrink-0"
             aria-label="Cerrar sesión"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4 text-red-600" />
           </button>
         </div>
       </div>
@@ -175,12 +166,10 @@ export function AdminSidebar() {
     <>
       {/* Mobile Top Toggle Bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-surface border-b border-border z-30 px-4 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-black text-sm">
-            N
-          </div>
-          <span className="font-extrabold text-base text-ink">
-            Nexus<span className="text-primary">Admin</span>
+        <div className="flex items-center gap-2">
+          <Cpu className="w-6 h-6 text-primary shrink-0" />
+          <span className="text-lg font-bold tracking-tight text-primary">
+            Nexus<span className="text-ink">PC</span>
           </span>
         </div>
         <button
@@ -213,6 +202,53 @@ export function AdminSidebar() {
       <aside className="hidden lg:block w-64 shrink-0 h-screen sticky top-0">
         {navContent}
       </aside>
+
+      {/* Modal Confirmación Cerrar Sesión */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            onClick={() => setShowLogoutModal(false)}
+            className="fixed inset-0 bg-ink/40 backdrop-blur-xs transition-opacity"
+          />
+
+          <div className="relative bg-surface rounded-2xl shadow-xl w-full max-w-sm p-6 border border-border z-10 space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2 text-danger">
+                <LogOut className="w-5 h-5 text-red-600" />
+                <h3 className="text-base font-bold text-ink">
+                  ¿Estás seguro que quieres cerrar sesión?
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 py-2.5 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-bold transition-colors cursor-pointer text-center"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLogoutModal(false);
+                  logout();
+                }}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer text-center"
+              >
+                Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
