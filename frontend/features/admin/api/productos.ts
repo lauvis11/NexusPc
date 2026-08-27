@@ -33,3 +33,15 @@ export async function actualizarProducto(data: PartialProductoInput, id: string)
 
     return response.json();
 }
+
+export async function eliminarProducto(id: string): Promise<void>{
+    const response = await fetch(`${API_URL}/productos/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+
+    if(!response.ok){
+       const error = await response.json().catch(() => ({}))
+       throw new Error(error.message || "Error al eliminar el producto")
+    }
+}
