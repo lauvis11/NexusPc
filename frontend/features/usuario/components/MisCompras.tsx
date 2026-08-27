@@ -17,6 +17,7 @@ import { DetallePedido } from "./DetallePedido";
 import { getMisOrdenes } from "@/features/ordenes/api/ordenes";
 import type { Orden } from "@/features/ordenes/types/ordenes";
 import { formatearPrecio } from "@/shared/utils/format";
+import { EstadoBadge } from "@/shared/components/ui/EstadoBadge";
 
 const formatearFecha = (fechaStr: string) => {
   try {
@@ -52,55 +53,6 @@ export function MisCompras() {
   useEffect(() => {
     fetchOrders();
   }, []);
-
-  const getStatusBadge = (estado: string) => {
-    const estadoUpper = (estado || "").toUpperCase();
-
-    switch (estadoUpper) {
-      case "ENTREGADO":
-      case "COMPLETADA":
-        return (
-          <span className="inline-flex items-center gap-1.5 text-emerald-600 text-xs font-extrabold">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>Entregado</span>
-          </span>
-        );
-      case "APROBADO":
-      case "PAGADO":
-        return (
-          <span className="inline-flex items-center gap-1.5 text-emerald-600 text-xs font-extrabold">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>Pagado</span>
-          </span>
-        );
-      case "EN_ENVIO":
-      case "ENVIADO":
-      case "EN CAMINO":
-        return (
-          <span className="inline-flex items-center gap-1.5 text-blue-600 text-xs font-extrabold">
-            <Truck className="w-4 h-4 shrink-0" />
-            <span>En camino</span>
-          </span>
-        );
-      case "CANCELADO":
-      case "CANCELADA":
-      case "RECHAZADO":
-        return (
-          <span className="inline-flex items-center gap-1.5 text-rose-600 text-xs font-extrabold">
-            <XCircle className="w-4 h-4 shrink-0" />
-            <span>Cancelado</span>
-          </span>
-        );
-      case "PENDIENTE":
-      default:
-        return (
-          <span className="inline-flex items-center gap-1.5 text-amber-600 text-xs font-extrabold">
-            <Clock className="w-4 h-4 shrink-0" />
-            <span>Pendiente</span>
-          </span>
-        );
-    }
-  };
 
   // Si hay un pedido seleccionado, renderiza la vista de DetallePedido
   if (selectedOrder) {
@@ -212,7 +164,7 @@ export function MisCompras() {
 
                       {/* Estado */}
                       <td className="px-5 py-4 text-center whitespace-nowrap">
-                        {getStatusBadge(order.estado)}
+                        <EstadoBadge estado={order.estado} variant="text" />
                       </td>
 
                       {/* Total */}
