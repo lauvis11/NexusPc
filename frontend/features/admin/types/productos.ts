@@ -15,3 +15,5 @@ export interface ProductoInput {
   destacado?: boolean;
   caracteristicas: CaracteristicaInput[];
 }
+
+export type PartialProductoInput = Partial<Omit<ProductoInput, 'caracteristicas'>>
