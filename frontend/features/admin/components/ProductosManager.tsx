@@ -158,6 +158,7 @@ export function ProductosManager() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProd, setEditingProd] = useState<ProductoAdminMock | null>(null);
+  const [productToDelete, setProductToDelete] = useState<ProductoAdminMock | null>(null);
 
   // Form Fields
   const [nombre, setNombre] = useState("");
@@ -305,11 +306,6 @@ export function ProductosManager() {
     setIsModalOpen(false);
   };
 
-  const handleDelete = (id: string, prodNombre: string) => {
-    if (!confirm(`¿Eliminar producto "${prodNombre}" del catálogo?`)) return;
-    setProductos((prev) => prev.filter((p) => p.id !== id));
-  };
-
   const handleToggleDestacado = (id: string) => {
     setProductos((prev) =>
       prev.map((p) => (p.id === id ? { ...p, destacado: !p.destacado } : p))
@@ -318,8 +314,8 @@ export function ProductosManager() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-7xl">
-      {/* Top Header & Actions */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-ink tracking-tight">
             Catálogo de Productos
@@ -329,8 +325,53 @@ export function ProductosManager() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          {/* Category Filter */}
+        <button
+          onClick={openCreateModal}
+          className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm shadow-primary/30 transition-colors shrink-0 self-start sm:self-auto"
+        >
+          <Plus className="w-4 h-4" />
+          Nuevo Producto
+        </button>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-surface p-4 rounded-2xl border border-border shadow-xs">
+          <p className="text-xs text-ink-secondary font-bold uppercase tracking-wider">Total Productos</p>
+          <p className="text-2xl font-black text-ink mt-1">{productos.length}</p>
+        </div>
+
+        <div className="bg-surface p-4 rounded-2xl border border-border shadow-xs">
+          <p className="text-xs text-ink-secondary font-bold uppercase tracking-wider">Stock Crítico (&le;2)</p>
+          <p className="text-2xl font-black text-ink mt-1">
+            {productos.filter((p) => p.stock <= 2).length}
+          </p>
+        </div>
+
+        <div className="bg-surface p-4 rounded-2xl border border-border shadow-xs">
+          <p className="text-xs text-ink-secondary font-bold uppercase tracking-wider">Destacados en Home</p>
+          <p className="text-2xl font-black text-ink mt-1">
+            {productos.filter((p) => p.destacado).length}
+          </p>
+        </div>
+      </div>
+
+      {/* Filters Toolbar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        {/* Search Input */}
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="w-4 h-4 text-ink-secondary absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por nombre..."
+            className="w-full pl-10 pr-3.5 py-2 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors"
+          />
+        </div>
+
+        {/* Dropdowns */}
+        <div className="flex flex-wrap items-center gap-3">
           <select
             value={filterCat}
             onChange={(e) => setFilterCat(e.target.value)}
@@ -344,7 +385,6 @@ export function ProductosManager() {
             ))}
           </select>
 
-          {/* Stock Filter */}
           <select
             value={filterStock}
             onChange={(e) => setFilterStock(e.target.value)}
@@ -355,64 +395,6 @@ export function ProductosManager() {
             <option value="low_stock">Stock bajo (&le;5)</option>
             <option value="out_of_stock">Sin stock (0)</option>
           </select>
-
-          {/* Search Input */}
-          <div className="relative w-full sm:w-56">
-            <Search className="w-4 h-4 text-ink-secondary absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar producto..."
-              className="w-full pl-10 pr-3.5 py-2 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors"
-            />
-          </div>
-
-          {/* Primary CTA */}
-          <button
-            onClick={openCreateModal}
-            className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm shadow-primary/30 transition-colors shrink-0"
-          >
-            <Plus className="w-4 h-4" />
-            Nuevo Producto
-          </button>
-        </div>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-surface p-4 rounded-2xl border border-border shadow-xs flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary-tint text-primary flex items-center justify-center font-bold">
-            <Package className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-xs text-ink-secondary font-medium">Total Productos</p>
-            <p className="text-xl font-extrabold text-ink">{productos.length}</p>
-          </div>
-        </div>
-
-        <div className="bg-surface p-4 rounded-2xl border border-border shadow-xs flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-warning/15 text-warning flex items-center justify-center font-bold">
-            <AlertTriangle className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-xs text-ink-secondary font-medium">Stock Crítico (&le;2)</p>
-            <p className="text-xl font-extrabold text-ink">
-              {productos.filter((p) => p.stock <= 2).length}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-surface p-4 rounded-2xl border border-border shadow-xs flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary-tint text-primary flex items-center justify-center font-bold">
-            <Star className="w-5 h-5 fill-primary" />
-          </div>
-          <div>
-            <p className="text-xs text-ink-secondary font-medium">Destacados en Home</p>
-            <p className="text-xl font-extrabold text-ink">
-              {productos.filter((p) => p.destacado).length}
-            </p>
-          </div>
         </div>
       </div>
 
@@ -517,17 +499,17 @@ export function ProductosManager() {
                     </td>
 
                     {/* Stock */}
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       {prod.stock === 0 ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-danger/15 text-danger border border-danger/20">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold text-danger border border-danger/40 bg-transparent">
                           Agotado (0)
                         </span>
                       ) : prod.stock <= 5 ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-warning/15 text-warning border border-warning/20">
-                          {prod.stock} un. (Bajo)
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold text-warning border border-warning/40 bg-transparent">
+                          {prod.stock} (Bajo)
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/20">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold text-success border border-success/40 bg-transparent">
                           {prod.stock} disponibles
                         </span>
                       )}
@@ -561,9 +543,9 @@ export function ProductosManager() {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(prod.id, prod.nombre)}
+                          onClick={() => setProductToDelete(prod)}
                           title="Eliminar producto"
-                          className="p-2 text-ink-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors"
+                          className="p-2 text-ink-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -809,18 +791,65 @@ export function ProductosManager() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors"
+                  className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-5 py-2 rounded-xl shadow-sm shadow-primary/30 transition-colors"
+                  className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-5 py-2 rounded-xl shadow-sm shadow-primary/30 transition-colors cursor-pointer"
                 >
                   {editingProd ? "Actualizar Producto" : "Publicar Producto"}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Confirmación Eliminar Producto */}
+      {productToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            onClick={() => setProductToDelete(null)}
+            className="fixed inset-0 bg-ink/40 backdrop-blur-xs transition-opacity"
+          />
+
+          <div className="relative bg-surface rounded-2xl shadow-xl w-full max-w-sm p-6 border border-border z-10 space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2 text-danger">
+                <Trash2 className="w-5 h-5 text-red-600 shrink-0" />
+                <h3 className="text-base font-bold text-ink">
+                  ¿Estás seguro que quieres eliminar este producto?
+                </h3>
+              </div>
+              <button
+                onClick={() => setProductToDelete(null)}
+                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setProductToDelete(null)}
+                className="flex-1 py-2.5 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-bold transition-colors cursor-pointer text-center"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setProductos((prev) => prev.filter((p) => p.id !== productToDelete.id));
+                  setProductToDelete(null);
+                }}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer text-center"
+              >
+                Eliminar
+              </button>
+            </div>
           </div>
         </div>
       )}
