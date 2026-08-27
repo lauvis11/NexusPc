@@ -18,6 +18,7 @@ import {
   X,
   AlertTriangle,
 } from "lucide-react";
+import { EstadoBadge } from "@/shared/components/ui/EstadoBadge";
 
 export type EstadoOrden =
   | "PENDIENTE"
@@ -366,12 +367,7 @@ export function OrdenesManager() {
                         ${ord.total.toLocaleString("es-AR")}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${estadoCfg.badgeClass}`}
-                        >
-                          <Icon className="w-3.5 h-3.5" />
-                          {estadoCfg.label}
-                        </span>
+                        <EstadoBadge estado={ord.estado} />
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button
@@ -432,13 +428,7 @@ export function OrdenesManager() {
                 <span className="text-xs font-bold uppercase tracking-wider text-ink-secondary">
                   Estado Actual
                 </span>
-                <span
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
-                    ESTADO_CONFIG[selectedOrden.estado].badgeClass
-                  }`}
-                >
-                  {ESTADO_CONFIG[selectedOrden.estado].label}
-                </span>
+                <EstadoBadge estado={selectedOrden.estado} />
               </div>
 
               {/* Transición de estados permitida */}
