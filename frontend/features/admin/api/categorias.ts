@@ -17,7 +17,7 @@ export async function crearCategoria(data: {nombre: string}): Promise<Categoria>
     return response.json()
 }
 
-export async function eliminarCategoria(id: string): Promise<void>{
+export async function eliminarCategoria(id: number): Promise<void>{
     const response = await fetch(`${API_URL}/categorias/${id}`, {
         method: 'DELETE',
         credentials: 'include'
