@@ -2,6 +2,7 @@ export interface Usuario{
     id: number
     nombre: string
     email: string
+    rol?: "ADMIN" | "CLIENTE" | string
     created_at: string
     nombre_completo: string | null
     dni: string | null

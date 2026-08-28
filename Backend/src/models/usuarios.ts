@@ -18,6 +18,7 @@ export class UsuariosModel{
                 usuario.id, 
                 nombre, 
                 email, 
+                rol,
                 created_at, 
                 datos_facturacion.nombre_completo,
                 datos_facturacion.dni,
