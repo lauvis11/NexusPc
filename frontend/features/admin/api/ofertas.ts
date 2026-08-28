@@ -34,4 +34,14 @@ export async function actualizarOferta(id: number, data: PartialOfertaInput): Pr
 
 }
 
+export async function eliminarOferta(id: number): Promise<void> {
+    const response = await fetch(`${API_URL}/ofertas/${id}`,{
+        credentials: 'include',
+        method: 'DELETE'
+    })
 
+    if(!response.ok){
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.message || "Error al eliminar la oferta")
+    }
+}
