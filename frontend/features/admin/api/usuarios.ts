@@ -12,3 +12,15 @@ export async function obtenerUsuarios(): Promise<Usuario[]>{
     }
     return response.json()
 }
+
+export async function eliminarUsuario(id: number): Promise<void> {
+    const response = await fetch(`${API_URL}/usuarios/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+    })
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || 'Error al eliminar usuario');
+    }
+}
