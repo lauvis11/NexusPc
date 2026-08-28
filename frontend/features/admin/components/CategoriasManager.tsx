@@ -4,14 +4,19 @@ import { useState, useEffect } from "react";
 import { Plus, Search, Trash2, X, Loader2, AlertCircle } from "lucide-react";
 import { Categoria } from "@/features/productos/types/types";
 import { getCategorias } from "@/features/productos/api/productos";
+import { crearCategoria } from "../api/categorias";
 
 export function CategoriasManager() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+
+  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [nombre, setNombre] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Carga inicial de categorías usando getCategorias existente
   useEffect(() => {
@@ -35,18 +40,28 @@ export function CategoriasManager() {
     c.nombre.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nombre.trim()) return;
-
-    // Próximo paso: conectar crearCategoria
-    const nueva: Categoria = {
-      id: Date.now(),
-      nombre: nombre.trim(),
-    };
-    setCategorias((prev) => [...prev, nueva]);
+  const handleOpenModal = () => {
     setNombre("");
-    setIsModalOpen(false);
+    setFormError(null);
+    setIsModalOpen(true);
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nombre.trim() || isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+      setFormError(null);
+      const nuevaCategoria = await crearCategoria({ nombre: nombre.trim() });
+      setCategorias((prev) => [...prev, nuevaCategoria]);
+      setNombre("");
+      setIsModalOpen(false);
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : "Error al crear la categoría");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDelete = (id: number) => {
@@ -82,10 +97,7 @@ export function CategoriasManager() {
 
           {/* Primary CTA */}
           <button
-            onClick={() => {
-              setNombre("");
-              setIsModalOpen(true);
-            }}
+            onClick={handleOpenModal}
             className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm shadow-primary/30 transition-colors shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -180,7 +192,7 @@ export function CategoriasManager() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            onClick={() => setIsModalOpen(false)}
+            onClick={() => !isSubmitting && setIsModalOpen(false)}
             className="fixed inset-0 bg-ink/40 backdrop-blur-xs transition-opacity"
           />
 
@@ -188,12 +200,21 @@ export function CategoriasManager() {
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-ink">Nueva Categoría</h3>
               <button
+                type="button"
+                disabled={isSubmitting}
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer"
+                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer disabled:opacity-50"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {formError && (
+              <div className="p-3 bg-danger/10 border border-danger/30 rounded-xl text-danger text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{formError}</span>
+              </div>
+            )}
 
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
@@ -204,27 +225,36 @@ export function CategoriasManager() {
                   type="text"
                   autoFocus
                   required
+                  disabled={isSubmitting}
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
                   placeholder="Ej. Refrigeración Líquida"
-                  className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
                 />
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                  className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={!nombre.trim()}
+                  disabled={!nombre.trim() || isSubmitting}
                   className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-5 py-2 rounded-xl shadow-sm shadow-primary/30 transition-colors disabled:opacity-50 cursor-pointer"
                 >
-                  Guardar
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    "Guardar"
+                  )}
                 </button>
               </div>
             </form>
