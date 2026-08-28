@@ -16,3 +16,5 @@ export interface Oferta {
   fecha_fin: string;
   activo: boolean;
 }
+
+export type PartialOfertaInput = Partial<OfertasInput>
