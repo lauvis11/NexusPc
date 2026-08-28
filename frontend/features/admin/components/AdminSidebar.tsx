@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   Cpu,
+  Loader2,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/features/auth/context/auth-context";
@@ -63,6 +64,19 @@ export function AdminSidebar() {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logout();
+      setShowLogoutModal(false);
+    } catch {
+      // ignore
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const isActive = (href: string, exact?: boolean) => {
     if (exact) return pathname === href;
@@ -230,20 +244,26 @@ export function AdminSidebar() {
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 type="button"
+                disabled={isLoggingOut}
                 onClick={() => setShowLogoutModal(false)}
-                className="flex-1 py-2.5 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-bold transition-colors cursor-pointer text-center"
+                className="flex-1 py-2.5 border border-border bg-surface hover:bg-surface-alt disabled:opacity-60 text-ink rounded-xl text-sm font-bold transition-colors cursor-pointer text-center"
               >
                 Cancelar
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setShowLogoutModal(false);
-                  logout();
-                }}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer text-center"
+                disabled={isLoggingOut}
+                onClick={handleLogout}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-sm font-bold py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer text-center"
               >
-                Cerrar Sesión
+                {isLoggingOut ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Cerrando...</span>
+                  </>
+                ) : (
+                  "Cerrar Sesión"
+                )}
               </button>
             </div>
           </div>
