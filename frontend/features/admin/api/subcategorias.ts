@@ -17,3 +17,15 @@ export async function crearSubcategoria(data: SubcategoriaInput): Promise<SubCat
 
     return response.json()
 }
+
+export async function eliminarSubcategoria(id: number): Promise<void>{
+    const response = await fetch(`${API_URL}/subcategorias/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+    })
+
+    if(!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Error al eliminar la subcategoria")
+    }
+}
