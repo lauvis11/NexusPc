@@ -1,29 +1,35 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Search, Trash2, X } from "lucide-react";
-
-interface CategoriaMock {
-  id: number;
-  nombre: string;
-}
-
-const INITIAL_MOCK_CATEGORIAS: CategoriaMock[] = [
-  { id: 1, nombre: "Procesadores (CPU)" },
-  { id: 2, nombre: "Tarjetas Gráficas (GPU)" },
-  { id: 3, nombre: "Placas Base (Motherboards)" },
-  { id: 4, nombre: "Memoria RAM" },
-  { id: 5, nombre: "Almacenamiento (SSD / HDD)" },
-  { id: 6, nombre: "Fuentes de Poder (PSU)" },
-  { id: 7, nombre: "Gabinetes" },
-  { id: 8, nombre: "Refrigeración" },
-];
+import { useState, useEffect } from "react";
+import { Plus, Search, Trash2, X, Loader2, AlertCircle } from "lucide-react";
+import { Categoria } from "@/features/productos/types/types";
+import { getCategorias } from "@/features/productos/api/productos";
 
 export function CategoriasManager() {
-  const [categorias, setCategorias] = useState<CategoriaMock[]>(INITIAL_MOCK_CATEGORIAS);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [nombre, setNombre] = useState("");
+
+  // Carga inicial de categorías usando getCategorias existente
+  useEffect(() => {
+    async function loadCategorias() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await getCategorias();
+        setCategorias(data);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Error al cargar categorías");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadCategorias();
+  }, []);
 
   const filteredCategorias = categorias.filter((c) =>
     c.nombre.toLowerCase().includes(search.toLowerCase())
@@ -33,7 +39,8 @@ export function CategoriasManager() {
     e.preventDefault();
     if (!nombre.trim()) return;
 
-    const nueva: CategoriaMock = {
+    // Próximo paso: conectar crearCategoria
+    const nueva: Categoria = {
       id: Date.now(),
       nombre: nombre.trim(),
     };
@@ -43,6 +50,7 @@ export function CategoriasManager() {
   };
 
   const handleDelete = (id: number) => {
+    // Próximo paso: conectar eliminarCategoria
     setCategorias((prev) => prev.filter((c) => c.id !== id));
   };
 
@@ -78,13 +86,21 @@ export function CategoriasManager() {
               setNombre("");
               setIsModalOpen(true);
             }}
-            className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm shadow-primary/30 transition-colors shrink-0"
+            className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-sm shadow-primary/30 transition-colors shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Nueva Categoría
           </button>
         </div>
       </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="p-4 bg-danger/10 border border-danger/30 rounded-2xl flex items-center gap-3 text-danger text-sm">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       {/* Data Table Card */}
       <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
@@ -104,7 +120,16 @@ export function CategoriasManager() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border text-sm">
-              {filteredCategorias.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={3} className="px-6 py-12 text-center text-ink-secondary">
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                      <span className="text-sm font-medium">Cargando categorías...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredCategorias.length === 0 ? (
                 <tr>
                   <td
                     colSpan={3}
@@ -131,7 +156,7 @@ export function CategoriasManager() {
                       <button
                         onClick={() => handleDelete(cat.id)}
                         title="Eliminar categoría"
-                        className="p-2 text-ink-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors focus:outline-none"
+                        className="p-2 text-ink-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors focus:outline-none cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -164,7 +189,7 @@ export function CategoriasManager() {
               <h3 className="text-lg font-bold text-ink">Nueva Categoría</h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors"
+                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -190,14 +215,14 @@ export function CategoriasManager() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors"
+                  className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={!nombre.trim()}
-                  className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-5 py-2 rounded-xl shadow-sm shadow-primary/30 transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-5 py-2 rounded-xl shadow-sm shadow-primary/30 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   Guardar
                 </button>
