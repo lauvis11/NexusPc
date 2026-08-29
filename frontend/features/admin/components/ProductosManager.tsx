@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { Categoria, Producto, SubCategoria } from "@/features/productos/types/types";
 import { getCategorias, getProductos, getSubCategorias } from "@/features/productos/api/productos";
-import { crearProducto, actualizarProducto } from "../api/productos";
+import { crearProducto, actualizarProducto, eliminarProducto } from "../api/productos";
 import type { PartialProductoInput } from "../types/productos";
 import { subirImagen } from "../api/upload";
 import { API_URL } from "@/lib/constants";
@@ -43,6 +43,7 @@ export function ProductosManager() {
   const [editingProd, setEditingProd] = useState<Producto | null>(null);
   const [productToDelete, setProductToDelete] = useState<Producto | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   // Form Fields
@@ -250,11 +251,20 @@ export function ProductosManager() {
     }
   };
 
-  const handleConfirmDelete = () => {
-    // Próximo paso: conectar eliminarProducto
-    if (!productToDelete) return;
-    setProductos((prev) => prev.filter((p) => p.id !== productToDelete.id));
-    setProductToDelete(null);
+  const handleConfirmDelete = async () => {
+    if (!productToDelete || isDeleting) return;
+
+    try {
+      setIsDeleting(true);
+      await eliminarProducto(productToDelete.id);
+      setProductos((prev) => prev.filter((p) => p.id !== productToDelete.id));
+      setProductToDelete(null);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error al eliminar el producto");
+      setProductToDelete(null);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -843,17 +853,26 @@ export function ProductosManager() {
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={() => setProductToDelete(null)}
-                className="flex-1 py-2.5 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-bold transition-colors cursor-pointer text-center"
+                className="flex-1 py-2.5 border border-border bg-surface hover:bg-surface-alt disabled:opacity-60 text-ink rounded-xl text-sm font-bold transition-colors cursor-pointer text-center"
               >
                 Cancelar
               </button>
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={handleConfirmDelete}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer text-center"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-sm font-bold py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer text-center"
               >
-                Eliminar
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Eliminando...</span>
+                  </>
+                ) : (
+                  "Eliminar"
+                )}
               </button>
             </div>
           </div>
