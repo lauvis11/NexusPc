@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Plus, Search, Trash2, X, Loader2, AlertCircle } from "lucide-react";
 import { Categoria, SubCategoria } from "@/features/productos/types/types";
 import { getCategorias, getSubCategorias } from "@/features/productos/api/productos";
-import { crearSubcategoria } from "../api/subcategorias";
+import { crearSubcategoria, eliminarSubcategoria } from "../api/subcategorias";
 
 export function SubcategoriasManager() {
   const [subcategorias, setSubcategorias] = useState<SubCategoria[]>([]);
@@ -15,12 +15,16 @@ export function SubcategoriasManager() {
   const [search, setSearch] = useState("");
   const [selectedCategoriaFilter, setSelectedCategoriaFilter] = useState<string>("all");
 
-  // Modal State
+  // Modal Crear State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [nombre, setNombre] = useState("");
   const [categoriaId, setCategoriaId] = useState<number | "">("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Modal Eliminar State
+  const [subcategoriaToDelete, setSubcategoriaToDelete] = useState<SubCategoria | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Carga inicial de Subcategorías y Categorías desde la API
   useEffect(() => {
@@ -91,9 +95,20 @@ export function SubcategoriasManager() {
     }
   };
 
-  const handleDelete = (id: number) => {
-    // Próximo paso: conectar eliminarSubcategoria
-    setSubcategorias((prev) => prev.filter((s) => s.id !== id));
+  const handleConfirmDelete = async () => {
+    if (!subcategoriaToDelete || isDeleting) return;
+
+    try {
+      setIsDeleting(true);
+      await eliminarSubcategoria(subcategoriaToDelete.id);
+      setSubcategorias((prev) => prev.filter((s) => s.id !== subcategoriaToDelete.id));
+      setSubcategoriaToDelete(null);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error al eliminar la subcategoría");
+      setSubcategoriaToDelete(null);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -225,7 +240,7 @@ export function SubcategoriasManager() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button
-                        onClick={() => handleDelete(sub.id)}
+                        onClick={() => setSubcategoriaToDelete(sub)}
                         title="Eliminar subcategoría"
                         className="p-2 text-ink-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors focus:outline-none cursor-pointer"
                       >
@@ -337,6 +352,65 @@ export function SubcategoriasManager() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Confirmación Eliminar Subcategoría */}
+      {subcategoriaToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            onClick={() => !isDeleting && setSubcategoriaToDelete(null)}
+            className="fixed inset-0 bg-ink/40 backdrop-blur-xs transition-opacity"
+          />
+
+          <div className="relative bg-surface rounded-2xl shadow-xl w-full max-w-sm p-6 border border-border z-10 space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2 text-danger">
+                <Trash2 className="w-5 h-5 text-red-600 shrink-0" />
+                <h3 className="text-base font-bold text-ink">
+                  ¿Eliminar subcategoría?
+                </h3>
+              </div>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setSubcategoriaToDelete(null)}
+                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-ink-secondary">
+              Se eliminará la subcategoría <strong className="text-ink">"{subcategoriaToDelete.nombre}"</strong>.
+            </p>
+
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setSubcategoriaToDelete(null)}
+                className="flex-1 py-2.5 border border-border bg-surface hover:bg-surface-alt disabled:opacity-60 text-ink rounded-xl text-sm font-bold transition-colors cursor-pointer text-center"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleConfirmDelete}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-sm font-bold py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer text-center"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Eliminando...</span>
+                  </>
+                ) : (
+                  "Eliminar"
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
