@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   Layers,
   Image as ImageIcon,
+  Upload,
   Tag,
   Percent,
   Loader2,
@@ -20,6 +21,8 @@ import {
 } from "lucide-react";
 import { Categoria, Producto, SubCategoria } from "@/features/productos/types/types";
 import { getCategorias, getProductos, getSubCategorias } from "@/features/productos/api/productos";
+import { crearProducto } from "../api/productos";
+import { subirImagen } from "../api/upload";
 import { API_URL } from "@/lib/constants";
 
 export function ProductosManager() {
@@ -38,6 +41,8 @@ export function ProductosManager() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProd, setEditingProd] = useState<Producto | null>(null);
   const [productToDelete, setProductToDelete] = useState<Producto | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Form Fields
   const [nombre, setNombre] = useState("");
@@ -48,6 +53,8 @@ export function ProductosManager() {
   const [subcategoriaId, setSubcategoriaId] = useState<number | "">("");
   const [destacado, setDestacado] = useState(false);
   const [imgUrl, setImgUrl] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
   const [caracteristicas, setCaracteristicas] = useState<Array<{ clave: string; valor: string }>>([
     { clave: "Garantía", valor: "12 Meses Oficial" },
   ]);
@@ -116,6 +123,9 @@ export function ProductosManager() {
     setSubcategoriaId("");
     setDestacado(false);
     setImgUrl("");
+    setImageFile(null);
+    setImagePreview("");
+    setFormError(null);
     setCaracteristicas([{ clave: "Garantía", valor: "12 Meses Oficial" }]);
     setIsModalOpen(true);
   };
@@ -131,12 +141,23 @@ export function ProductosManager() {
     setSubcategoriaId(prod.subcategoria_id ?? "");
     setDestacado(prod.destacado);
     setImgUrl(prod.img_url);
+    setImageFile(null);
+    setImagePreview(prod.img_url);
+    setFormError(null);
     setCaracteristicas(
       prod.caracteristicas && prod.caracteristicas.length > 0
         ? [...prod.caracteristicas]
         : [{ clave: "Garantía", valor: "12 Meses Oficial" }]
     );
     setIsModalOpen(true);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
   const handleAddCaracteristica = () => {
@@ -159,12 +180,57 @@ export function ProductosManager() {
     setCaracteristicas((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nombre.trim() || precio === "" || stock === "") return;
+    if (!nombre.trim() || precio === "" || stock === "" || isSubmitting) return;
 
-    // Próximo paso: conectar crearProducto y actualizarProducto
-    setIsModalOpen(false);
+    const validSpecs = caracteristicas.filter(
+      (c) => c.clave.trim() !== "" && c.valor.trim() !== ""
+    );
+
+    try {
+      setIsSubmitting(true);
+      setFormError(null);
+
+      let uploadedUrl = imgUrl;
+      let uploadedPublicId = editingProd?.public_id || "";
+
+      // Si subió un archivo nuevo, enviarlo primero a Cloudinary
+      if (imageFile) {
+        const uploadRes = await subirImagen(imageFile);
+        uploadedUrl = uploadRes.url;
+        uploadedPublicId = uploadRes.public_id;
+      }
+
+      if (!uploadedUrl) {
+        throw new Error("Debe seleccionar una imagen para el producto");
+      }
+
+      if (editingProd) {
+        // Próximo paso: conectar actualizarProducto
+      } else {
+        const nuevo = await crearProducto({
+          nombre: nombre.trim(),
+          descripcion: descripcion.trim(),
+          precio: Number(precio),
+          stock: Number(stock),
+          categoria_id: categoriaId,
+          subcategoria_id: subcategoriaId ? Number(subcategoriaId) : null,
+          destacado,
+          img_url: uploadedUrl,
+          public_id: uploadedPublicId,
+          caracteristicas: validSpecs,
+        });
+
+        setProductos((prev) => [nuevo, ...prev]);
+      }
+
+      setIsModalOpen(false);
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : "Error al guardar el producto");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleConfirmDelete = () => {
@@ -456,7 +522,7 @@ export function ProductosManager() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            onClick={() => setIsModalOpen(false)}
+            onClick={() => !isSubmitting && setIsModalOpen(false)}
             className="fixed inset-0 bg-ink/40 backdrop-blur-xs transition-opacity"
           />
 
@@ -467,16 +533,25 @@ export function ProductosManager() {
                   {editingProd ? "Editar Producto" : "Nuevo Producto"}
                 </h3>
                 <p className="text-xs text-ink-secondary">
-                  Complete los datos básicos, categorías, precio y especificaciones.
+                  Complete los datos básicos, categorías, precio, imagen y especificaciones.
                 </p>
               </div>
               <button
+                type="button"
+                disabled={isSubmitting}
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer"
+                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer disabled:opacity-50"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {formError && (
+              <div className="p-3 bg-danger/10 border border-danger/30 rounded-xl text-danger text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{formError}</span>
+              </div>
+            )}
 
             <form onSubmit={handleSave} className="space-y-4">
               {/* Nombre */}
@@ -487,10 +562,11 @@ export function ProductosManager() {
                 <input
                   type="text"
                   required
+                  disabled={isSubmitting}
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
                   placeholder="Ej. Tarjeta Gráfica NVIDIA RTX 4070 SUPER"
-                  className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
                 />
               </div>
 
@@ -501,12 +577,13 @@ export function ProductosManager() {
                     Categoría *
                   </label>
                   <select
+                    disabled={isSubmitting}
                     value={categoriaId}
                     onChange={(e) => {
                       setCategoriaId(Number(e.target.value));
                       setSubcategoriaId("");
                     }}
-                    className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink focus:outline-none focus:border-primary transition-colors cursor-pointer"
+                    className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink focus:outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50"
                   >
                     {categorias.map((c) => (
                       <option key={c.id} value={c.id}>
@@ -521,9 +598,9 @@ export function ProductosManager() {
                     Subcategoría
                   </label>
                   <select
+                    disabled={isSubmitting || availableSubcats.length === 0}
                     value={subcategoriaId}
                     onChange={(e) => setSubcategoriaId(e.target.value === "" ? "" : Number(e.target.value))}
-                    disabled={availableSubcats.length === 0}
                     className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink focus:outline-none focus:border-primary transition-colors cursor-pointer disabled:opacity-50"
                   >
                     <option value="">Ninguna / Opcional</option>
@@ -546,10 +623,11 @@ export function ProductosManager() {
                     type="number"
                     required
                     min={1}
+                    disabled={isSubmitting}
                     value={precio}
                     onChange={(e) => setPrecio(e.target.value === "" ? "" : Number(e.target.value))}
                     placeholder="Ej. 450000"
-                    className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors"
+                    className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
                   />
                 </div>
 
@@ -561,10 +639,11 @@ export function ProductosManager() {
                     type="number"
                     required
                     min={0}
+                    disabled={isSubmitting}
                     value={stock}
                     onChange={(e) => setStock(e.target.value === "" ? "" : Number(e.target.value))}
                     placeholder="Ej. 10"
-                    className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors"
+                    className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -576,25 +655,50 @@ export function ProductosManager() {
                 </label>
                 <textarea
                   rows={3}
+                  disabled={isSubmitting}
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
                   placeholder="Detalles del producto, especificaciones generales..."
-                  className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
                 />
               </div>
 
-              {/* URL Imagen */}
+              {/* Selector y Subida de Imagen a Cloudinary */}
               <div>
                 <label className="block text-xs font-bold text-ink uppercase tracking-wider mb-1.5">
-                  URL de Imagen
+                  Imagen del Producto {!editingProd && "*"}
                 </label>
-                <input
-                  type="url"
-                  value={imgUrl}
-                  onChange={(e) => setImgUrl(e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors"
-                />
+                <div className="flex items-center gap-4 p-3.5 border border-border rounded-xl bg-surface-alt/40">
+                  <div className="w-16 h-16 rounded-xl bg-surface border border-border flex items-center justify-center overflow-hidden shrink-0">
+                    {imagePreview ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-contain p-1"
+                      />
+                    ) : (
+                      <ImageIcon className="w-6 h-6 text-ink-secondary" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <label className="inline-flex items-center gap-2 px-3.5 py-2 bg-surface hover:bg-surface-alt border border-border text-ink rounded-xl text-xs font-bold cursor-pointer transition-colors">
+                      <Upload className="w-3.5 h-3.5 text-primary" />
+                      <span>{imageFile ? "Cambiar archivo" : "Seleccionar imagen"}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={isSubmitting}
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </label>
+                    <p className="text-[11px] text-ink-secondary mt-1 truncate">
+                      {imageFile ? imageFile.name : "Formatos soportados: JPG, PNG, WEBP"}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Destacado Toggle */}
@@ -602,9 +706,10 @@ export function ProductosManager() {
                 <input
                   type="checkbox"
                   id="destacado"
+                  disabled={isSubmitting}
                   checked={destacado}
                   onChange={(e) => setDestacado(e.target.checked)}
-                  className="w-4 h-4 accent-primary rounded cursor-pointer"
+                  className="w-4 h-4 accent-primary rounded cursor-pointer disabled:opacity-50"
                 />
                 <label htmlFor="destacado" className="text-sm font-semibold text-ink cursor-pointer select-none">
                   Marcar como Producto Destacado (aparece en la Home)
@@ -619,8 +724,9 @@ export function ProductosManager() {
                   </label>
                   <button
                     type="button"
+                    disabled={isSubmitting}
                     onClick={handleAddCaracteristica}
-                    className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Agregar Fila
@@ -632,22 +738,25 @@ export function ProductosManager() {
                     <div key={index} className="flex items-center gap-2">
                       <input
                         type="text"
+                        disabled={isSubmitting}
                         placeholder="Clave (Ej. RAM)"
                         value={item.clave}
                         onChange={(e) => handleUpdateCaracteristica(index, "clave", e.target.value)}
-                        className="flex-1 px-3 py-1.5 border border-border rounded-lg bg-surface text-xs text-ink focus:outline-none focus:border-primary"
+                        className="flex-1 px-3 py-1.5 border border-border rounded-lg bg-surface text-xs text-ink focus:outline-none focus:border-primary disabled:opacity-50"
                       />
                       <input
                         type="text"
+                        disabled={isSubmitting}
                         placeholder="Valor (Ej. 16GB DDR5)"
                         value={item.valor}
                         onChange={(e) => handleUpdateCaracteristica(index, "valor", e.target.value)}
-                        className="flex-1 px-3 py-1.5 border border-border rounded-lg bg-surface text-xs text-ink focus:outline-none focus:border-primary"
+                        className="flex-1 px-3 py-1.5 border border-border rounded-lg bg-surface text-xs text-ink focus:outline-none focus:border-primary disabled:opacity-50"
                       />
                       <button
                         type="button"
+                        disabled={isSubmitting}
                         onClick={() => handleRemoveCaracteristica(index)}
-                        className="p-1.5 text-ink-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-ink-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -660,16 +769,25 @@ export function ProductosManager() {
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                  className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-5 py-2 rounded-xl shadow-sm shadow-primary/30 transition-colors cursor-pointer"
+                  disabled={!nombre.trim() || precio === "" || stock === "" || isSubmitting}
+                  className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-5 py-2 rounded-xl shadow-sm shadow-primary/30 transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  Guardar Producto
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>{imageFile ? "Subiendo y guardando..." : "Guardando..."}</span>
+                    </>
+                  ) : (
+                    "Guardar Producto"
+                  )}
                 </button>
               </div>
             </form>
