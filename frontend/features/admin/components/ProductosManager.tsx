@@ -21,7 +21,8 @@ import {
 } from "lucide-react";
 import { Categoria, Producto, SubCategoria } from "@/features/productos/types/types";
 import { getCategorias, getProductos, getSubCategorias } from "@/features/productos/api/productos";
-import { crearProducto } from "../api/productos";
+import { crearProducto, actualizarProducto } from "../api/productos";
+import type { PartialProductoInput } from "../types/productos";
 import { subirImagen } from "../api/upload";
 import { API_URL } from "@/lib/constants";
 
@@ -180,7 +181,7 @@ export function ProductosManager() {
     setCaracteristicas((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!nombre.trim() || precio === "" || stock === "" || isSubmitting) return;
 
@@ -207,7 +208,23 @@ export function ProductosManager() {
       }
 
       if (editingProd) {
-        // Próximo paso: conectar actualizarProducto
+        const updateData: PartialProductoInput = {
+          nombre: nombre.trim(),
+          descripcion: descripcion.trim(),
+          precio: Number(precio),
+          stock: Number(stock),
+          categoria_id: categoriaId,
+          subcategoria_id: subcategoriaId ? Number(subcategoriaId) : null,
+          destacado,
+          img_url: uploadedUrl,
+          public_id: uploadedPublicId,
+        };
+
+        const actualizado = await actualizarProducto(updateData, editingProd.id);
+
+        setProductos((prev) =>
+          prev.map((p) => (p.id === editingProd.id ? actualizado : p))
+        );
       } else {
         const nuevo = await crearProducto({
           nombre: nombre.trim(),
