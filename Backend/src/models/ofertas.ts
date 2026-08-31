@@ -2,6 +2,25 @@ import { pool } from "../config/db.js";
 import type { OfertaInput, OfertaInputPartial } from "../schemas/ofertas.js";
 
 export class OfertasModel{
+    static async getAll(){
+        const result = await pool.query(
+            `SELECT 
+                oferta.id,
+                oferta.producto_id,
+                producto.nombre AS producto_nombre,
+                producto.precio AS precio_original,
+                oferta.tipo,
+                oferta.valor,
+                oferta.fecha_inicio,
+                oferta.fecha_fin,
+                oferta.activo
+            FROM oferta
+            JOIN producto ON producto.id = oferta.producto_id
+            ORDER BY oferta.id DESC`
+        )
+        return result.rows
+    }
+
     static async create(input: OfertaInput){
         const {
             producto_id,
