@@ -1,80 +1,68 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Clock,
   CheckCircle2,
   TrendingUp,
   ArrowRight,
+  Loader2,
+  Users,
 } from "lucide-react";
-import { EstadoBadge, type EstadoOrdenTipo } from "@/shared/components/ui/EstadoBadge";
-
-interface OrdenRecienteMock {
-  id: string;
-  usuario_nombre: string;
-  usuario_email: string;
-  productos_resumen: string;
-  total: number;
-  created_at: string;
-  estado: EstadoOrdenTipo;
-}
-
-const RECENT_ORDERS_MOCK: OrdenRecienteMock[] = [
-  {
-    id: "9f8a1c24-b234-4e89-9a21-998812345671",
-    usuario_nombre: "Lucas Giménez",
-    usuario_email: "lucas.gimenez@gmail.com",
-    productos_resumen: "NVIDIA RTX 4060 Ti 8GB (x2)",
-    total: 960000,
-    created_at: "2026-08-27T09:40:00.000Z",
-    estado: "PENDIENTE",
-  },
-  {
-    id: "7e5d2b11-a123-4f90-8b12-887766554432",
-    usuario_nombre: "Camila Rodríguez",
-    usuario_email: "camila.dev@hotmail.com",
-    productos_resumen: "AMD Ryzen 7 7800X3D + 1 más",
-    total: 710000,
-    created_at: "2026-08-27T08:15:00.000Z",
-    estado: "PAGADO",
-  },
-  {
-    id: "5c3a9f00-c456-4d12-7a98-776655443321",
-    usuario_nombre: "Agustín Fernández",
-    usuario_email: "agus.f@gmail.com",
-    productos_resumen: 'Monitor ASUS TUF 27" 165Hz (x1)',
-    total: 340000,
-    created_at: "2026-08-26T19:30:00.000Z",
-    estado: "ENVIADO",
-  },
-  {
-    id: "3b1e8d99-d789-4b34-6c87-665544332210",
-    usuario_nombre: "Sofía Martínez",
-    usuario_email: "sofia.mtz@yahoo.com",
-    productos_resumen: "SSD Kingston KC3000 1TB (x1)",
-    total: 135000,
-    created_at: "2026-08-26T15:20:00.000Z",
-    estado: "COMPLETADA",
-  },
-  {
-    id: "2d4f8a77-c901-4e23-8b54-443322110099",
-    usuario_nombre: "Ignacio Benítez",
-    usuario_email: "nacho.b@gmail.com",
-    productos_resumen: "RAM Corsair 32GB DDR5 6000MHz (x1)",
-    total: 190000,
-    created_at: "2026-08-26T11:05:00.000Z",
-    estado: "PAGADO",
-  },
-  {
-    id: "1a0c7e88-e012-4c56-5d76-554433221109",
-    usuario_nombre: "Mariano Torres",
-    usuario_email: "mtorres@empresa.com",
-    productos_resumen: "NVIDIA RTX 4060 Ti 8GB (x1)",
-    total: 480000,
-    created_at: "2026-08-25T14:10:00.000Z",
-    estado: "CANCELADA",
-  },
-];
+import { EstadoBadge } from "@/shared/components/ui/EstadoBadge";
+import { Orden } from "@/features/ordenes/types/ordenes";
+import { obtenerOrdenes } from "@/features/admin/api/ordenes";
+import { getProductos } from "@/features/productos/api/productos";
+import { obtenerOfertas } from "@/features/admin/api/ofertas";
+import { obtenerUsuarios } from "@/features/admin/api/usuarios";
+import { API_URL } from "@/lib/constants";
 
 export default function AdminDashboardPage() {
+  const [ordenes, setOrdenes] = useState<Orden[]>([]);
+  const [totalProductos, setTotalProductos] = useState<number>(0);
+  const [totalOfertasActivas, setTotalOfertasActivas] = useState<number>(0);
+  const [totalUsuarios, setTotalUsuarios] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      try {
+        setIsLoading(true);
+        const [ordenesRes, prodsRes, ofertasRes, usuariosRes] =
+          await Promise.allSettled([
+            obtenerOrdenes(),
+            getProductos(`${API_URL}/productos?limit=100`, 0),
+            obtenerOfertas(),
+            obtenerUsuarios(),
+          ]);
+
+        if (ordenesRes.status === "fulfilled") {
+          setOrdenes(ordenesRes.value);
+        }
+        if (prodsRes.status === "fulfilled") {
+          setTotalProductos(prodsRes.value.pagination?.total || prodsRes.value.data.length);
+        }
+        if (ofertasRes.status === "fulfilled") {
+          setTotalOfertasActivas(ofertasRes.value.filter((o) => o.activo).length);
+        }
+        if (usuariosRes.status === "fulfilled") {
+          setTotalUsuarios(usuariosRes.value.length);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadDashboardData();
+  }, []);
+
+  // Órdenes activas (todas excepto las ya completadas o canceladas)
+  const ordenesActivas = ordenes.filter(
+    (o) => o.estado !== "COMPLETADA" && o.estado !== "CANCELADA"
+  );
+  const ultimasOrdenes = ordenes.slice(0, 6);
+
   return (
     <div className="p-6 lg:p-8 space-y-8 max-w-7xl">
       {/* Header */}
@@ -89,43 +77,71 @@ export default function AdminDashboardPage() {
 
       {/* Quick Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Órdenes Activas (En proceso / Sin completar) */}
         <div className="bg-surface p-5 rounded-2xl border border-border shadow-xs">
           <span className="text-xs font-bold uppercase tracking-wider text-ink-secondary block">
-            Órdenes
+            Órdenes Activas
           </span>
-          <p className="text-2xl font-black text-ink mt-2">24</p>
+          <p className="text-2xl font-black text-ink mt-2">
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+            ) : (
+              ordenesActivas.length
+            )}
+          </p>
           <p className="text-xs text-ink-secondary mt-1 flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5 text-warning" /> 5 pendientes de envío
+            <Clock className="w-3.5 h-3.5 text-warning" /> En proceso de entrega
           </p>
         </div>
 
+        {/* Productos Activos */}
         <div className="bg-surface p-5 rounded-2xl border border-border shadow-xs">
           <span className="text-xs font-bold uppercase tracking-wider text-ink-secondary block">
             Productos
           </span>
-          <p className="text-2xl font-black text-ink mt-2">18</p>
+          <p className="text-2xl font-black text-ink mt-2">
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+            ) : (
+              totalProductos
+            )}
+          </p>
           <p className="text-xs text-ink-secondary mt-1 flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5 text-success" /> En catálogo activo
           </p>
         </div>
 
+        {/* Ofertas Activas */}
         <div className="bg-surface p-5 rounded-2xl border border-border shadow-xs">
           <span className="text-xs font-bold uppercase tracking-wider text-ink-secondary block">
             Ofertas Activas
           </span>
-          <p className="text-2xl font-black text-ink mt-2">4</p>
+          <p className="text-2xl font-black text-ink mt-2">
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+            ) : (
+              totalOfertasActivas
+            )}
+          </p>
           <p className="text-xs text-ink-secondary mt-1 flex items-center gap-1">
-            <TrendingUp className="w-3.5 h-3.5 text-primary" /> Promociones activas
+            <TrendingUp className="w-3.5 h-3.5 text-primary" /> Promociones vigentes
           </p>
         </div>
 
+        {/* Usuarios Registrados */}
         <div className="bg-surface p-5 rounded-2xl border border-border shadow-xs">
           <span className="text-xs font-bold uppercase tracking-wider text-ink-secondary block">
             Usuarios
           </span>
-          <p className="text-2xl font-black text-ink mt-2">156</p>
+          <p className="text-2xl font-black text-ink mt-2">
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+            ) : (
+              totalUsuarios
+            )}
+          </p>
           <p className="text-xs text-ink-secondary mt-1 flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5 text-success" /> Clientes registrados
+            <Users className="w-3.5 h-3.5 text-success" /> Cuentas registradas
           </p>
         </div>
       </div>
@@ -172,52 +188,83 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border text-sm">
-                {RECENT_ORDERS_MOCK.map((ord, idx) => (
-                  <tr
-                    key={ord.id}
-                    className={`transition-colors hover:bg-primary-tint/40 group ${
-                      idx % 2 === 1 ? "bg-surface-alt/40" : "bg-surface"
-                    }`}
-                  >
-                      <td className="px-6 py-4 font-mono font-bold text-primary text-xs">
-                        #{ord.id.slice(0, 8)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="font-semibold text-ink leading-tight">
-                            {ord.usuario_nombre}
-                          </p>
-                          <p className="text-xs text-ink-secondary leading-tight mt-0.5">
-                            {ord.usuario_email}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-xs font-medium text-ink-secondary">
-                        {ord.productos_resumen}
-                      </td>
-                      <td className="px-6 py-4 text-xs text-ink-secondary whitespace-nowrap">
-                        {new Date(ord.created_at).toLocaleDateString("es-AR", {
-                          day: "2-digit",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </td>
-                      <td className="px-6 py-4 font-extrabold text-ink whitespace-nowrap">
-                        ${ord.total.toLocaleString("es-AR")}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <EstadoBadge estado={ord.estado} />
-                      </td>
-                    </tr>
-                  ))}
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-ink-secondary">
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                        <span className="text-sm font-medium">Cargando órdenes...</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : ultimasOrdenes.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="px-6 py-12 text-center text-ink-secondary text-sm"
+                    >
+                      No hay órdenes registradas en el sistema.
+                    </td>
+                  </tr>
+                ) : (
+                  ultimasOrdenes.map((ord, idx) => {
+                    const productos = ord.productos || [];
+                    const resumen = productos[0]?.nombre || "Sin ítems";
+                    const totalVal = Number(ord.total || 0);
+
+                    return (
+                      <tr
+                        key={ord.id}
+                        className={`transition-colors hover:bg-primary-tint/40 group ${
+                          idx % 2 === 1 ? "bg-surface-alt/40" : "bg-surface"
+                        }`}
+                      >
+                        <td className="px-6 py-4 font-mono font-bold text-primary text-xs">
+                          #{ord.id.slice(0, 8)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="font-semibold text-ink leading-tight">
+                              {ord.usuario_nombre}
+                            </p>
+                            {ord.usuario_email && (
+                              <p className="text-xs text-ink-secondary leading-tight mt-0.5">
+                                {ord.usuario_email}
+                              </p>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-xs font-medium text-ink-secondary">
+                          {resumen}
+                          {productos.length > 1 && ` + ${productos.length - 1} más`}
+                        </td>
+                        <td className="px-6 py-4 text-xs text-ink-secondary whitespace-nowrap">
+                          {new Date(ord.created_at).toLocaleDateString("es-AR", {
+                            day: "2-digit",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </td>
+                        <td className="px-6 py-4 font-extrabold text-ink whitespace-nowrap">
+                          ${totalVal.toLocaleString("es-AR")}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <EstadoBadge estado={ord.estado} />
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
 
           {/* Footer de la tabla */}
           <div className="px-6 py-3.5 flex items-center justify-between border-t border-border bg-surface-alt/60 text-xs text-ink-secondary font-medium">
-            <span>Mostrando las últimas 6 órdenes</span>
+            <span>
+              Mostrando las últimas {ultimasOrdenes.length} órdenes registradas
+            </span>
           </div>
         </div>
       </div>
