@@ -14,12 +14,13 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Usuario } from "@/features/auth/types/auth";
-import { obtenerUsuarios } from "../api/usuarios";
+import { obtenerUsuarios, eliminarUsuario } from "../api/usuarios";
 
 export function UsuariosManager() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Filters State
   const [search, setSearch] = useState("");
@@ -54,11 +55,20 @@ export function UsuariosManager() {
     return matchesSearch && matchesRol;
   });
 
-  const handleDelete = () => {
-    // Próximo paso: conectar eliminarUsuario
-    if (!userToDelete) return;
-    setUsuarios((prev) => prev.filter((u) => u.id !== userToDelete.id));
-    setUserToDelete(null);
+  const handleDelete = async () => {
+    if (!userToDelete || isDeleting) return;
+
+    try {
+      setIsDeleting(true);
+      await eliminarUsuario(userToDelete.id);
+      setUsuarios((prev) => prev.filter((u) => u.id !== userToDelete.id));
+      setUserToDelete(null);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error al dar de baja al usuario");
+      setUserToDelete(null);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -309,17 +319,26 @@ export function UsuariosManager() {
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={() => setUserToDelete(null)}
-                className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt disabled:opacity-60 text-ink rounded-xl text-sm font-semibold transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={handleDelete}
-                className="inline-flex items-center gap-2 bg-danger hover:bg-danger/90 text-white text-sm font-bold px-4 py-2 rounded-xl shadow-sm transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 bg-danger hover:bg-danger/90 disabled:opacity-60 text-white text-sm font-bold px-4 py-2 rounded-xl shadow-sm transition-colors cursor-pointer"
               >
-                Confirmar Baja
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Dando de baja...</span>
+                  </>
+                ) : (
+                  "Confirmar Baja"
+                )}
               </button>
             </div>
           </div>
