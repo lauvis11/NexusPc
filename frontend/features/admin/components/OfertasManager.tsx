@@ -13,104 +13,64 @@ import {
   ToggleLeft,
   ToggleRight,
   Loader2,
+  AlertCircle,
 } from "lucide-react";
-
-interface OfertaMock {
-  id: string;
-  producto_id: string;
-  producto_nombre: string;
-  tipo: "porcentaje" | "monto_fijo";
-  valor: number;
-  precio_original: number;
-  fecha_inicio: string;
-  fecha_fin: string;
-  activo: boolean;
-}
-
-interface ProductoMockOption {
-  id: string;
-  nombre: string;
-  precio: number;
-}
-
-const MOCK_PRODUCTOS_LIST: ProductoMockOption[] = [
-  { id: "prod-1", nombre: "NVIDIA GeForce RTX 4060 Ti 8GB", precio: 480000 },
-  { id: "prod-2", nombre: "AMD Ryzen 7 7800X3D AM5", precio: 520000 },
-  { id: "prod-3", nombre: "Monitor ASUS TUF Gaming 27\" 165Hz", precio: 340000 },
-  { id: "prod-4", nombre: "Memoria RAM Corsair Vengeance 32GB (2x16) DDR5", precio: 190000 },
-  { id: "prod-5", nombre: "SSD Kingston KC3000 1TB NVMe PCIe 4.0", precio: 135000 },
-  { id: "prod-6", nombre: "Placa Base ASUS ROG Strix B650-A Gaming WiFi", precio: 290000 },
-  { id: "prod-7", nombre: "Fuente Corsair RM850e 850W 80 Plus Gold", precio: 175000 },
-];
-
-const INITIAL_MOCK_OFERTAS: OfertaMock[] = [
-  {
-    id: "OF-001",
-    producto_id: "prod-1",
-    producto_nombre: "NVIDIA GeForce RTX 4060 Ti 8GB",
-    tipo: "porcentaje",
-    valor: 15,
-    precio_original: 480000,
-    fecha_inicio: "2026-08-20",
-    fecha_fin: "2026-09-10",
-    activo: true,
-  },
-  {
-    id: "OF-002",
-    producto_id: "prod-2",
-    producto_nombre: "AMD Ryzen 7 7800X3D AM5",
-    tipo: "monto_fijo",
-    valor: 50000,
-    precio_original: 520000,
-    fecha_inicio: "2026-08-25",
-    fecha_fin: "2026-09-05",
-    activo: true,
-  },
-  {
-    id: "OF-003",
-    producto_id: "prod-3",
-    producto_nombre: "Monitor ASUS TUF Gaming 27\" 165Hz",
-    tipo: "porcentaje",
-    valor: 20,
-    precio_original: 340000,
-    fecha_inicio: "2026-08-01",
-    fecha_fin: "2026-08-20",
-    activo: false,
-  },
-  {
-    id: "OF-004",
-    producto_id: "prod-5",
-    producto_nombre: "SSD Kingston KC3000 1TB NVMe PCIe 4.0",
-    tipo: "monto_fijo",
-    valor: 20000,
-    precio_original: 135000,
-    fecha_inicio: "2026-08-26",
-    fecha_fin: "2026-09-15",
-    activo: true,
-  },
-];
+import { Oferta } from "../types/ofertas";
+import { Producto } from "@/features/productos/types/types";
+import { obtenerOfertas } from "../api/ofertas";
+import { getProductos } from "@/features/productos/api/productos";
+import { API_URL } from "@/lib/constants";
 
 export function OfertasManager() {
-  const [ofertas, setOfertas] = useState<OfertaMock[]>(INITIAL_MOCK_OFERTAS);
+  const [ofertas, setOfertas] = useState<Oferta[]>([]);
+  const [productosList, setProductosList] = useState<Producto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Filters State
   const [search, setSearch] = useState("");
   const [filterEstado, setFilterEstado] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [ofertaToDelete, setOfertaToDelete] = useState<OfertaMock | null>(null);
+  const [ofertaToDelete, setOfertaToDelete] = useState<Oferta | null>(null);
 
   // Form states
   const [prodSearchTerm, setProdSearchTerm] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<ProductoMockOption | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
   const [isSearchingProd, setIsSearchingProd] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [filteredProdOptions, setFilteredProdOptions] = useState<ProductoMockOption[]>([]);
+  const [filteredProdOptions, setFilteredProdOptions] = useState<Producto[]>([]);
 
   const [tipo, setTipo] = useState<"porcentaje" | "monto_fijo">("porcentaje");
   const [valor, setValor] = useState<number | "">(15);
-  const [fechaInicio, setFechaInicio] = useState("2026-08-28");
-  const [fechaFin, setFechaFin] = useState("2026-09-15");
+  const [fechaInicio, setFechaInicio] = useState(new Date().toISOString().slice(0, 10));
+  const [fechaFin, setFechaFin] = useState(
+    new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  );
   const [activo, setActivo] = useState(true);
 
-  // 300ms Debounced product search
+  // Carga inicial de ofertas y catálogo de productos desde la API
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const [ofertasData, prodsRes] = await Promise.all([
+          obtenerOfertas(),
+          getProductos(`${API_URL}/productos?limit=100`, 0),
+        ]);
+        setOfertas(ofertasData);
+        setProductosList(prodsRes.data);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Error al cargar las ofertas");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  // 300ms Debounced product search sobre la lista real de productos
   useEffect(() => {
     if (selectedProduct) {
       setIsDropdownOpen(false);
@@ -129,7 +89,7 @@ export function OfertasManager() {
     setIsDropdownOpen(true);
 
     const timer = setTimeout(() => {
-      const results = MOCK_PRODUCTOS_LIST.filter((p) =>
+      const results = productosList.filter((p) =>
         p.nombre.toLowerCase().includes(prodSearchTerm.toLowerCase())
       );
       setFilteredProdOptions(results);
@@ -137,7 +97,7 @@ export function OfertasManager() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [prodSearchTerm, selectedProduct]);
+  }, [prodSearchTerm, selectedProduct, productosList]);
 
   const calculateFinalPrice = (original: number, tipo: "porcentaje" | "monto_fijo", val: number) => {
     if (tipo === "porcentaje") {
@@ -147,9 +107,10 @@ export function OfertasManager() {
   };
 
   const filteredOfertas = ofertas.filter((of) => {
+    const pNombre = of.producto_nombre || "";
     const matchesSearch =
-      of.producto_nombre.toLowerCase().includes(search.toLowerCase()) ||
-      of.id.toLowerCase().includes(search.toLowerCase());
+      pNombre.toLowerCase().includes(search.toLowerCase()) ||
+      String(of.id).includes(search);
     const matchesEstado =
       filterEstado === "all" ||
       (filterEstado === "activas" && of.activo) ||
@@ -165,13 +126,13 @@ export function OfertasManager() {
     setIsDropdownOpen(false);
     setTipo("porcentaje");
     setValor(15);
-    setFechaInicio("2026-08-28");
-    setFechaFin("2026-09-15");
+    setFechaInicio(new Date().toISOString().slice(0, 10));
+    setFechaFin(new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10));
     setActivo(true);
     setIsModalOpen(true);
   };
 
-  const handleSelectProduct = (prod: ProductoMockOption) => {
+  const handleSelectProduct = (prod: Producto) => {
     setSelectedProduct(prod);
     setProdSearchTerm(prod.nombre);
     setIsDropdownOpen(false);
@@ -186,31 +147,19 @@ export function OfertasManager() {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProduct || valor === "" || Number(valor) <= 0) return;
-
-    const nueva: OfertaMock = {
-      id: `OF-${String(ofertas.length + 1).padStart(3, "0")}`,
-      producto_id: selectedProduct.id,
-      producto_nombre: selectedProduct.nombre,
-      tipo,
-      valor: Number(valor),
-      precio_original: selectedProduct.precio,
-      fecha_inicio: fechaInicio,
-      fecha_fin: fechaFin,
-      activo,
-    };
-
-    setOfertas((prev) => [nueva, ...prev]);
+    // Próximo paso: conectar crearOferta
     setIsModalOpen(false);
   };
 
-  const handleToggleActivo = (id: string) => {
+  const handleToggleActivo = (id: number) => {
+    // Próximo paso: conectar actualizarOferta
     setOfertas((prev) =>
       prev.map((of) => (of.id === id ? { ...of, activo: !of.activo } : of))
     );
   };
 
   const handleConfirmDelete = () => {
+    // Próximo paso: conectar eliminarOferta
     if (!ofertaToDelete) return;
     setOfertas((prev) => prev.filter((of) => of.id !== ofertaToDelete.id));
     setOfertaToDelete(null);
@@ -259,6 +208,22 @@ export function OfertasManager() {
           </p>
         </div>
       </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="p-4 bg-danger/10 border border-danger/30 rounded-2xl flex items-center justify-between gap-3 text-danger text-sm">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={() => setError(null)}
+            className="p-1 hover:bg-danger/20 rounded-lg transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Filters Toolbar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
@@ -316,7 +281,16 @@ export function OfertasManager() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border text-sm">
-              {filteredOfertas.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-ink-secondary">
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                      <span className="text-sm font-medium">Cargando ofertas...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredOfertas.length === 0 ? (
                 <tr>
                   <td
                     colSpan={7}
@@ -327,8 +301,9 @@ export function OfertasManager() {
                 </tr>
               ) : (
                 filteredOfertas.map((of, idx) => {
+                  const originalPrice = of.precio_original || 0;
                   const finalPrice = calculateFinalPrice(
-                    of.precio_original,
+                    originalPrice,
                     of.tipo,
                     of.valor
                   );
@@ -341,10 +316,10 @@ export function OfertasManager() {
                       }`}
                     >
                       <td className="px-6 py-4 font-mono font-medium text-ink-secondary text-xs">
-                        {of.id}
+                        #{String(of.id).padStart(3, "0")}
                       </td>
                       <td className="px-6 py-4 font-semibold text-ink max-w-xs truncate">
-                        {of.producto_nombre}
+                        {of.producto_nombre || `Producto ID: ${of.producto_id}`}
                       </td>
                       <td className="px-6 py-4">
                         {of.tipo === "porcentaje" ? (
@@ -364,15 +339,18 @@ export function OfertasManager() {
                           <span className="font-extrabold text-ink text-sm">
                             ${finalPrice.toLocaleString("es-AR")}
                           </span>
-                          <span className="text-xs text-ink-secondary line-through">
-                            ${of.precio_original.toLocaleString("es-AR")}
-                          </span>
+                          {originalPrice > 0 && (
+                            <span className="text-xs text-ink-secondary line-through">
+                              ${originalPrice.toLocaleString("es-AR")}
+                            </span>
+                          )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-xs text-ink-secondary">
+                      <td className="px-6 py-4 text-xs text-ink-secondary whitespace-nowrap">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-ink-secondary" />
-                          {of.fecha_inicio} al {of.fecha_fin}
+                          {new Date(of.fecha_inicio).toLocaleDateString("es-AR")} al{" "}
+                          {new Date(of.fecha_fin).toLocaleDateString("es-AR")}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
@@ -477,7 +455,7 @@ export function OfertasManager() {
                   )}
                 </div>
 
-                {/* Dropdown flotante con resultados */}
+                {/* Dropdown flotante con resultados de la API */}
                 {isDropdownOpen && !selectedProduct && (
                   <div className="absolute left-0 right-0 top-full mt-1.5 bg-surface rounded-xl border border-border shadow-lg z-30 max-h-60 overflow-y-auto divide-y divide-border/50">
                     {isSearchingProd ? (
@@ -535,7 +513,7 @@ export function OfertasManager() {
                     type="button"
                     onClick={() => {
                       setTipo("monto_fijo");
-                      setValor(30000);
+                      setValor(Math.min(30000, (selectedProduct?.precio ?? 100000) - 1000));
                     }}
                     className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-bold transition-colors cursor-pointer ${
                       tipo === "monto_fijo"
