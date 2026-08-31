@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { EstadoBadge } from "@/shared/components/ui/EstadoBadge";
 import { EstadoOrden, Orden } from "@/features/ordenes/types/ordenes";
-import { obtenerOrdenes } from "../api/ordenes";
+import { obtenerOrdenes, actualizarEstadoOrden } from "../api/ordenes";
 
 const ESTADO_CONFIG: Record<
   EstadoOrden,
@@ -65,6 +65,7 @@ export function OrdenesManager() {
   const [ordenes, setOrdenes] = useState<Orden[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUpdatingEstado, setIsUpdatingEstado] = useState(false);
 
   // Filters State
   const [search, setSearch] = useState("");
@@ -102,15 +103,29 @@ export function OrdenesManager() {
     return matchesSearch && matchesEstado;
   });
 
-  const handleUpdateEstado = (ordenId: string, nuevoEstado: EstadoOrden) => {
-    // Próximo paso: conectar actualizarEstadoOrden
-    setOrdenes((prev) =>
-      prev.map((ord) =>
-        ord.id === ordenId ? { ...ord, estado: nuevoEstado } : ord
-      )
-    );
-    if (selectedOrden && selectedOrden.id === ordenId) {
-      setSelectedOrden((prev) => (prev ? { ...prev, estado: nuevoEstado } : null));
+  const handleUpdateEstado = async (ordenId: string, nuevoEstado: EstadoOrden) => {
+    if (isUpdatingEstado) return;
+
+    try {
+      setIsUpdatingEstado(true);
+      setError(null);
+      await actualizarEstadoOrden(ordenId, nuevoEstado);
+
+      setOrdenes((prev) =>
+        prev.map((ord) =>
+          ord.id === ordenId ? { ...ord, estado: nuevoEstado } : ord
+        )
+      );
+
+      if (selectedOrden && selectedOrden.id === ordenId) {
+        setSelectedOrden((prev) =>
+          prev ? { ...prev, estado: nuevoEstado } : null
+        );
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error al actualizar el estado de la orden");
+    } finally {
+      setIsUpdatingEstado(false);
     }
   };
 
@@ -412,14 +427,16 @@ export function OrdenesManager() {
                   {TRANSICIONES_VALIDAS[selectedOrden.estado].map((trans) => (
                     <button
                       key={trans}
+                      disabled={isUpdatingEstado}
                       onClick={() => handleUpdateEstado(selectedOrden.id, trans)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                      className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 ${
                         trans === "CANCELADA"
                           ? "bg-danger/10 hover:bg-danger/20 text-danger border border-danger/30"
                           : "bg-primary hover:bg-primary-hover text-white shadow-xs"
                       }`}
                     >
-                      Marcar como {ESTADO_CONFIG[trans]?.label ?? trans}
+                      {isUpdatingEstado && <Loader2 className="w-3 h-3 animate-spin" />}
+                      <span>Marcar como {ESTADO_CONFIG[trans]?.label ?? trans}</span>
                     </button>
                   ))}
                 </div>
