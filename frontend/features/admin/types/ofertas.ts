@@ -10,6 +10,8 @@ export interface OfertasInput {
 export interface Oferta {
   id: number;
   producto_id: string;
+  producto_nombre?: string;
+  precio_original?: number;
   tipo: 'porcentaje' | 'monto_fijo';
   valor: number;
   fecha_inicio: string;
