@@ -5,8 +5,9 @@ import type { FacturacionInput, UpdateFacturacionInput } from "../schemas/datos_
 export class UsuariosModel{
     static async getAll(){
         const usuarios = await pool.query(
-            `SELECT id, nombre, email, created_at FROM usuario
-            WHERE activo = true`
+            `SELECT id, nombre, email, rol, created_at FROM usuario
+            WHERE activo = true
+            ORDER BY created_at DESC`
         )
 
         return usuarios.rows
