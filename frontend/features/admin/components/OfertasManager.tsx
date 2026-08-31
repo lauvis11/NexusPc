@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Oferta, OfertasInput } from "../types/ofertas";
 import { Producto } from "@/features/productos/types/types";
-import { obtenerOfertas, crearOferta } from "../api/ofertas";
+import { obtenerOfertas, crearOferta, actualizarOferta } from "../api/ofertas";
 import { getProductos } from "@/features/productos/api/productos";
 import { API_URL } from "@/lib/constants";
 
@@ -182,11 +182,26 @@ export function OfertasManager() {
     }
   };
 
-  const handleToggleActivo = (id: number) => {
-    // Próximo paso: conectar actualizarOferta
+  const handleToggleActivo = async (id: number) => {
+    const ofertaActual = ofertas.find((o) => o.id === id);
+    if (!ofertaActual) return;
+
+    const nuevoEstado = !ofertaActual.activo;
+
+    // Actualización optimista en UI
     setOfertas((prev) =>
-      prev.map((of) => (of.id === id ? { ...of, activo: !of.activo } : of))
+      prev.map((of) => (of.id === id ? { ...of, activo: nuevoEstado } : of))
     );
+
+    try {
+      await actualizarOferta(id, { activo: nuevoEstado });
+    } catch (err: unknown) {
+      // Revertir en caso de error
+      setOfertas((prev) =>
+        prev.map((of) => (of.id === id ? { ...of, activo: ofertaActual.activo } : of))
+      );
+      setError(err instanceof Error ? err.message : "Error al actualizar el estado de la oferta");
+    }
   };
 
   const handleConfirmDelete = () => {
