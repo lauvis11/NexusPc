@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Oferta, OfertasInput } from "../types/ofertas";
 import { Producto } from "@/features/productos/types/types";
-import { obtenerOfertas, crearOferta, actualizarOferta } from "../api/ofertas";
+import { obtenerOfertas, crearOferta, actualizarOferta, eliminarOferta } from "../api/ofertas";
 import { getProductos } from "@/features/productos/api/productos";
 import { API_URL } from "@/lib/constants";
 
@@ -33,6 +33,7 @@ export function OfertasManager() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ofertaToDelete, setOfertaToDelete] = useState<Oferta | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   // Form states
@@ -204,11 +205,20 @@ export function OfertasManager() {
     }
   };
 
-  const handleConfirmDelete = () => {
-    // Próximo paso: conectar eliminarOferta
-    if (!ofertaToDelete) return;
-    setOfertas((prev) => prev.filter((of) => of.id !== ofertaToDelete.id));
-    setOfertaToDelete(null);
+  const handleConfirmDelete = async () => {
+    if (!ofertaToDelete || isDeleting) return;
+
+    try {
+      setIsDeleting(true);
+      await eliminarOferta(ofertaToDelete.id);
+      setOfertas((prev) => prev.filter((of) => of.id !== ofertaToDelete.id));
+      setOfertaToDelete(null);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error al eliminar la oferta");
+      setOfertaToDelete(null);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -729,20 +739,36 @@ export function OfertasManager() {
               </button>
             </div>
 
+            <p className="text-xs text-ink-secondary">
+              Se eliminará la oferta del producto{" "}
+              <strong className="text-ink">
+                "{ofertaToDelete.producto_nombre || ofertaToDelete.id}"
+              </strong>.
+            </p>
+
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={() => setOfertaToDelete(null)}
-                className="flex-1 py-2.5 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-bold transition-colors cursor-pointer text-center"
+                className="flex-1 py-2.5 border border-border bg-surface hover:bg-surface-alt disabled:opacity-60 text-ink rounded-xl text-sm font-bold transition-colors cursor-pointer text-center"
               >
                 Cancelar
               </button>
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={handleConfirmDelete}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer text-center"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-sm font-bold py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer text-center"
               >
-                Eliminar
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Eliminando...</span>
+                  </>
+                ) : (
+                  "Eliminar"
+                )}
               </button>
             </div>
           </div>
