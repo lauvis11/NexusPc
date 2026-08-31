@@ -3,6 +3,15 @@ import { ValidateOferta, ValidatePartialOferta } from "../schemas/ofertas.js"
 import { OfertasModel } from "../models/ofertas.js"
 
 export class OfertasController{
+    static async getAll(_req: Request, res: Response, next: NextFunction){
+        try{
+            const ofertas = await OfertasModel.getAll()
+            return res.status(200).json(ofertas)
+        }catch(err){
+            return next(err)
+        }
+    }
+
     static async create(req: Request, res: Response, next: NextFunction){
         const result = ValidateOferta(req.body)
         if(!result.success){
