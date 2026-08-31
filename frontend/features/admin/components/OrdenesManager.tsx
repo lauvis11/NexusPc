@@ -71,6 +71,7 @@ export function OrdenesManager() {
   const [search, setSearch] = useState("");
   const [filterEstado, setFilterEstado] = useState<string>("all");
   const [selectedOrden, setSelectedOrden] = useState<Orden | null>(null);
+  const [ordenForProductsModal, setOrdenForProductsModal] = useState<Orden | null>(null);
 
   // Carga inicial de órdenes desde la API
   useEffect(() => {
@@ -269,7 +270,7 @@ export function OrdenesManager() {
                   Cliente
                 </th>
                 <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-ink-secondary">
-                  Ítems
+                  Productos
                 </th>
                 <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-ink-secondary">
                   Fecha
@@ -306,8 +307,6 @@ export function OrdenesManager() {
                 </tr>
               ) : (
                 filteredOrdenes.map((ord, idx) => {
-                  const productos = ord.productos || [];
-                  const totalItems = productos.reduce((a, b) => a + Number(b.cantidad || 0), 0);
                   const totalVal = Number(ord.total || 0);
 
                   return (
@@ -333,14 +332,14 @@ export function OrdenesManager() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-xs text-ink-secondary font-medium">
-                          {productos[0]?.nombre || "Sin ítems"}
-                          {productos.length > 1 && (
-                            <span className="text-primary font-bold ml-1">
-                              +{productos.length - 1} más ({totalItems} un.)
-                            </span>
-                          )}
-                        </span>
+                        <button
+                          onClick={() => setOrdenForProductsModal(ord)}
+                          className="inline-flex items-center gap-1 p-2 text-primary hover:bg-primary-tint rounded-lg transition-colors font-semibold text-xs cursor-pointer"
+                          title="Ver productos de esta orden"
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span>Ver</span>
+                        </button>
                       </td>
                       <td className="px-6 py-4 text-xs text-ink-secondary whitespace-nowrap">
                         {new Date(ord.created_at).toLocaleDateString("es-AR", {
@@ -360,10 +359,10 @@ export function OrdenesManager() {
                         <button
                           onClick={() => setSelectedOrden(ord)}
                           className="inline-flex items-center gap-1 p-2 text-primary hover:bg-primary-tint rounded-lg transition-colors font-semibold text-xs cursor-pointer"
-                          title="Ver detalle"
+                          title="Ver detalle de la orden"
                         >
                           <Eye className="w-4 h-4" />
-                          <span className="hidden sm:inline">Ver</span>
+                          <span>Ver</span>
                         </button>
                       </td>
                     </tr>
@@ -512,6 +511,73 @@ export function OrdenesManager() {
               <span className="font-bold text-ink">Total Facturado</span>
               <span className="text-2xl font-black text-primary">
                 ${Number(selectedOrden.total || 0).toLocaleString("es-AR")}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Sencillo de Productos de la Orden */}
+      {ordenForProductsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            onClick={() => setOrdenForProductsModal(null)}
+            className="fixed inset-0 bg-ink/40 backdrop-blur-xs transition-opacity"
+          />
+
+          <div className="relative bg-surface rounded-2xl shadow-xl w-full max-w-lg p-6 border border-border z-10 space-y-4 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div>
+                <span className="text-xs font-mono font-bold text-primary">
+                  ORDEN #{ordenForProductsModal.id.slice(0, 8)}
+                </span>
+                <h3 className="text-lg font-bold text-ink">
+                  Productos de la Orden
+                </h3>
+              </div>
+              <button
+                onClick={() => setOrdenForProductsModal(null)}
+                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="border border-border rounded-xl overflow-hidden divide-y divide-border">
+              {(ordenForProductsModal.productos || []).map((item, i) => {
+                const unitPrice = Number(item.precio_unitario || 0);
+                const itemTotal = Number(item.cantidad || 0) * unitPrice;
+
+                return (
+                  <div
+                    key={i}
+                    className="p-3.5 flex items-center justify-between bg-surface hover:bg-surface-alt/50 transition-colors text-sm"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 pr-2">
+                      <div className="w-8 h-8 rounded-lg bg-primary-tint text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                        <Package className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-ink truncate">{item.nombre}</p>
+                        <p className="text-xs text-ink-secondary">
+                          {item.cantidad} x ${unitPrice.toLocaleString("es-AR")}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="font-extrabold text-ink whitespace-nowrap">
+                      ${itemTotal.toLocaleString("es-AR")}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-border">
+              <span className="text-xs text-ink-secondary font-medium">
+                Total Facturado
+              </span>
+              <span className="text-lg font-black text-primary">
+                ${Number(ordenForProductsModal.total || 0).toLocaleString("es-AR")}
               </span>
             </div>
           </div>
