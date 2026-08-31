@@ -21,6 +21,7 @@ export interface Orden {
   total: number | string;
   created_at: string;
   usuario_nombre: string;
+  usuario_email?: string;
   productos: ProductoDetalleOrden[];
 }
 

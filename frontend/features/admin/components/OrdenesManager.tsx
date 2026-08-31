@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   ShoppingBag,
@@ -14,93 +14,13 @@ import {
   Calendar,
   User,
   Mail,
-  ChevronRight,
   X,
-  AlertTriangle,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { EstadoBadge } from "@/shared/components/ui/EstadoBadge";
-
-export type EstadoOrden =
-  | "PENDIENTE"
-  | "PAGADO"
-  | "ENVIADO"
-  | "COMPLETADA"
-  | "CANCELADA";
-
-interface DetalleProductoMock {
-  nombre: string;
-  cantidad: number;
-  precio_unitario: number;
-}
-
-interface OrdenMock {
-  id: string;
-  usuario_nombre: string;
-  usuario_email: string;
-  total: number;
-  created_at: string;
-  estado: EstadoOrden;
-  productos: DetalleProductoMock[];
-}
-
-const INITIAL_MOCK_ORDENES: OrdenMock[] = [
-  {
-    id: "9f8a1c24-b234-4e89-9a21-998812345671",
-    usuario_nombre: "Lucas Giménez",
-    usuario_email: "lucas.gimenez@gmail.com",
-    total: 960000,
-    created_at: "2026-08-26T11:20:00.000Z",
-    estado: "PENDIENTE",
-    productos: [
-      { nombre: "NVIDIA GeForce RTX 4060 Ti 8GB", cantidad: 2, precio_unitario: 480000 },
-    ],
-  },
-  {
-    id: "7e5d2b11-a123-4f90-8b12-887766554432",
-    usuario_nombre: "Camila Rodríguez",
-    usuario_email: "camila.dev@hotmail.com",
-    total: 710000,
-    created_at: "2026-08-26T09:45:00.000Z",
-    estado: "PAGADO",
-    productos: [
-      { nombre: "AMD Ryzen 7 7800X3D AM5", cantidad: 1, precio_unitario: 520000 },
-      { nombre: "Memoria RAM Corsair 32GB DDR5", cantidad: 1, precio_unitario: 190000 },
-    ],
-  },
-  {
-    id: "5c3a9f00-c456-4d12-7a98-776655443321",
-    usuario_nombre: "Agustín Fernández",
-    usuario_email: "agus.f@gmail.com",
-    total: 340000,
-    created_at: "2026-08-25T17:15:00.000Z",
-    estado: "ENVIADO",
-    productos: [
-      { nombre: 'Monitor ASUS TUF Gaming 27" 165Hz', cantidad: 1, precio_unitario: 340000 },
-    ],
-  },
-  {
-    id: "3b1e8d99-d789-4b34-6c87-665544332210",
-    usuario_nombre: "Sofía Martínez",
-    usuario_email: "sofia.mtz@yahoo.com",
-    total: 135000,
-    created_at: "2026-08-24T14:30:00.000Z",
-    estado: "COMPLETADA",
-    productos: [
-      { nombre: "SSD Kingston KC3000 1TB NVMe PCIe 4.0", cantidad: 1, precio_unitario: 135000 },
-    ],
-  },
-  {
-    id: "1a0c7e88-e012-4c56-5d76-554433221109",
-    usuario_nombre: "Mariano Torres",
-    usuario_email: "mtorres@empresa.com",
-    total: 480000,
-    created_at: "2026-08-23T10:10:00.000Z",
-    estado: "CANCELADA",
-    productos: [
-      { nombre: "NVIDIA GeForce RTX 4060 Ti 8GB", cantidad: 1, precio_unitario: 480000 },
-    ],
-  },
-];
+import { EstadoOrden, Orden } from "@/features/ordenes/types/ordenes";
+import { obtenerOrdenes } from "../api/ordenes";
 
 const ESTADO_CONFIG: Record<
   EstadoOrden,
@@ -142,15 +62,39 @@ const TRANSICIONES_VALIDAS: Record<EstadoOrden, EstadoOrden[]> = {
 };
 
 export function OrdenesManager() {
-  const [ordenes, setOrdenes] = useState<OrdenMock[]>(INITIAL_MOCK_ORDENES);
+  const [ordenes, setOrdenes] = useState<Orden[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Filters State
   const [search, setSearch] = useState("");
   const [filterEstado, setFilterEstado] = useState<string>("all");
-  const [selectedOrden, setSelectedOrden] = useState<OrdenMock | null>(null);
+  const [selectedOrden, setSelectedOrden] = useState<Orden | null>(null);
+
+  // Carga inicial de órdenes desde la API
+  useEffect(() => {
+    async function loadOrdenes() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await obtenerOrdenes();
+        setOrdenes(data);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Error al cargar las órdenes");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadOrdenes();
+  }, []);
 
   const filteredOrdenes = ordenes.filter((ord) => {
+    const uNombre = ord.usuario_nombre || "";
+    const uEmail = ord.usuario_email || "";
     const matchesSearch =
-      ord.usuario_nombre.toLowerCase().includes(search.toLowerCase()) ||
-      ord.usuario_email.toLowerCase().includes(search.toLowerCase()) ||
+      uNombre.toLowerCase().includes(search.toLowerCase()) ||
+      uEmail.toLowerCase().includes(search.toLowerCase()) ||
       ord.id.toLowerCase().includes(search.toLowerCase());
     const matchesEstado =
       filterEstado === "all" || ord.estado === filterEstado;
@@ -159,6 +103,7 @@ export function OrdenesManager() {
   });
 
   const handleUpdateEstado = (ordenId: string, nuevoEstado: EstadoOrden) => {
+    // Próximo paso: conectar actualizarEstadoOrden
     setOrdenes((prev) =>
       prev.map((ord) =>
         ord.id === ordenId ? { ...ord, estado: nuevoEstado } : ord
@@ -171,7 +116,7 @@ export function OrdenesManager() {
 
   const totalRecaudado = ordenes
     .filter((o) => o.estado !== "CANCELADA")
-    .reduce((acc, o) => acc + o.total, 0);
+    .reduce((acc, o) => acc + Number(o.total || 0), 0);
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-7xl">
@@ -280,6 +225,22 @@ export function OrdenesManager() {
         </div>
       </div>
 
+      {/* Error Banner */}
+      {error && (
+        <div className="p-4 bg-danger/10 border border-danger/30 rounded-2xl flex items-center justify-between gap-3 text-danger text-sm">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={() => setError(null)}
+            className="p-1 hover:bg-danger/20 rounded-lg transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Data Table Card */}
       <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
@@ -310,7 +271,16 @@ export function OrdenesManager() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border text-sm">
-              {filteredOrdenes.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-ink-secondary">
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                      <span className="text-sm font-medium">Cargando órdenes...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredOrdenes.length === 0 ? (
                 <tr>
                   <td
                     colSpan={7}
@@ -321,9 +291,9 @@ export function OrdenesManager() {
                 </tr>
               ) : (
                 filteredOrdenes.map((ord, idx) => {
-                  const estadoCfg = ESTADO_CONFIG[ord.estado];
-                  const Icon = estadoCfg.icon;
-                  const totalItems = ord.productos.reduce((a, b) => a + b.cantidad, 0);
+                  const productos = ord.productos || [];
+                  const totalItems = productos.reduce((a, b) => a + Number(b.cantidad || 0), 0);
+                  const totalVal = Number(ord.total || 0);
 
                   return (
                     <tr
@@ -340,17 +310,19 @@ export function OrdenesManager() {
                           <p className="font-semibold text-ink leading-tight">
                             {ord.usuario_nombre}
                           </p>
-                          <p className="text-xs text-ink-secondary leading-tight mt-0.5">
-                            {ord.usuario_email}
-                          </p>
+                          {ord.usuario_email && (
+                            <p className="text-xs text-ink-secondary leading-tight mt-0.5">
+                              {ord.usuario_email}
+                            </p>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-xs text-ink-secondary font-medium">
-                          {ord.productos[0]?.nombre}
-                          {ord.productos.length > 1 && (
+                          {productos[0]?.nombre || "Sin ítems"}
+                          {productos.length > 1 && (
                             <span className="text-primary font-bold ml-1">
-                              +{ord.productos.length - 1} más ({totalItems} un.)
+                              +{productos.length - 1} más ({totalItems} un.)
                             </span>
                           )}
                         </span>
@@ -364,7 +336,7 @@ export function OrdenesManager() {
                         })}
                       </td>
                       <td className="px-6 py-4 font-extrabold text-ink whitespace-nowrap">
-                        ${ord.total.toLocaleString("es-AR")}
+                        ${totalVal.toLocaleString("es-AR")}
                       </td>
                       <td className="px-6 py-4 text-center">
                         <EstadoBadge estado={ord.estado} />
@@ -372,7 +344,7 @@ export function OrdenesManager() {
                       <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => setSelectedOrden(ord)}
-                          className="inline-flex items-center gap-1 p-2 text-primary hover:bg-primary-tint rounded-lg transition-colors font-semibold text-xs"
+                          className="inline-flex items-center gap-1 p-2 text-primary hover:bg-primary-tint rounded-lg transition-colors font-semibold text-xs cursor-pointer"
                           title="Ver detalle"
                         >
                           <Eye className="w-4 h-4" />
@@ -416,7 +388,7 @@ export function OrdenesManager() {
               </div>
               <button
                 onClick={() => setSelectedOrden(null)}
-                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors"
+                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -432,7 +404,7 @@ export function OrdenesManager() {
               </div>
 
               {/* Transición de estados permitida */}
-              {TRANSICIONES_VALIDAS[selectedOrden.estado].length > 0 ? (
+              {TRANSICIONES_VALIDAS[selectedOrden.estado]?.length > 0 ? (
                 <div className="pt-2 border-t border-border flex flex-wrap items-center gap-2">
                   <span className="text-xs font-semibold text-ink">
                     Cambiar estado a:
@@ -441,13 +413,13 @@ export function OrdenesManager() {
                     <button
                       key={trans}
                       onClick={() => handleUpdateEstado(selectedOrden.id, trans)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                         trans === "CANCELADA"
                           ? "bg-danger/10 hover:bg-danger/20 text-danger border border-danger/30"
                           : "bg-primary hover:bg-primary-hover text-white shadow-xs"
                       }`}
                     >
-                      Marcar como {ESTADO_CONFIG[trans].label}
+                      Marcar como {ESTADO_CONFIG[trans]?.label ?? trans}
                     </button>
                   ))}
                 </div>
@@ -465,9 +437,11 @@ export function OrdenesManager() {
                   <User className="w-3.5 h-3.5 text-primary" /> Cliente
                 </span>
                 <p className="font-bold text-ink">{selectedOrden.usuario_nombre}</p>
-                <p className="text-xs text-ink-secondary flex items-center gap-1">
-                  <Mail className="w-3 h-3" /> {selectedOrden.usuario_email}
-                </p>
+                {selectedOrden.usuario_email && (
+                  <p className="text-xs text-ink-secondary flex items-center gap-1">
+                    <Mail className="w-3 h-3" /> {selectedOrden.usuario_email}
+                  </p>
+                )}
               </div>
 
               <div className="p-3.5 bg-surface rounded-xl border border-border space-y-1">
@@ -487,27 +461,32 @@ export function OrdenesManager() {
                 Productos en la Orden
               </h4>
               <div className="border border-border rounded-xl overflow-hidden divide-y divide-border">
-                {selectedOrden.productos.map((item, i) => (
-                  <div
-                    key={i}
-                    className="p-3.5 flex items-center justify-between bg-surface hover:bg-surface-alt/50 transition-colors text-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary-tint text-primary flex items-center justify-center font-bold text-xs">
-                        <Package className="w-4 h-4" />
+                {(selectedOrden.productos || []).map((item, i) => {
+                  const unitPrice = Number(item.precio_unitario || 0);
+                  const itemTotal = Number(item.cantidad || 0) * unitPrice;
+
+                  return (
+                    <div
+                      key={i}
+                      className="p-3.5 flex items-center justify-between bg-surface hover:bg-surface-alt/50 transition-colors text-sm"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary-tint text-primary flex items-center justify-center font-bold text-xs">
+                          <Package className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-ink">{item.nombre}</p>
+                          <p className="text-xs text-ink-secondary">
+                            {item.cantidad} x ${unitPrice.toLocaleString("es-AR")}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-bold text-ink">{item.nombre}</p>
-                        <p className="text-xs text-ink-secondary">
-                          {item.cantidad} x ${item.precio_unitario.toLocaleString("es-AR")}
-                        </p>
-                      </div>
+                      <span className="font-extrabold text-ink">
+                        ${itemTotal.toLocaleString("es-AR")}
+                      </span>
                     </div>
-                    <span className="font-extrabold text-ink">
-                      ${(item.cantidad * item.precio_unitario).toLocaleString("es-AR")}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -515,7 +494,7 @@ export function OrdenesManager() {
             <div className="flex items-center justify-between pt-4 border-t border-border">
               <span className="font-bold text-ink">Total Facturado</span>
               <span className="text-2xl font-black text-primary">
-                ${selectedOrden.total.toLocaleString("es-AR")}
+                ${Number(selectedOrden.total || 0).toLocaleString("es-AR")}
               </span>
             </div>
           </div>
