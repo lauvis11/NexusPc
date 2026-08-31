@@ -15,9 +15,9 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import { Oferta } from "../types/ofertas";
+import { Oferta, OfertasInput } from "../types/ofertas";
 import { Producto } from "@/features/productos/types/types";
-import { obtenerOfertas } from "../api/ofertas";
+import { obtenerOfertas, crearOferta } from "../api/ofertas";
 import { getProductos } from "@/features/productos/api/productos";
 import { API_URL } from "@/lib/constants";
 
@@ -32,6 +32,8 @@ export function OfertasManager() {
   const [filterEstado, setFilterEstado] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ofertaToDelete, setOfertaToDelete] = useState<Oferta | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Form states
   const [prodSearchTerm, setProdSearchTerm] = useState("");
@@ -129,6 +131,7 @@ export function OfertasManager() {
     setFechaInicio(new Date().toISOString().slice(0, 10));
     setFechaFin(new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10));
     setActivo(true);
+    setFormError(null);
     setIsModalOpen(true);
   };
 
@@ -145,10 +148,38 @@ export function OfertasManager() {
     setIsDropdownOpen(false);
   };
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Próximo paso: conectar crearOferta
-    setIsModalOpen(false);
+    if (!selectedProduct || valor === "" || Number(valor) <= 0 || isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+      setFormError(null);
+
+      const input: OfertasInput = {
+        producto_id: selectedProduct.id,
+        tipo,
+        valor: Number(valor),
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin,
+        activo,
+      };
+
+      const nueva = await crearOferta(input);
+
+      const nuevaCompleta: Oferta = {
+        ...nueva,
+        producto_nombre: selectedProduct.nombre,
+        precio_original: selectedProduct.precio,
+      };
+
+      setOfertas((prev) => [nuevaCompleta, ...prev]);
+      setIsModalOpen(false);
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : "Error al crear la oferta");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleToggleActivo = (id: number) => {
@@ -399,7 +430,7 @@ export function OfertasManager() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            onClick={() => setIsModalOpen(false)}
+            onClick={() => !isSubmitting && setIsModalOpen(false)}
             className="fixed inset-0 bg-ink/40 backdrop-blur-xs transition-opacity"
           />
 
@@ -412,12 +443,21 @@ export function OfertasManager() {
                 </p>
               </div>
               <button
+                type="button"
+                disabled={isSubmitting}
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer"
+                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer disabled:opacity-50"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {formError && (
+              <div className="p-3 bg-danger/10 border border-danger/30 rounded-xl text-danger text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{formError}</span>
+              </div>
+            )}
 
             <form onSubmit={handleCreate} className="space-y-4 pt-1">
               {/* Selector Producto Dinámico */}
@@ -430,6 +470,7 @@ export function OfertasManager() {
                   <input
                     type="text"
                     required={!selectedProduct}
+                    disabled={isSubmitting}
                     value={prodSearchTerm}
                     onChange={(e) => {
                       if (selectedProduct) setSelectedProduct(null);
@@ -441,11 +482,12 @@ export function OfertasManager() {
                       }
                     }}
                     placeholder="Buscar producto por nombre..."
-                    className="w-full pl-10 pr-10 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors"
+                    className="w-full pl-10 pr-10 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
                   />
                   {selectedProduct && (
                     <button
                       type="button"
+                      disabled={isSubmitting}
                       onClick={handleClearSelectedProduct}
                       className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ink-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer"
                       title="Limpiar selección"
@@ -496,11 +538,12 @@ export function OfertasManager() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
+                    disabled={isSubmitting}
                     onClick={() => {
                       setTipo("porcentaje");
                       setValor(15);
                     }}
-                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-bold transition-colors cursor-pointer ${
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-bold transition-colors cursor-pointer disabled:opacity-50 ${
                       tipo === "porcentaje"
                         ? "border-primary bg-primary-tint text-primary"
                         : "border-border bg-surface text-ink-secondary hover:bg-surface-alt"
@@ -511,11 +554,12 @@ export function OfertasManager() {
                   </button>
                   <button
                     type="button"
+                    disabled={isSubmitting}
                     onClick={() => {
                       setTipo("monto_fijo");
                       setValor(Math.min(30000, (selectedProduct?.precio ?? 100000) - 1000));
                     }}
-                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-bold transition-colors cursor-pointer ${
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-bold transition-colors cursor-pointer disabled:opacity-50 ${
                       tipo === "monto_fijo"
                         ? "border-primary bg-primary-tint text-primary"
                         : "border-border bg-surface text-ink-secondary hover:bg-surface-alt"
@@ -537,10 +581,11 @@ export function OfertasManager() {
                   required
                   min={1}
                   max={tipo === "porcentaje" ? 99 : (selectedProduct?.precio ?? 999999) - 1}
+                  disabled={isSubmitting}
                   value={valor}
                   onChange={(e) => setValor(e.target.value === "" ? "" : Number(e.target.value))}
                   placeholder={tipo === "porcentaje" ? "Ej. 20" : "Ej. 25000"}
-                  className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-surface text-sm text-ink placeholder:text-ink-secondary focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
                 />
               </div>
 
@@ -575,9 +620,10 @@ export function OfertasManager() {
                   <input
                     type="date"
                     required
+                    disabled={isSubmitting}
                     value={fechaInicio}
                     onChange={(e) => setFechaInicio(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded-xl bg-surface text-xs text-ink focus:outline-none focus:border-primary"
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-surface text-xs text-ink focus:outline-none focus:border-primary disabled:opacity-50"
                   />
                 </div>
                 <div>
@@ -587,9 +633,10 @@ export function OfertasManager() {
                   <input
                     type="date"
                     required
+                    disabled={isSubmitting}
                     value={fechaFin}
                     onChange={(e) => setFechaFin(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded-xl bg-surface text-xs text-ink focus:outline-none focus:border-primary"
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-surface text-xs text-ink focus:outline-none focus:border-primary disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -601,8 +648,9 @@ export function OfertasManager() {
                 </span>
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => setActivo(!activo)}
-                  className="text-primary focus:outline-none cursor-pointer"
+                  className="text-primary focus:outline-none cursor-pointer disabled:opacity-50"
                 >
                   {activo ? (
                     <ToggleRight className="w-8 h-8 text-primary" />
@@ -616,17 +664,25 @@ export function OfertasManager() {
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                  className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={!selectedProduct}
+                  disabled={!selectedProduct || isSubmitting}
                   className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold px-5 py-2 rounded-xl shadow-sm shadow-primary/30 transition-colors cursor-pointer"
                 >
-                  Guardar Oferta
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Guardando...</span>
+                    </>
+                  ) : (
+                    "Guardar Oferta"
+                  )}
                 </button>
               </div>
             </form>
