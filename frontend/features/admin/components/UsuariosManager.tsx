@@ -1,86 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   Users,
   UserCheck,
-  UserX,
   Trash2,
-  Mail,
   Calendar,
   Shield,
-  ShieldAlert,
   X,
   AlertTriangle,
-  CheckCircle2,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
-
-interface UsuarioMock {
-  id: number;
-  nombre: string;
-  email: string;
-  rol: "ADMIN" | "CLIENTE";
-  created_at: string;
-  total_ordenes?: number;
-}
-
-const INITIAL_MOCK_USUARIOS: UsuarioMock[] = [
-  {
-    id: 1,
-    nombre: "Franco Administrador",
-    email: "admin@nexuspc.com",
-    rol: "ADMIN",
-    created_at: "2026-07-15T14:30:00.000Z",
-    total_ordenes: 0,
-  },
-  {
-    id: 2,
-    nombre: "Lucas Giménez",
-    email: "lucas.gimenez@gmail.com",
-    rol: "CLIENTE",
-    created_at: "2026-08-01T10:15:00.000Z",
-    total_ordenes: 3,
-  },
-  {
-    id: 3,
-    nombre: "Camila Rodríguez",
-    email: "camila.dev@hotmail.com",
-    rol: "CLIENTE",
-    created_at: "2026-08-10T18:40:00.000Z",
-    total_ordenes: 2,
-  },
-  {
-    id: 4,
-    nombre: "Agustín Fernández",
-    email: "agus.f@gmail.com",
-    rol: "CLIENTE",
-    created_at: "2026-08-15T12:00:00.000Z",
-    total_ordenes: 1,
-  },
-  {
-    id: 5,
-    nombre: "Sofía Martínez",
-    email: "sofia.mtz@yahoo.com",
-    rol: "CLIENTE",
-    created_at: "2026-08-20T09:25:00.000Z",
-    total_ordenes: 4,
-  },
-  {
-    id: 6,
-    nombre: "Mariano Torres",
-    email: "mtorres@empresa.com",
-    rol: "CLIENTE",
-    created_at: "2026-08-22T16:50:00.000Z",
-    total_ordenes: 1,
-  },
-];
+import { Usuario } from "@/features/auth/types/auth";
+import { obtenerUsuarios } from "../api/usuarios";
 
 export function UsuariosManager() {
-  const [usuarios, setUsuarios] = useState<UsuarioMock[]>(INITIAL_MOCK_USUARIOS);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Filters State
   const [search, setSearch] = useState("");
   const [filterRol, setFilterRol] = useState<string>("all");
-  const [userToDelete, setUserToDelete] = useState<UsuarioMock | null>(null);
+  const [userToDelete, setUserToDelete] = useState<Usuario | null>(null);
+
+  // Carga inicial de usuarios desde la API
+  useEffect(() => {
+    async function loadUsuarios() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await obtenerUsuarios();
+        setUsuarios(data);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Error al cargar los usuarios");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadUsuarios();
+  }, []);
 
   const filteredUsuarios = usuarios.filter((u) => {
     const matchesSearch =
@@ -93,6 +55,7 @@ export function UsuariosManager() {
   });
 
   const handleDelete = () => {
+    // Próximo paso: conectar eliminarUsuario
     if (!userToDelete) return;
     setUsuarios((prev) => prev.filter((u) => u.id !== userToDelete.id));
     setUserToDelete(null);
@@ -154,9 +117,9 @@ export function UsuariosManager() {
             <UserCheck className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs text-ink-secondary font-medium">Clientes Activos</p>
+            <p className="text-xs text-ink-secondary font-medium">Clientes Registrados</p>
             <p className="text-xl font-extrabold text-ink">
-              {usuarios.filter((u) => u.rol === "CLIENTE").length}
+              {usuarios.filter((u) => u.rol === "CLIENTE" || !u.rol).length}
             </p>
           </div>
         </div>
@@ -173,6 +136,22 @@ export function UsuariosManager() {
           </div>
         </div>
       </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="p-4 bg-danger/10 border border-danger/30 rounded-2xl flex items-center justify-between gap-3 text-danger text-sm">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={() => setError(null)}
+            className="p-1 hover:bg-danger/20 rounded-lg transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Data Table Card */}
       <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
@@ -201,7 +180,16 @@ export function UsuariosManager() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border text-sm">
-              {filteredUsuarios.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-ink-secondary">
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                      <span className="text-sm font-medium">Cargando usuarios...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredUsuarios.length === 0 ? (
                 <tr>
                   <td
                     colSpan={6}
@@ -224,7 +212,7 @@ export function UsuariosManager() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary-tint text-primary font-bold text-xs flex items-center justify-center shrink-0">
-                          {u.nombre.charAt(0).toUpperCase()}
+                          {u.nombre ? u.nombre.charAt(0).toUpperCase() : "U"}
                         </div>
                         <span className="font-bold text-ink">{u.nombre}</span>
                       </div>
@@ -246,11 +234,13 @@ export function UsuariosManager() {
                     <td className="px-6 py-4 text-xs text-ink-secondary">
                       <span className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-ink-secondary" />
-                        {new Date(u.created_at).toLocaleDateString("es-AR", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                        {u.created_at
+                          ? new Date(u.created_at).toLocaleDateString("es-AR", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "-"}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -265,7 +255,7 @@ export function UsuariosManager() {
                         <button
                           onClick={() => setUserToDelete(u)}
                           title="Dar de baja usuario"
-                          className="p-2 text-ink-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors focus:outline-none"
+                          className="p-2 text-ink-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors focus:outline-none cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -302,7 +292,7 @@ export function UsuariosManager() {
               </div>
               <button
                 onClick={() => setUserToDelete(null)}
-                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors"
+                className="p-1.5 text-ink-secondary hover:bg-surface-alt rounded-lg transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -320,14 +310,14 @@ export function UsuariosManager() {
               <button
                 type="button"
                 onClick={() => setUserToDelete(null)}
-                className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors"
+                className="px-4 py-2 border border-border bg-surface hover:bg-surface-alt text-ink rounded-xl text-sm font-semibold transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleDelete}
-                className="inline-flex items-center gap-2 bg-danger hover:bg-danger/90 text-white text-sm font-bold px-4 py-2 rounded-xl shadow-sm transition-colors"
+                className="inline-flex items-center gap-2 bg-danger hover:bg-danger/90 text-white text-sm font-bold px-4 py-2 rounded-xl shadow-sm transition-colors cursor-pointer"
               >
                 Confirmar Baja
               </button>
