@@ -16,7 +16,7 @@ import helmet from "helmet";
 import { ofertasRouter } from "./routes/ofertas.js";
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 app.use(helmet());
 app.use(cors({
