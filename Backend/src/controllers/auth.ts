@@ -4,6 +4,13 @@ import { AuthModel } from "../models/auth.js";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 
+const isProd = env.NODE_ENV === "production";
+const baseCookieOptions = {
+  httpOnly: true,
+  secure: isProd,
+  sameSite: (isProd ? "none" : "lax") as "none" | "lax",
+};
+
 export class AuthController {
   static async register(req: Request, res: Response, next: NextFunction) {
     const result = ValidateRegister(req.body);
@@ -29,6 +36,7 @@ export class AuthController {
           expiresIn: "7d",
         }
       );
+
       await AuthModel.saveRefreshToken({
         token: refreshToken,
         usuarioId: registrarUsuario.id,
@@ -37,15 +45,11 @@ export class AuthController {
       return res
         .status(201)
         .cookie("access-token", token, {
-          httpOnly: true,
-          secure: env.NODE_ENV === "production",
-          sameSite: "lax",
+          ...baseCookieOptions,
           maxAge: 60 * 60 * 1000,
         })
         .cookie("refresh-token", refreshToken, {
-          httpOnly: true,
-          secure: env.NODE_ENV === "production",
-          sameSite: "lax",
+          ...baseCookieOptions,
           maxAge: 7 * 24 * 60 * 60 * 1000,
         })
         .json(registrarUsuario);
@@ -87,15 +91,11 @@ export class AuthController {
       return res
         .status(200)
         .cookie("access-token", token, {
-          httpOnly: true,
-          secure: env.NODE_ENV === "production",
-          sameSite: "lax",
+          ...baseCookieOptions,
           maxAge: 60 * 60 * 1000,
         })
         .cookie("refresh-token", refreshToken, {
-          httpOnly: true,
-          secure: env.NODE_ENV === "production",
-          sameSite: "lax",
+          ...baseCookieOptions,
           maxAge: 7 * 24 * 60 * 60 * 1000,
         })
         .json(validarUsuario);
@@ -135,9 +135,7 @@ export class AuthController {
 
       return res
         .cookie("access-token", newAccessToken, {
-          httpOnly: true,
-          secure: env.NODE_ENV === "production",
-          sameSite: "lax",
+          ...baseCookieOptions,
           maxAge: 60 * 60 * 1000,
         })
         .status(200)
@@ -154,15 +152,9 @@ export class AuthController {
         return res.status(401).json({ message: "Acceso no autorizado" });
       await AuthModel.logout(usuarioId);
 
-      const cookieOptions = {
-        httpOnly: true,
-        secure: env.NODE_ENV === "production",
-        sameSite: "lax" as const,
-      };
-
       return res
-        .clearCookie("access-token", cookieOptions)
-        .clearCookie("refresh-token", cookieOptions)
+        .clearCookie("access-token", baseCookieOptions)
+        .clearCookie("refresh-token", baseCookieOptions)
         .status(200)
         .json({ message: "Sesión cerrada correctamente" });
     } catch (err) {

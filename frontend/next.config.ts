@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
-const isDev = process.env.NODE_ENV === "development";
-const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const rawBackendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const backendUrl = rawBackendUrl.startsWith("http://") || rawBackendUrl.startsWith("https://")
+  ? rawBackendUrl
+  : `https://${rawBackendUrl}`;
 
 /**
  * Content Security Policy (CSP)
@@ -27,8 +29,9 @@ const cspDirectives = [
   `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
   `font-src 'self' https://fonts.gstatic.com`,
   `img-src 'self' data: blob: https://res.cloudinary.com https://fakestoreapi.com https://lh3.googleusercontent.com`,
-  `connect-src 'self' ${backendUrl} ${isDev ? "ws://localhost:* http://localhost:*" : ""}`,
-  "frame-src 'none'",
+  `connect-src 'self' ${backendUrl} https://*.mercadopago.com https://*.mercadolibre.com ${isDev ? "ws://localhost:* http://localhost:*" : ""}`,
+  "frame-src https://*.mercadopago.com https://*.mercadolibre.com",
+  "manifest-src 'self' https://vercel.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
