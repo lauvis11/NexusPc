@@ -67,7 +67,7 @@ export class ProductosController{
         const rawLimit = Number(req.query.limit)
 
         const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1
-        const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? rawLimit : 20
+        const limit = Number.isInteger(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 100) : 20
 
         try{
             const { data, total } = await ProductosModel.getAll({
