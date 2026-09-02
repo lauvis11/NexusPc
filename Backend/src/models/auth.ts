@@ -52,6 +52,13 @@ export class AuthModel{
     static async saveRefreshToken(input: {token: string, usuarioId: number}){
         const { token, usuarioId } = input
         const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+
+        // Eliminar tokens expirados de la base de datos y tokens anteriores de este usuario
+        await pool.query(
+            `DELETE FROM refresh_token WHERE expires_at < NOW() OR usuario_id = $1`,
+            [usuarioId]
+        )
+
         await pool.query(
             `INSERT INTO refresh_token(token, usuario_id, expires_at)
             VALUES($1, $2, $3)`, [token, usuarioId, expiresAt] 
@@ -65,6 +72,11 @@ export class AuthModel{
             `, [refreshToken]
         )
         if(token.rows.length === 0) return null
+
+        if (new Date() > new Date(token.rows[0].expires_at)) {
+            await pool.query(`DELETE FROM refresh_token WHERE token = $1`, [refreshToken])
+            return null
+        }
 
         return token.rows[0]
     }
