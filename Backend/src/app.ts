@@ -18,7 +18,8 @@ import { ofertasRouter } from "./routes/ofertas.js";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(helmet());
+const helmetFn = typeof helmet === "function" ? helmet : (helmet as any).default;
+app.use((helmetFn as any)());
 app.use(cors({
     origin: env.FRONTEND_URL,
     credentials: true,
