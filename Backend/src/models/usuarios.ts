@@ -140,6 +140,4 @@ export class UsuariosModel{
             client.release()
         }
     }
-
-    static async forgotPassword(){}
 }

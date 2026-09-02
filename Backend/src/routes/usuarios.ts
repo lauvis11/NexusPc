@@ -10,5 +10,4 @@ usuariosRouter.post("/datos-facturacion", VerifyToken, UsuariosController.create
 usuariosRouter.patch("/datos-facturacion", VerifyToken, UsuariosController.updateDatosFacturacion)
 usuariosRouter.delete("/:id", VerifyToken, VerifyAdmin('ADMIN'), UsuariosController.deleteUsuario)
 usuariosRouter.post("/update-password", VerifyToken, UsuariosController.updatePassword)
-usuariosRouter.post("/forgot-password", UsuariosController.forgotPassword)
 

@@ -85,6 +85,4 @@ export class UsuariosController{
             return next(err)
         }
     }
-
-    static async forgotPassword(){}
 }
