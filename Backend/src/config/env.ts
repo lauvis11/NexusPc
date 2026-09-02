@@ -6,7 +6,7 @@ const requiredEnvVars = [
     'CLOUDINARY_CLOUD_NAME',
     'CLOUDINARY_API_KEY',
     'CLOUDINARY_API_SECRET',
-    'TEST_ACCESS_TOKEN',
+    'MP_ACCESS_TOKEN',
     'WEBHOOK_URL',
     'WEBHOOK_SECRET'
 ] as const
@@ -25,7 +25,7 @@ export const env = {
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
-    TEST_ACCESS_TOKEN: process.env.TEST_ACCESS_TOKEN as string,
+    MP_ACCESS_TOKEN: process.env.MP_ACCESS_TOKEN as string,
     WEBHOOK_URL: process.env.WEBHOOK_URL as string,
     WEBHOOK_SECRET: process.env.WEBHOOK_SECRET as string,
 }
