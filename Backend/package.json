@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "tsc": "tsc",
     "dev": "tsx watch --env-file=.env src/app.ts",
     "start": "node dist/app.js",
