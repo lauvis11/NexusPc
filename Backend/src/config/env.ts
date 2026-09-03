@@ -20,7 +20,7 @@ for (const envVar of requiredEnvVars) {
 
 export const env = {
     NODE_ENV: process.env.NODE_ENV as string,
-    FRONTEND_URL: process.env.FRONTEND_URL as string,
+    FRONTEND_URL: (process.env.FRONTEND_URL as string).replace(/\/$/, ""),
     DATABASE_URL: process.env.DATABASE_URL as string,
     SECRET_KEY: process.env.SECRET_KEY as string,
     REFRESH_KEY: process.env.REFRESH_KEY as string,
