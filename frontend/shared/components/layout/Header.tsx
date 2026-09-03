@@ -13,6 +13,7 @@ import {
   LogOut,
   ChevronDown,
   Loader2,
+  LayoutDashboard,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/context/auth-context";
 import { useCarritoStore } from "@/features/carrito/store/store";
@@ -165,14 +166,25 @@ export function Header() {
                       />
 
                       <div className="absolute right-0 mt-2 w-56 bg-surface rounded-2xl border-2 border-primary shadow-xl z-50 p-2 animate-fade-in space-y-1.5">
-                        <a
+                        {user.rol === "ADMIN" && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-extrabold text-primary bg-primary-tint/40 hover:bg-primary-tint/70 transition-colors"
+                          >
+                            <LayoutDashboard className="w-5 h-5 text-primary" />
+                            <span>Panel Admin</span>
+                          </Link>
+                        )}
+
+                        <Link
                           href="/perfil"
                           onClick={() => setUserDropdownOpen(false)}
                           className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-extrabold text-ink hover:bg-primary-tint/50 hover:text-primary transition-colors"
                         >
                           <User className="w-5 h-5 text-primary" />
                           <span>Mi Cuenta</span>
-                        </a>
+                        </Link>
 
                         <button
                           onClick={() => {
@@ -296,14 +308,25 @@ export function Header() {
             </div>
           ) : user ? (
             <>
-              <a
+              {user.rol === "ADMIN" && (
+                <Link
+                  href="/admin"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 w-full px-3 py-3 rounded-xl bg-primary-tint/40 hover:bg-primary-tint/70 text-primary font-bold transition-colors cursor-pointer"
+                >
+                  <LayoutDashboard className="w-5 h-5 text-primary" />
+                  <span className="text-sm">Panel Admin</span>
+                </Link>
+              )}
+
+              <Link
                 href="/perfil"
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-primary-tint/50 text-ink hover:text-primary transition-colors cursor-pointer"
               >
                 <User className="w-5 h-5 text-primary" />
                 <span className="text-sm font-bold truncate">Mi cuenta ({user.nombre})</span>
-              </a>
+              </Link>
 
               <button
                 onClick={() => {

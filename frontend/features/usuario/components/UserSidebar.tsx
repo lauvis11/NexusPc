@@ -1,6 +1,7 @@
 "use client";
 
-import { User, Package, Shield, LogOut } from "lucide-react";
+import Link from "next/link";
+import { User, Package, Shield, LogOut, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/features/auth/context/auth-context";
 
 export type UserSidebarTab = "mis-datos" | "mis-compras" | "cambiar-contraseña";
@@ -11,7 +12,7 @@ interface UserSidebarProps {
 }
 
 export function UserSidebar({ activeTab = "mis-datos", onTabChange }: UserSidebarProps) {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const menuItems: Array<{
     id: UserSidebarTab;
@@ -77,8 +78,20 @@ export function UserSidebar({ activeTab = "mis-datos", onTabChange }: UserSideba
             );
           })}
 
+          {user?.rol === "ADMIN" && (
+            <div className="pt-2 border-t border-border/60">
+              <Link
+                href="/admin"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold bg-primary-tint/40 hover:bg-primary-tint/70 text-primary transition-all text-left"
+              >
+                <LayoutDashboard className="w-4 h-4 text-primary" />
+                <span>Panel de Administración</span>
+              </Link>
+            </div>
+          )}
+
           {/* Botón de Cerrar Sesión Real */}
-          <div className="pt-4 border-t border-border/60">
+          <div className="pt-2 border-t border-border/60">
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-600 hover:bg-red-500/10 transition-all text-left cursor-pointer"
