@@ -15,12 +15,11 @@ import helmet from "helmet";
 import { ofertasRouter } from "./routes/ofertas.js";
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = Number(process.env.PORT) || 4000;
 
 const helmetFn = typeof helmet === "function" ? helmet : (helmet as any).default;
 app.use((helmetFn as any)());
 app.use(corsMiddleware);
-
 app.use(express.json({limit: '1mb'}));
 app.use(cookieParser())
 
@@ -42,6 +41,6 @@ app.use('/webhooks', webhookRouter)
 
 app.use(errorHandler)
 
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto: http://localhost:${PORT}`)
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Servidor corriendo en el puerto: ${PORT}`)
 })
