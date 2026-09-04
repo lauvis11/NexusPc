@@ -292,7 +292,6 @@ export class OrdenesModel{
                 items,
                 payer: {
                     name: usuarioComprador.nombre,
-                    email: usuarioComprador.email,
                 },
                 external_reference: orden_id,
                 // auto_return solo es válido en Mercado Pago con URLs públicas / HTTPS (no en localhost)
