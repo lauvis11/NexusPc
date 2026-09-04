@@ -6,7 +6,13 @@ import { useCarritoStore } from "@/features/carrito/store/store";
 import type { ResumenCheckoutProps } from "../types/ordenes";
 import { formatearPrecio } from "@/shared/utils/format";
 
-export function ResumenCheckout({ onPagar, loading = false, disabled = false }: ResumenCheckoutProps) {
+export function ResumenCheckout({
+  onPagar,
+  loading = false,
+  disabled = false,
+  textoBoton,
+  subtextoBoton,
+}: ResumenCheckoutProps) {
   const { items, total, totalItems } = useCarritoStore();
 
   // Calcular precio original sin ofertas y ahorro total
@@ -118,12 +124,12 @@ export function ResumenCheckout({ onPagar, loading = false, disabled = false }: 
               <span>Procesando compra...</span>
             </>
           ) : (
-            <span>Comprar</span>
+            <span>{textoBoton || "Comprar"}</span>
           )}
         </button>
 
         <p className="text-[11px] text-center text-ink-secondary">
-          Serás redirigido a la pasarela de Mercado Pago para finalizar la compra
+          {subtextoBoton || "Serás redirigido a la pasarela de Mercado Pago para finalizar la compra"}
         </p>
       </div>
 

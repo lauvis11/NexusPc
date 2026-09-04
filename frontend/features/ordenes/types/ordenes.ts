@@ -42,4 +42,6 @@ export interface ResumenCheckoutProps {
   onPagar?: () => void;
   loading?: boolean;
   disabled?: boolean;
+  textoBoton?: string;
+  subtextoBoton?: string;
 }
