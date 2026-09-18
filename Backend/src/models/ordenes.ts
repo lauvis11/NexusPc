@@ -284,7 +284,8 @@ export class OrdenesModel{
 
         // Iniciamos una instancia de preference de mercadopago e utilizamos el cliente de la configuracion 
         const preference = new Preference(client)
-        const isLocalhost = env.FRONTEND_URL.includes("localhost") || env.FRONTEND_URL.includes("127.0.0.1");
+        const isLocalhost = env.FRONTEND_URL.includes("localhost") || env.FRONTEND_URL.includes("127.0.0.1") || !env.FRONTEND_URL.startsWith("https://");
+        const returnBaseUrl = isLocalhost ? "https://nexus-pc-front-bay.vercel.app" : env.FRONTEND_URL;
 
         // Llama a la instancia para crear una "preferencia de pago", un objeto que describe QUÉ se va a cobrar y CÓMO manejar el resultado
         const resultado = await preference.create({
@@ -294,13 +295,12 @@ export class OrdenesModel{
                     name: usuarioComprador.nombre,
                 },
                 external_reference: orden_id,
-                // auto_return solo es válido en Mercado Pago con URLs públicas / HTTPS (no en localhost)
-                ...(!isLocalhost ? { auto_return: 'approved' } : {}),
+                auto_return: 'approved',
                 // URLs del frontend a las que MercadoPago redirige al usuario según el resultado del pago
                 back_urls: {
-                    success: `${env.FRONTEND_URL}/pago/exito`,
-                    failure: `${env.FRONTEND_URL}/pago/error`,
-                    pending: `${env.FRONTEND_URL}/pago/pendiente`
+                    success: `${returnBaseUrl}/pago/exito`,
+                    failure: `${returnBaseUrl}/pago/error`,
+                    pending: `${returnBaseUrl}/pago/pendiente`
                 },
                 notification_url: env.WEBHOOK_URL
             }
