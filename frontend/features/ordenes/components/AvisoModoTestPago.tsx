@@ -8,6 +8,7 @@ import {
   Check,
   ExternalLink,
   AlertCircle,
+  AlertTriangle,
   Eye,
   EyeOff,
 } from "lucide-react";
@@ -166,9 +167,18 @@ export function AvisoModoTestPago() {
             )}
           </div>
 
-          <p className="text-[11px] text-ink-secondary leading-relaxed bg-surface-alt/70 p-2.5 rounded-lg border border-border/60">
-            <span className="font-bold text-ink">Importante:</span> Al ingresar a Mercado Pago, inicia sesión con este usuario o usa la tarjeta de prueba de abajo.
-          </p>
+          {/* Mensaje Destacado: Asegurar inicio de sesión con cuenta de test y no personal */}
+          <div className="p-3.5 sm:p-4 rounded-xl bg-amber-500/15 border-2 border-amber-500/50 dark:border-amber-500/40 text-ink shadow-xs space-y-1.5">
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" strokeWidth={2.4} />
+              <span className="text-xs sm:text-sm font-black uppercase tracking-wider">
+                Importante
+              </span>
+            </div>
+            <p className="text-xs sm:text-[13px] text-ink leading-relaxed">
+              Asegúrate de haber iniciado sesión en Mercado Pago con la <strong className="font-extrabold text-amber-600 dark:text-amber-300">cuenta de prueba indicada arriba</strong> y <strong className="font-extrabold text-red-600 dark:text-red-400 underline underline-offset-2">NUNCA con tu cuenta personal</strong>. Si tu navegador tiene tu cuenta real abierta, ciérrala antes de continuar.
+            </p>
+          </div>
         </div>
 
         {/* 2. TARJETA DE PRUEBA (PAGO APROBADO) */}

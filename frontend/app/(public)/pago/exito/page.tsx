@@ -15,13 +15,19 @@ import {
 import { Header } from "@/shared/components/layout/Header";
 import { Footer } from "@/shared/components/layout/Footer";
 import { buildPagoUrl } from "@/features/ordenes/utils/mercadoPago";
+import { useCarritoStore } from "@/features/carrito/store/store";
 
 function ContenidoPagoExito() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { limpiarCarrito } = useCarritoStore();
   const [copiado, setCopiado] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
+
+  useEffect(() => {
+    limpiarCarrito();
+  }, [limpiarCarrito]);
 
   useEffect(() => {
     const status = (

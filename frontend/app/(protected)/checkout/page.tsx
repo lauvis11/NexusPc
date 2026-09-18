@@ -190,8 +190,8 @@ export default function CheckoutPage() {
 
       // Validar que la URL de pago provenga de un dominio oficial de Mercado Pago
       if (pagoResponse?.init_point && isValidMercadoPagoUrl(pagoResponse.init_point)) {
-        limpiarCarrito();
-        window.location.href = pagoResponse.init_point;
+        window.open(pagoResponse.init_point, "_blank");
+        setIsSubmitting(false);
       } else {
         throw new Error("El enlace de pago obtenido no es válido o seguro.");
       }
