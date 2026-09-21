@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ProductoCard } from "./ProductoCard";
 import {
   FiltroCategorias,
+  TarjetaCategoriaActiva,
   FiltrosState,
 } from "./FiltroCategorias";
 import type { Producto, ProductosResponse } from "../types/types";
@@ -38,7 +39,6 @@ function buildQueryString(
   if (filtros.precio_min) params.set("precio_min", filtros.precio_min);
   if (filtros.precio_max) params.set("precio_max", filtros.precio_max);
   if (filtros.en_stock) params.set("en_stock", "true");
-
   params.set("page", String(page));
   params.set("limit", String(limit));
 
@@ -46,6 +46,7 @@ function buildQueryString(
 }
 
 export function Catalogo() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const busquedaFromUrl = searchParams.get("busqueda") || searchParams.get("q") || searchParams.get("search") || null;
   const categoriaFromUrl = searchParams.get("categoria");
@@ -76,7 +77,7 @@ export function Catalogo() {
   const [pagination, setPagination] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [mobileOpenSection, setMobileOpenSection] = useState<"categorias" | "filtros" | null>(null);
 
   const fetchProductos = useCallback(async () => {
     setLoading(true);
@@ -150,49 +151,92 @@ export function Catalogo() {
 
   return (
     <>
-      {/* Banner Superior / Header de Página */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4 pb-4 border-b border-border/50">
-        <div>
-          <h1 className="text-2xl sm:text-4xl font-black text-ink tracking-tight">
-            Catálogo de <span className="text-primary font-black">Productos</span>
-          </h1>
-          {!loading && (
-            <p className="text-xs sm:text-sm text-ink-secondary mt-1">
-              {pagination.total} producto{pagination.total !== 1 ? "s" : ""} encontrado{pagination.total !== 1 ? "s" : ""}
-            </p>
-          )}
-        </div>
-
-        {/* Acciones: Filtros mobile & Selector Ordenar */}
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+      {/* Banner Superior: Botón Volver + Título + Selector Ordenar al lado (siempre en la misma fila) */}
+      <div className="flex flex-row justify-between items-center mb-6 gap-3 pb-4 border-b border-border/50">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <button
-            onClick={() => setMobileFilterOpen(true)}
-            className="lg:hidden flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 bg-surface border border-border rounded-xl text-xs font-bold text-ink hover:border-primary transition-all cursor-pointer shadow-2xs"
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/");
+              }
+            }}
+            className="p-1 sm:p-1.5 -ml-1 sm:-ml-1.5 rounded-xl text-primary hover:bg-slate-100 active:bg-slate-200 transition-colors cursor-pointer shrink-0 flex items-center justify-center"
+            title="Volver atrás"
+            aria-label="Volver atrás"
           >
-            {filtros.categoria ? (
-              <SlidersHorizontal className="w-4 h-4 text-primary" />
-            ) : (
-              <Layers className="w-4 h-4 text-primary" />
-            )}
-            <span>{filtros.categoria ? "Filtros Activos" : "Categorías"}</span>
+            <ChevronLeft className="w-5.5 h-5.5 sm:w-7 sm:h-7" />
           </button>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="hidden sm:inline text-xs font-semibold text-ink-secondary uppercase tracking-wider">
-              Ordenar:
-            </span>
-            <select
-              value={orden}
-              onChange={(e) => handleOrdenChange(e.target.value as OrdenOption)}
-              className="bg-surface border border-border rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-semibold text-ink focus:border-primary outline-none cursor-pointer shadow-2xs"
-            >
-              <option value="relevancia">Relevancia</option>
-              <option value="precio_asc">Precio: Menor a Mayor</option>
-              <option value="precio_desc">Precio: Mayor a Menor</option>
-              <option value="recientes">Más recientes</option>
-            </select>
-          </div>
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-ink tracking-tight">
+            Productos
+          </h1>
         </div>
+
+        {/* Selector Ordenar: Al lado del título aun en responsive */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <span className="text-[11px] sm:text-xs font-bold text-ink-secondary uppercase tracking-wider">
+            Ordenar:
+          </span>
+          <select
+            value={orden}
+            onChange={(e) => handleOrdenChange(e.target.value as OrdenOption)}
+            className="bg-surface border border-border rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-semibold text-ink focus:border-primary outline-none cursor-pointer shadow-2xs"
+          >
+            <option value="relevancia">Relevancia</option>
+            <option value="precio_asc">Menor precio</option>
+            <option value="precio_desc">Mayor precio</option>
+            <option value="recientes">Más recientes</option>
+          </select>
+        </div>
+      </div>
+
+      {/* ── BOTONES RESPONSIVE / PANEL DESPLEGABLE A ANCHO COMPLETO ── */}
+      <div className="lg:hidden mb-6 space-y-3">
+        {/* Tarjeta de categoría activa: si hay categoría seleccionada, siempre se muestra arriba */}
+        {filtros.categoria && (
+          <TarjetaCategoriaActiva
+            filtros={filtros}
+            onChangeFiltros={handleChangeFiltros}
+          />
+        )}
+
+        {mobileOpenSection === null ? (
+          /* Cuando ningún menú está abierto, se muestran los dos botones lado a lado con el mismo tamaño */
+          <div className="grid grid-cols-2 gap-3 w-full">
+            {/* Botón Categorías */}
+            <button
+              type="button"
+              onClick={() => setMobileOpenSection("categorias")}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold bg-surface text-ink border border-border hover:border-primary transition-all cursor-pointer shadow-2xs"
+            >
+              <Layers className="w-4 h-4 text-primary" />
+              <span>Categorías</span>
+            </button>
+
+            {/* Botón Filtros */}
+            <button
+              type="button"
+              onClick={() => setMobileOpenSection("filtros")}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold bg-surface text-ink border border-border hover:border-primary transition-all cursor-pointer shadow-2xs"
+            >
+              <SlidersHorizontal className="w-4 h-4 text-primary" />
+              <span>Filtros</span>
+            </button>
+          </div>
+        ) : (
+          /* Reutilizamos directamente el menú ocupando todo el ancho, sin contenedores redundantes */
+          <div className="w-full animate-fade-in">
+            <FiltroCategorias
+              filtros={filtros}
+              onChangeFiltros={handleChangeFiltros}
+              mode={mobileOpenSection}
+              onCloseMobile={() => setMobileOpenSection(null)}
+              hideActiveCard={true}
+            />
+          </div>
+        )}
       </div>
 
       {/* Layout Grid: Filtros + Grilla */}
@@ -333,49 +377,6 @@ export function Catalogo() {
         </section>
 
       </div>
-
-      {/* ── MOBILE FILTROS DRAWER ───────────────────────── */}
-      {mobileFilterOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end lg:hidden">
-          <div
-            className="fixed inset-0 bg-ink/50 backdrop-blur-xs transition-opacity"
-            onClick={() => setMobileFilterOpen(false)}
-          />
-          <div className="relative w-80 max-w-full h-full bg-surface shadow-2xl flex flex-col z-10 overflow-y-auto p-6 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-border/50">
-              <h3 className="font-black text-ink text-lg tracking-tight flex items-center gap-2">
-                {filtros.categoria ? (
-                  <SlidersHorizontal className="w-5 h-5 text-primary" />
-                ) : (
-                  <Layers className="w-5 h-5 text-primary" />
-                )}
-                <span>{filtros.categoria ? "Filtros" : "Categorías"}</span>
-              </h3>
-              <button
-                onClick={() => setMobileFilterOpen(false)}
-                className="p-1 text-ink-secondary hover:text-primary rounded-lg cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <FiltroCategorias
-              filtros={filtros}
-              onChangeFiltros={handleChangeFiltros}
-              showHeader={false}
-            />
-
-            <div className="pt-4 border-t border-border/50 flex items-center gap-3 mt-auto">
-              <button
-                onClick={() => setMobileFilterOpen(false)}
-                className="w-full py-3 bg-primary text-surface font-bold text-xs rounded-xl shadow-md cursor-pointer"
-              >
-                Aplicar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }

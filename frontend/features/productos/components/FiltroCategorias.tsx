@@ -80,11 +80,147 @@ export interface FiltrosState {
   en_stock: boolean;
 }
 
+export interface TarjetaCategoriaActivaProps {
+  filtros: FiltrosState;
+  onChangeFiltros: (nuevosFiltros: FiltrosState) => void;
+  categoriasTree?: CategoriaItem[];
+  activeCategoryObj?: CategoriaItem;
+}
+
+export function TarjetaCategoriaActiva({
+  filtros,
+  onChangeFiltros,
+  categoriasTree: propCategoriasTree,
+  activeCategoryObj: propActiveCategoryObj,
+}: TarjetaCategoriaActivaProps) {
+  const [internalTree, setInternalTree] = useState<CategoriaItem[]>(propCategoriasTree ?? []);
+
+  useEffect(() => {
+    if (propActiveCategoryObj || (propCategoriasTree && propCategoriasTree.length > 0)) return;
+    let isMounted = true;
+    async function loadTree() {
+      try {
+        const [cats, subs] = await Promise.all([getCategorias(), getSubCategorias()]);
+        if (!isMounted) return;
+        const tree: CategoriaItem[] = cats.map((cat) => ({
+          id: String(cat.id),
+          nombre: cat.nombre,
+          subcategorias: subs
+            .filter((sub) => sub.categoria_id === cat.id)
+            .map((sub) => ({ id: sub.id, nombre: sub.nombre })),
+        }));
+        setInternalTree(tree);
+      } catch {
+        if (isMounted) setInternalTree(CATEGORIAS_TREE_DEFAULT);
+      }
+    }
+    loadTree();
+    return () => {
+      isMounted = false;
+    };
+  }, [propActiveCategoryObj, propCategoriasTree]);
+
+  if (!filtros.categoria) return null;
+
+  const treeToUse = propActiveCategoryObj
+    ? [propActiveCategoryObj]
+    : internalTree.length > 0
+    ? internalTree
+    : CATEGORIAS_TREE_DEFAULT;
+
+  const foundCategory =
+    propActiveCategoryObj ||
+    treeToUse.find(
+      (c) =>
+        c.nombre.toLowerCase() === filtros.categoria?.toLowerCase() ||
+        c.id === filtros.categoria
+    );
+
+  const handleClear = () => {
+    onChangeFiltros({
+      ...filtros,
+      categoria: null,
+      subcategoria_id: null,
+      precio_min: "",
+      precio_max: "",
+      en_stock: false,
+    });
+  };
+
+  const handleSelectSub = (subId: number) => {
+    onChangeFiltros({
+      ...filtros,
+      subcategoria_id: filtros.subcategoria_id === subId ? null : subId,
+    });
+  };
+
+  return (
+    <div className="bg-primary text-white rounded-2xl p-4 space-y-3 shadow-md transition-all animate-fade-in">
+      <div className="flex items-center justify-between gap-2">
+        <h4 className="font-black text-white text-sm sm:text-base tracking-tight truncate">
+          {foundCategory?.nombre || filtros.categoria}
+        </h4>
+
+        <button
+          onClick={handleClear}
+          className="inline-flex items-center gap-1 text-xs font-bold text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition-colors cursor-pointer shrink-0"
+          title="Quitar categoría seleccionada"
+        >
+          <X className="w-3.5 h-3.5 text-white" />
+          <span>Quitar</span>
+        </button>
+      </div>
+
+      {foundCategory?.subcategorias && foundCategory.subcategorias.length > 0 && (
+        <div className="pt-2.5 border-t border-white/20 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/80">
+              Subcategorías
+            </span>
+            {filtros.subcategoria_id !== null && (
+              <button
+                onClick={() => handleSelectSub(filtros.subcategoria_id!)}
+                className="text-[10px] font-bold text-white hover:underline cursor-pointer"
+              >
+                Ver todas
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-1.5">
+            {foundCategory.subcategorias.map((sub) => {
+              const isSelected = filtros.subcategoria_id === sub.id;
+              return (
+                <button
+                  key={sub.id}
+                  type="button"
+                  onClick={() => handleSelectSub(sub.id)}
+                  className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg transition-all cursor-pointer font-semibold ${
+                    isSelected
+                      ? "bg-white text-primary font-bold shadow-xs"
+                      : "bg-white/15 text-white hover:bg-white/25 border border-white/20"
+                  }`}
+                >
+                  <span>{sub.nombre}</span>
+                  {isSelected && <Check className="w-3 h-3 text-primary" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface FiltroCategoriasProps {
   categoriasTree?: CategoriaItem[];
   filtros: FiltrosState;
   onChangeFiltros: (nuevosFiltros: FiltrosState) => void;
   showHeader?: boolean;
+  mode?: "all" | "categorias" | "filtros";
+  onCloseMobile?: () => void;
+  hideActiveCard?: boolean;
 }
 
 export function FiltroCategorias({
@@ -92,6 +228,9 @@ export function FiltroCategorias({
   filtros,
   onChangeFiltros,
   showHeader = true,
+  mode = "all",
+  onCloseMobile,
+  hideActiveCard = false,
 }: FiltroCategoriasProps) {
   const [categoriasTree, setCategoriasTree] = useState<CategoriaItem[]>(
     propCategoriasTree ?? []
@@ -100,8 +239,8 @@ export function FiltroCategorias({
   const [openCategoryId, setOpenCategoryId] = useState<string | null>(null);
 
   // El menú de categorías del sidebar es desplegable.
-  // Si hay categoría seleccionada, por defecto se mantiene NO desplegado.
-  // Si no hay categoría seleccionada, arranca desplegado para explorar.
+  // Si no hay categoría seleccionada, arranca desplegado.
+  // Si hay categoría seleccionada, arranca plegado y se despliega al hacer click.
   const [sidebarMenuOpen, setSidebarMenuOpen] = useState<boolean>(!filtros.categoria);
 
   // Sincronizar el despliegue del menú cuando cambia la categoría seleccionada
@@ -167,6 +306,9 @@ export function FiltroCategorias({
       subcategoria_id: null,
     });
     setSidebarMenuOpen(false);
+    if (onCloseMobile) {
+      onCloseMobile();
+    }
   };
 
   const handleClearCategory = () => {
@@ -222,94 +364,57 @@ export function FiltroCategorias({
     filtros.en_stock ||
     filtros.subcategoria_id !== null;
 
+  const showCategories = mode === "all" || mode === "categorias";
+  const showFilters = mode === "all" || mode === "filtros";
+
   return (
     <div className="space-y-4">
-      {/* ── 1. TARJETA DE CATEGORÍA SELECCIONADA (si hay categoría activa) ── */}
-      {filtros.categoria && (
-        <div className="bg-primary text-white rounded-2xl p-4 space-y-3 shadow-md transition-all animate-fade-in">
-          {/* Nombre de la categoría a la izquierda y acción de quitar a la derecha */}
-          <div className="flex items-center justify-between gap-2">
-            <h4 className="font-black text-white text-sm sm:text-base tracking-tight truncate">
-              {activeCategoryObj?.nombre || filtros.categoria}
-            </h4>
-
-            <button
-              onClick={handleClearCategory}
-              className="inline-flex items-center gap-1 text-xs font-bold text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg transition-colors cursor-pointer shrink-0"
-              title="Quitar categoría seleccionada"
-            >
-              <X className="w-3.5 h-3.5 text-white" />
-              <span>Quitar</span>
-            </button>
-          </div>
-
-          {/* Subcategorías asociadas si existen */}
-          {activeCategoryObj?.subcategorias && activeCategoryObj.subcategorias.length > 0 && (
-            <div className="pt-2.5 border-t border-white/20 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/80">
-                  Subcategorías
-                </span>
-                {filtros.subcategoria_id !== null && (
-                  <button
-                    onClick={() => handleSelectSubcategoria(filtros.subcategoria_id!)}
-                    className="text-[10px] font-bold text-white hover:underline cursor-pointer"
-                  >
-                    Ver todas
-                  </button>
-                )}
-              </div>
-
-              <div className="flex flex-wrap gap-1.5">
-                {activeCategoryObj.subcategorias.map((sub) => {
-                  const isSelected = filtros.subcategoria_id === sub.id;
-                  return (
-                    <button
-                      key={sub.id}
-                      type="button"
-                      onClick={() => handleSelectSubcategoria(sub.id)}
-                      className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg transition-all cursor-pointer font-semibold ${
-                        isSelected
-                          ? "bg-white text-primary font-bold shadow-xs"
-                          : "bg-white/15 text-white hover:bg-white/25 border border-white/20"
-                      }`}
-                    >
-                      <span>{sub.nombre}</span>
-                      {isSelected && <Check className="w-3 h-3 text-primary" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
+      {/* ── 1. TARJETA DE CATEGORÍA SELECCIONADA (si hay categoría activa y no está oculta) ── */}
+      {!hideActiveCard && showCategories && filtros.categoria && (
+        <TarjetaCategoriaActiva
+          filtros={filtros}
+          onChangeFiltros={onChangeFiltros}
+          activeCategoryObj={activeCategoryObj}
+          categoriasTree={treeToUse}
+        />
       )}
 
       {/* ── 2. MENÚ DESPLEGABLE DEL SIDEBAR (CATEGORÍAS) ── */}
-      <div className="rounded-2xl border border-border/80 bg-surface overflow-hidden transition-all shadow-2xs">
+      {showCategories && (
+        <div className="rounded-2xl border border-border/80 bg-surface overflow-hidden transition-all shadow-2xs">
         {/* Encabezado desplegable para todo el bloque de categorías */}
-        <button
-          type="button"
-          onClick={() => setSidebarMenuOpen((prev) => !prev)}
-          className="w-full flex items-center justify-between p-3.5 hover:bg-surface-alt transition-colors cursor-pointer text-left select-none group"
-        >
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="w-full flex items-center justify-between p-3.5 hover:bg-surface-alt/50 transition-colors select-none group">
+          <button
+            type="button"
+            onClick={() => setSidebarMenuOpen((prev) => !prev)}
+            className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer"
+          >
             <span className="p-1.5 rounded-lg bg-primary-tint/70 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
               <Layers className="w-4 h-4" />
             </span>
             <span className="font-extrabold text-xs sm:text-sm text-ink block truncate">
               Categorías
             </span>
-          </div>
+            <div
+              className={`p-1 rounded-lg transition-transform duration-300 ${
+                sidebarMenuOpen ? "rotate-180 text-primary bg-primary-tint/50" : "rotate-0 text-ink-secondary"
+              }`}
+            >
+              <ChevronDown className="w-4 h-4" />
+            </div>
+          </button>
 
-          <div
-            className={`p-1.5 rounded-lg transition-transform duration-300 ${
-              sidebarMenuOpen ? "rotate-180 text-primary bg-primary-tint/50" : "rotate-0 text-ink-secondary"
-            }`}
-          >
-            <ChevronDown className="w-4 h-4" />
-          </div>
-        </button>
+          {onCloseMobile && (
+            <button
+              type="button"
+              onClick={onCloseMobile}
+              className="p-1.5 rounded-xl bg-surface-alt hover:bg-border text-ink-secondary hover:text-ink transition-colors cursor-pointer shrink-0 ml-2"
+              title="Cerrar categorías"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
 
         {/* Contenedor colapsable del menú de categorías */}
         <div
@@ -408,24 +513,38 @@ export function FiltroCategorias({
           </div>
         </div>
       </div>
+      )}
 
       {/* ── 3. FILTROS ADICIONALES (PRECIO Y DISPONIBILIDAD) ── */}
-      <div className="rounded-2xl border border-border/80 bg-surface p-4 space-y-3.5 shadow-2xs">
+      {showFilters && (
+        <div className="rounded-2xl border border-border/80 bg-surface p-4 space-y-3.5 shadow-2xs">
         <div className="flex items-center justify-between pb-2 border-b border-border/50">
           <h4 className="font-extrabold text-ink text-xs sm:text-sm tracking-tight flex items-center gap-2">
             <SlidersHorizontal className="w-4 h-4 text-primary" />
             <span>Filtros</span>
           </h4>
-          {filtros.categoria && hasAdditionalFilters && (
-            <button
-              onClick={handleResetFiltros}
-              className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
-              title="Restablecer filtros"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Limpiar</span>
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {filtros.categoria && hasAdditionalFilters && (
+              <button
+                onClick={handleResetFiltros}
+                className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                title="Restablecer filtros"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Limpiar</span>
+              </button>
+            )}
+            {onCloseMobile && (
+              <button
+                type="button"
+                onClick={onCloseMobile}
+                className="p-1.5 rounded-xl bg-surface-alt hover:bg-border text-ink-secondary hover:text-ink transition-colors cursor-pointer shrink-0"
+                title="Cerrar filtros"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {filtros.categoria ? (
@@ -485,6 +604,7 @@ export function FiltroCategorias({
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
