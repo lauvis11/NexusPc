@@ -106,9 +106,9 @@ export class OrdenesModel{
         if(existe.rows.length === 0) return null
         const datosFacturacionId = existe.rows[0].id
         
-        const client = await pool.connect()
+        const dbClient = await pool.connect()
         try{
-            await client.query('BEGIN')
+            await dbClient.query('BEGIN')
 
             const itemsValidados: { producto_id: string, cantidad: number, precio_unitario: number }[] = []
             let total = 0
@@ -116,7 +116,7 @@ export class OrdenesModel{
             const productosOrdenados = [...input.productos].sort((a, b) => a.id.localeCompare(b.id))
 
             for (const item of productosOrdenados) {
-                const productoResult = await client.query(
+                const productoResult = await dbClient.query(
                     `SELECT 
                         producto.precio,
                         producto.stock,
@@ -159,7 +159,7 @@ export class OrdenesModel{
                 })
             }
 
-            const ordenResult = await client.query(
+            const ordenResult = await dbClient.query(
                 `INSERT INTO orden(usuario_id, datos_facturacion_id, total, estado)
                 VALUES($1, $2, $3, $4)
                 RETURNING id`,
@@ -168,26 +168,26 @@ export class OrdenesModel{
             const ordenId = ordenResult.rows[0].id
 
             for (const item of itemsValidados) {
-                await client.query(
+                await dbClient.query(
                     `INSERT INTO detalle_orden(orden_id, producto_id, cantidad, precio_unitario)
                     VALUES($1, $2, $3, $4)`,
                     [ordenId, item.producto_id, item.cantidad, item.precio_unitario]
                 )
 
-                await client.query(
+                await dbClient.query(
                     `UPDATE producto SET stock = stock - $1 WHERE id = $2`,
                     [item.cantidad, item.producto_id]
                 )
             }
 
-            await client.query('COMMIT')
+            await dbClient.query('COMMIT')
 
             return await OrdenesModel.getById(ordenId)
         }catch(error){
-            await client.query('ROLLBACK')
+            await dbClient.query('ROLLBACK')
             throw error
         }finally{
-            client.release()
+            dbClient.release()
         }
     }
 
@@ -200,12 +200,12 @@ export class OrdenesModel{
             CANCELADA:  [],
         }
 
-        const client = await pool.connect()
+        const dbClient = await pool.connect()
         try {
-            await client.query('BEGIN')
+            await dbClient.query('BEGIN')
 
             // Bloquear la orden mientras se procesa
-            const ordenResult = await client.query(
+            const ordenResult = await dbClient.query(
                 `SELECT id, estado FROM orden WHERE id = $1 FOR UPDATE`, [ordenId]
             )
 
@@ -221,31 +221,31 @@ export class OrdenesModel{
 
             // Devolver stock si se cancela
             if (nuevoEstado === 'CANCELADA') {
-                const detalles = await client.query(
+                const detalles = await dbClient.query(
                     `SELECT producto_id, cantidad FROM detalle_orden WHERE orden_id = $1`, [ordenId]
                 )
 
                 for (const detalle of detalles.rows) {
-                    await client.query(
+                    await dbClient.query(
                         `UPDATE producto SET stock = stock + $1 WHERE id = $2`,
                         [detalle.cantidad, detalle.producto_id]
                     )
                 }
             }
 
-            await client.query(
+            await dbClient.query(
                 `UPDATE orden SET estado = $1 WHERE id = $2`,
                 [nuevoEstado, ordenId]
             )
 
-            await client.query('COMMIT')
+            await dbClient.query('COMMIT')
 
             return await OrdenesModel.getById(ordenId)
         } catch (error) {
-            await client.query('ROLLBACK')
+            await dbClient.query('ROLLBACK')
             throw error
         } finally {
-            client.release()
+            dbClient.release()
         }
     }
 
