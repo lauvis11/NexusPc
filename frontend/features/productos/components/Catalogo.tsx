@@ -199,8 +199,8 @@ export function Catalogo() {
       <div className="flex flex-col lg:flex-row gap-8">
         
         {/* ── SIDEBAR FILTROS (Desktop) ─────────────────────────── */}
-        <aside className="hidden lg:block w-64 shrink-0">
-          <div className="bg-surface p-5 rounded-2xl border border-border shadow-2xs sticky top-28">
+        <aside className="hidden lg:block w-72 shrink-0">
+          <div className="sticky top-28 space-y-4">
             <FiltroCategorias
               filtros={filtros}
               onChangeFiltros={handleChangeFiltros}
