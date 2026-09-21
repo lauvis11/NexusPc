@@ -3,7 +3,7 @@ import { env } from "../config/env.js";
 
 const allowedOrigins = [
   env.FRONTEND_URL,
-  "https://nexus-pc-front-bay.vercel.app",
+  "https://nexuspcarg.vercel.app",
   "http://localhost:3000",
 ].filter(Boolean);
 
