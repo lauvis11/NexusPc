@@ -31,6 +31,13 @@ export const metadata: Metadata = {
   authors: [{ name: "NexusPC" }],
   creator: "NexusPC",
   publisher: "NexusPC",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
   formatDetection: {
     email: false,
     address: false,
