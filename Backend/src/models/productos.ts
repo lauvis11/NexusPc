@@ -230,7 +230,7 @@ export class ProductosModel{
 
         try{
             // Validar subcategoría si se proporciona
-            if (subcategoria_id !== undefined) {
+            if (subcategoria_id !== undefined && subcategoria_id !== null) {
                 const subcategoriaResult = await client.query(
                     `SELECT categoria_id FROM subcategoria WHERE id = $1`,
                     [subcategoria_id]
