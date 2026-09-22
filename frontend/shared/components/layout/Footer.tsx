@@ -121,8 +121,8 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar (Copyright) */}
-        <div className="mt-12 pt-8 border-t border-border/60 flex items-center justify-center text-center text-xs text-ink-secondary">
-          <p>© 2026 NexusPC PC Components. Precision Engineered. Todos los derechos reservados.</p>
+        <div className="mt-12 pt-8 border-t border-border/60 flex flex-col items-center justify-center gap-1 text-center text-xs text-ink-secondary">
+          <p>© 2026 NexusPC. Plataforma demostrativa sin fines comerciales ni ventas reales.</p>
         </div>
       </div>
     </footer>
