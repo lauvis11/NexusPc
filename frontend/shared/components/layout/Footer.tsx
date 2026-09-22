@@ -108,10 +108,10 @@ export function Footer() {
                 <a href="#" className="text-ink-secondary hover:text-primary transition-colors">Términos de Servicio</a>
               </li>
               <li>
-                <a href="#" className="text-ink-secondary hover:text-primary transition-colors">Política de Privacidad</a>
+                <Link href="/privacidad" className="text-ink-secondary hover:text-primary transition-colors">Política de Privacidad</Link>
               </li>
               <li>
-                <a href="#" className="text-ink-secondary hover:text-primary transition-colors">Política de Cookies</a>
+                <Link href="/privacidad#cookies" className="text-ink-secondary hover:text-primary transition-colors">Política de Cookies</Link>
               </li>
               <li>
                 <a href="#" className="text-ink-secondary hover:text-primary transition-colors">Boton de Arrepentimiento</a>
