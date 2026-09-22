@@ -18,21 +18,21 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 const HERO_BANNERS = [
   {
     id: 1,
-    title: "NVIDIA GeForce RTX 40 Series - Potencia Absoluta",
-    image: "/banners/hero1.png",
-    link: "/productos?categoria=Placas+de+Video",
-  },
-  {
-    id: 2,
-    title: "Procesadores AMD Ryzen 7000 - Rendimiento Next-Gen",
-    image: "/banners/hero2.png",
+    title: "AMD Ryzen - Maximizá tu Productividad con AMD",
+    image: "/banners/Banner-1.webp",
     link: "/productos?busqueda=Ryzen",
   },
   {
+    id: 2,
+    title: "Potenciá tus Emociones con GIGABYTE",
+    image: "/banners/Banner-2.webp",
+    link: "/productos?busqueda=Gigabyte",
+  },
+  {
     id: 3,
-    title: "Armá tu PC Gamer a Medida con Garantía Oficial",
-    image: "/banners/hero3.png",
-    link: "/productos",
+    title: "ASUS ROG GeForce Línea 40 - Genialidad sin Límites",
+    image: "/banners/Banner-3.webp",
+    link: "/productos?categoria=Placas+de+Video",
   },
 ];
 
@@ -44,7 +44,7 @@ const homeStructuredData = {
       "@id": `${SITE_URL}/#organization`,
       name: "NexusPC",
       url: SITE_URL,
-      logo: `${SITE_URL}/banners/hero1.png`,
+      logo: `${SITE_URL}/banners/Banner-1.webp`,
       description:
         "Tienda líder en hardware gamer, componentes de computación y PCs armadas con el mejor precio y garantía en Argentina.",
     },
