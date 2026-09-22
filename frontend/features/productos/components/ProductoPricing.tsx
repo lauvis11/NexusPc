@@ -29,16 +29,6 @@ export function ProductoPricing({
   const agregarProducto = useCarritoStore((state) => state.agregarProducto);
   const [cantidad, setCantidad] = useState(1);
 
-  // Galería de imágenes (usa img_url principal + miniaturas de muestra)
-  const imagenes = [
-    producto.img_url,
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuASzu7gFFgKou7QDYgZkRHVkakmtr2ekMU4dcw6X4iX7vhc6npxuvYiG0jnXxmJeTma3BvrAC_PuZUguJeFt2x8emWRAhVJSiicW8QCrgp3Daq00TSjBLDw8dhwstHC5hfelxG1xtLW886oKjxLy2FNFyq3CXnkZHufGElKdtNvy19dyw2L0rwuiTKsRweE-CpO-xXLXO-i-WsGmuewGz0Ed3KIcXsT0GRc1yk_kBdzcoA2rc3FOjgH",
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuC9Ql14hhgVvLrrAUFHdS-7W1JgyewRgrHeH2TftJbqLDZrnQYzx-gLoQj--BJCR5rLN8LvVQm9KksQC2Xu5nz8iQ95nB0RQ7HwrrdY6ItN92kl6kDQOou3GUeUX-COmEejyAJwnN-mS8wBKClURYlWAVE33RnYIrAmKJPozVh5vYNkQNOFAM6q8pLrfwhPzGD6fcWnn9EH5AQYnen_VmtJsDqvQrjZpOLuCGZubJDk1SBZvRi9HZxY",
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuDoL_g_6SdsqJYltSB_NfzRS9Anp8-GrL8qBVgyr3_Ts47_D4Vlk15V3LuQ14toxzo-L1hSJNNu3t1cGtGHC8CXiyaVEEMaZ1_eOyQkowIIJlCYUxQpOi3AcJsp9pLs0jjNYEvgdOjk4vdltgKvTttNyfNarwpLm3NiFS6ENg6CzTjxoye7wInigxA5K9VhOT-2vKKoEG6dgnA65QHJJCJKIPXZbz9GP1NjeLygewM7f53yMJSbrRWG",
-  ];
-
-  const [selectedImgIndex, setSelectedImgIndex] = useState(0);
-
   const enOferta = estaEnOferta(producto);
   const descuento = enOferta
     ? Number(producto.precio) - Number(producto.precio_oferta!)
@@ -78,9 +68,8 @@ export function ProductoPricing({
       {/* ── PRODUCT HERO SECTION ───────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         
-        {/* GALERÍA DE IMÁGENES (LG: 7 Cols) */}
+        {/* IMAGEN DEL PRODUCTO (LG: 7 Cols) */}
         <div className="lg:col-span-7 flex flex-col gap-4">
-          {/* Imagen Principal */}
           <div className="relative bg-surface border border-border/80 rounded-2xl p-6 sm:p-10 flex justify-center items-center h-[340px] sm:h-[460px] shadow-2xs overflow-hidden group">
             {enOferta && (
               <div className="absolute top-4 left-4 z-10">
@@ -90,7 +79,7 @@ export function ProductoPricing({
               </div>
             )}
             <Image
-              src={imagenes[selectedImgIndex] || producto.img_url || "/placeholder-product.png"}
+              src={producto.img_url || "/placeholder-product.png"}
               alt={producto.nombre}
               fill
               priority
@@ -101,25 +90,18 @@ export function ProductoPricing({
 
           {/* Miniaturas de la Galería */}
           <div className="grid grid-cols-4 gap-3">
-            {imagenes.map((img, idx) => (
-              <button
-                key={idx}
-                onClick={() => setSelectedImgIndex(idx)}
-                className={`relative bg-surface border-2 rounded-xl p-2 flex justify-center items-center h-20 sm:h-24 cursor-pointer transition-all overflow-hidden ${
-                  selectedImgIndex === idx
-                    ? "border-primary shadow-sm scale-102"
-                    : "border-border hover:border-primary/50 opacity-70 hover:opacity-100"
-                }`}
-              >
-                <Image
-                  src={img || "/placeholder-product.png"}
-                  alt={`Vista ${idx + 1}`}
-                  fill
-                  sizes="100px"
-                  className="object-contain p-2"
-                />
-              </button>
-            ))}
+            <button
+              type="button"
+              className="relative bg-surface border-2 border-primary shadow-sm scale-102 rounded-xl p-2 flex justify-center items-center h-20 sm:h-24 cursor-pointer transition-all overflow-hidden"
+            >
+              <Image
+                src={producto.img_url || "/placeholder-product.png"}
+                alt={producto.nombre}
+                fill
+                sizes="100px"
+                className="object-contain p-2"
+              />
+            </button>
           </div>
         </div>
 
