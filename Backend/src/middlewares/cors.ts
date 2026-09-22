@@ -5,6 +5,7 @@ const allowedOrigins = [
   env.FRONTEND_URL,
   "https://nexuspcarg.vercel.app",
   "http://localhost:3000",
+  "http://127.0.0.1:3000",
 ].filter(Boolean);
 
 export const corsMiddleware = cors({
