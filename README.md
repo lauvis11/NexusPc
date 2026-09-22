@@ -1,8 +1,8 @@
+# NexusPC — E-Commerce de Hardware & Componentes de PC
+
 <p align="center">
   <img src="./docs/logo.svg" alt="NexusPC Logo" width="280" />
 </p>
-
-# NexusPC — E-Commerce de Hardware & Componentes de PC
 
 Plataforma web full-stack de tienda online para venta de hardware, componentes y periféricos de PC de alto rendimiento en Argentina. Desarrollada con arquitectura moderna (Frontend en Next.js y Backend en Express con PostgreSQL).
 
