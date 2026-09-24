@@ -14,6 +14,7 @@ import {
   SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   X,
   Layers,
   AlertCircle,
@@ -151,9 +152,9 @@ export function Catalogo() {
 
   return (
     <>
-      {/* Banner Superior: Botón Volver + Título + Selector Ordenar al lado (siempre en la misma fila) */}
-      <div className="flex flex-row justify-between items-center mb-6 gap-3 pb-4 border-b border-border/50">
-        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+      {/* Banner Superior: Botón Volver + Título + Selector Ordenar */}
+      <div className="flex items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-4 pb-3 sm:pb-4 border-b border-border/50">
+        <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
           <button
             type="button"
             onClick={() => {
@@ -163,32 +164,37 @@ export function Catalogo() {
                 router.push("/");
               }
             }}
-            className="p-1 sm:p-1.5 -ml-1 sm:-ml-1.5 rounded-xl text-primary hover:bg-slate-100 active:bg-slate-200 transition-colors cursor-pointer shrink-0 flex items-center justify-center"
+            className="p-1 sm:p-1.5 -ml-1 rounded-xl text-primary hover:bg-slate-100 active:bg-slate-200 transition-colors cursor-pointer shrink-0 flex items-center justify-center"
             title="Volver atrás"
             aria-label="Volver atrás"
           >
-            <ChevronLeft className="w-5.5 h-5.5 sm:w-7 sm:h-7" />
+            <ChevronLeft className="w-5 h-5 sm:w-7 sm:h-7" />
           </button>
-          <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-ink tracking-tight">
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-ink tracking-tight truncate">
             Productos
           </h1>
         </div>
 
-        {/* Selector Ordenar: Al lado del título aun en responsive */}
+        {/* Selector Ordenar: compacto en móvil para evitar superposiciones */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <span className="text-[11px] sm:text-xs font-bold text-ink-secondary uppercase tracking-wider">
-            Ordenar:
-          </span>
-          <select
-            value={orden}
-            onChange={(e) => handleOrdenChange(e.target.value as OrdenOption)}
-            className="bg-surface border border-border rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-semibold text-ink focus:border-primary outline-none cursor-pointer shadow-2xs"
-          >
-            <option value="relevancia">Relevancia</option>
-            <option value="precio_asc">Menor precio</option>
-            <option value="precio_desc">Mayor precio</option>
-            <option value="recientes">Más recientes</option>
-          </select>
+          <label htmlFor="ordenar-select" className="hidden sm:inline text-xs font-bold text-ink-secondary uppercase tracking-wider">
+            Ordenar por:
+          </label>
+          <div className="relative">
+            <select
+              id="ordenar-select"
+              value={orden}
+              onChange={(e) => handleOrdenChange(e.target.value as OrdenOption)}
+              className="bg-surface border border-border rounded-xl pl-2.5 pr-7 py-1.5 sm:pl-3 sm:pr-8 sm:py-1.5 text-xs font-semibold text-ink focus:border-primary outline-none cursor-pointer shadow-2xs appearance-none"
+              aria-label="Ordenar productos"
+            >
+              <option value="relevancia">Relevancia</option>
+              <option value="precio_asc">Menor precio</option>
+              <option value="precio_desc">Mayor precio</option>
+              <option value="recientes">Más recientes</option>
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 text-ink-secondary absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
         </div>
       </div>
 
