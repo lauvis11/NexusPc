@@ -65,7 +65,6 @@ const homeStructuredData = {
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
 
   // Rotación automática cada 5 segundos
   useEffect(() => {
@@ -154,10 +153,7 @@ export default function Home() {
       <SeccionOfertas />
 
       {/* CATEGORÍAS */}
-      <Categorias
-        selectedCategoryId={selectedCategory}
-        onSelectCategory={(id) => setSelectedCategory(id)}
-      />
+      <Categorias />
 
       {/* SECCIÓN BRAND NVIDIA */}
       <SeccionNvidia />

@@ -1,5 +1,7 @@
 "use client";
+
 import { useState, useRef } from "react";
+import Link from "next/link";
 import {
   Cpu,
   Laptop,
@@ -13,7 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-// Categorías recibidas de la API
+// Categorías disponibles
 export interface Categoria {
   id: number;
   nombre: string;
@@ -53,6 +55,7 @@ export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasP
   const [currentSlide, setCurrentSlide] = useState(0);
   const totalSlides = 2;
   const touchStartX = useRef<number | null>(null);
+  const isDragging = useRef(false);
 
   const handlePrev = () => {
     setCurrentSlide((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
@@ -64,6 +67,15 @@ export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasP
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+    isDragging.current = false;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current !== null) {
+      if (Math.abs(e.touches[0].clientX - touchStartX.current) > 10) {
+        isDragging.current = true;
+      }
+    }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -75,35 +87,49 @@ export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasP
       handlePrev();
     }
     touchStartX.current = null;
+    setTimeout(() => {
+      isDragging.current = false;
+    }, 80);
   };
 
   const renderCategoriaCard = (cat: Categoria) => {
     const Icon = getCategoriaIcon(cat.nombre);
     const isSelected = selectedCategoryId === cat.id;
+    const href = `/productos?categoria=${encodeURIComponent(cat.nombre)}`;
 
     return (
-      <button
+      <Link
         key={cat.id}
-        onClick={() => onSelectCategory && onSelectCategory(cat.id)}
-        className="flex flex-col items-center justify-center p-1.5 sm:p-3 text-center transition-colors group cursor-pointer w-full select-none"
+        href={href}
+        onClick={(e) => {
+          if (isDragging.current) {
+            e.preventDefault();
+            return;
+          }
+          if (onSelectCategory) {
+            onSelectCategory(cat.id);
+          }
+        }}
+        className="flex flex-col items-center justify-center p-1.5 sm:p-3 text-center transition-all group cursor-pointer w-full select-none"
+        title={`Ver ${cat.nombre}`}
       >
         <div
-          className={`w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-1.5 sm:mb-3 shrink-0 transition-colors ${
+          className={`w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-1.5 sm:mb-3 shrink-0 transition-all duration-300 group-hover:scale-105 active:scale-95 ${
             isSelected
               ? "bg-primary text-surface shadow-md shadow-primary/30"
-              : "bg-primary-tint text-primary group-hover:bg-primary group-hover:text-surface"
+              : "bg-primary-tint text-primary group-hover:bg-primary group-hover:text-surface group-hover:shadow-md group-hover:shadow-primary/20"
           }`}
         >
-          <Icon className="w-7 h-7 sm:w-10 sm:h-10" />
+          <Icon className="w-7 h-7 sm:w-10 sm:h-10 transition-transform duration-300 group-hover:scale-110" />
         </div>
         <h3
-          className={`font-extrabold text-xs sm:text-lg tracking-tight leading-snug transition-colors w-full text-center ${
+          className={`font-extrabold text-xs sm:text-base lg:text-lg tracking-tight leading-snug transition-colors w-full text-center ${
             isSelected ? "text-primary font-black" : "text-ink group-hover:text-primary"
           }`}
         >
           {cat.nombre}
         </h3>
-      </button>
+      </Link>
     );
   };
 
@@ -145,6 +171,7 @@ export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasP
       <div
         className="overflow-hidden relative py-2 touch-pan-y"
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         <div
