@@ -12,11 +12,8 @@ export function SeccionOfertas() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [itemsVisible, setItemsVisible] = useState(4);
-  const [gapPx, setGapPx] = useState(24);
 
-  const touchStartX = useRef<number | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchOfertas = async () => {
     setLoading(true);
@@ -38,44 +35,26 @@ export function SeccionOfertas() {
     fetchOfertas();
   }, []);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 640) {
-        setItemsVisible(2.25); // 2 cards completas + 3ra asomada (< 50%)
-        setGapPx(12);
-      } else if (window.innerWidth < 1024) {
-        setItemsVisible(2);
-        setGapPx(24);
-      } else {
-        setItemsVisible(4);
-        setGapPx(24);
-      }
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const totalItems = productos.length;
-  const maxIndex = Math.max(0, totalItems - Math.floor(itemsVisible));
-
-  const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
-  const handleNext = () => setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-
-  // Touch handlers para swipe en mobile
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
+  const handlePrev = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const scrollAmount = el.clientWidth * 0.75;
+    if (el.scrollLeft <= 10) {
+      el.scrollTo({ left: el.scrollWidth, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+    }
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const diffX = touchStartX.current - e.changedTouches[0].clientX;
-    if (diffX > 40) {
-      handleNext();
-    } else if (diffX < -40) {
-      handlePrev();
+  const handleNext = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const scrollAmount = el.clientWidth * 0.75;
+    if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
+      el.scrollTo({ left: 0, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
-    touchStartX.current = null;
   };
 
   // Estado de Carga con SeccionSkeleton
@@ -145,27 +124,20 @@ export function SeccionOfertas() {
         </div>
       </div>
 
-      {/* Carrusel Deslizante */}
+      {/* Carrusel Deslizante Libre con soporte táctil nativo fluido y snap */}
       <div
-        className="relative py-2 touch-pan-y"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+        ref={scrollContainerRef}
+        className="flex gap-3 sm:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory py-3 px-1 -mx-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x"
+        style={{ WebkitOverflowScrolling: "touch" }}
       >
-        <div
-          className="flex transition-transform duration-500 ease-in-out gap-3 sm:gap-6"
-          style={{
-            transform: `translateX(calc(-${currentIndex} * (100% + ${gapPx}px) / ${itemsVisible}))`,
-          }}
-        >
-          {productos.map((producto) => (
-            <div
-              key={producto.id}
-              className="w-[calc((100%-12px)/2.25)] sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3*1.5rem)/4)] shrink-0"
-            >
-              <ProductoCard producto={producto} />
-            </div>
-          ))}
-        </div>
+        {productos.map((producto) => (
+          <div
+            key={producto.id}
+            className="w-[calc((100%-12px)/2.25)] sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3*1.5rem)/4)] shrink-0 snap-start"
+          >
+            <ProductoCard producto={producto} />
+          </div>
+        ))}
       </div>
     </section>
   );

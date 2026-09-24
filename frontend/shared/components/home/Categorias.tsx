@@ -52,17 +52,40 @@ interface CategoriasProps {
 }
 
 export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasProps) {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const totalSlides = 2;
+  const [activeSlide, setActiveSlide] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const isDragging = useRef(false);
 
   const handlePrev = () => {
-    setCurrentSlide((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const colWidth = el.firstElementChild?.clientWidth || 100;
+    if (el.scrollLeft <= 10) {
+      el.scrollTo({ left: el.scrollWidth, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: -colWidth - 16, behavior: "smooth" });
+    }
   };
 
   const handleNext = () => {
-    setCurrentSlide((prev) => (prev === totalSlides - 1 ? 0 : prev + 1));
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const colWidth = el.firstElementChild?.clientWidth || 100;
+    if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
+      el.scrollTo({ left: 0, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: colWidth + 16, behavior: "smooth" });
+    }
+  };
+
+  const handleScroll = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 0) return;
+    const progress = el.scrollLeft / maxScroll;
+    setActiveSlide(progress > 0.5 ? 1 : 0);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -78,14 +101,7 @@ export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasP
     }
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const diffX = touchStartX.current - e.changedTouches[0].clientX;
-    if (diffX > 40) {
-      handleNext();
-    } else if (diffX < -40) {
-      handlePrev();
-    }
+  const handleTouchEnd = () => {
     touchStartX.current = null;
     setTimeout(() => {
       isDragging.current = false;
@@ -167,39 +183,40 @@ export function Categorias({ onSelectCategory, selectedCategoryId }: CategoriasP
         </div>
       </div>
 
-      {/* Carrusel Slider Continuo con soporte táctil */}
+      {/* Carrusel Slider Libre con soporte táctil nativo fluido y snap */}
       <div
-        className="overflow-hidden relative py-2 touch-pan-y"
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="flex gap-3 sm:gap-8 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 px-1 -mx-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x"
+        style={{ WebkitOverflowScrolling: "touch" }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div
-          className="flex transition-transform duration-500 ease-in-out gap-3 sm:gap-8"
-          style={{
-            transform: `translateX(calc(-${currentSlide} * (100% + 0.75rem) / 3))`,
-          }}
-        >
-          {COLUMNAS.map((col, idx) => (
-            <div
-              key={idx}
-              className="w-[calc((100%-2*0.75rem)/3)] sm:w-[calc((100%-2*2rem)/3)] shrink-0 flex flex-col gap-3 sm:gap-8 items-center"
-            >
-              {renderCategoriaCard(col[0])}
-              {renderCategoriaCard(col[1])}
-            </div>
-          ))}
-        </div>
+        {COLUMNAS.map((col, idx) => (
+          <div
+            key={idx}
+            className="w-[calc((100%-2*0.75rem)/3)] sm:w-[calc((100%-2*2rem)/3)] shrink-0 snap-start flex flex-col gap-3 sm:gap-8 items-center"
+          >
+            {renderCategoriaCard(col[0])}
+            {renderCategoriaCard(col[1])}
+          </div>
+        ))}
       </div>
 
       {/* Indicadores del Carrusel */}
       <div className="flex justify-center items-center gap-2 mt-4 sm:mt-6">
-        {Array.from({ length: totalSlides }).map((_, idx) => (
+        {[0, 1].map((idx) => (
           <button
             key={idx}
-            onClick={() => setCurrentSlide(idx)}
-            className={`h-2 sm:h-2.5 rounded-full transition-all duration-300 ${
-              currentSlide === idx
+            onClick={() => {
+              const el = scrollContainerRef.current;
+              if (!el) return;
+              const maxScroll = el.scrollWidth - el.clientWidth;
+              el.scrollTo({ left: idx * maxScroll, behavior: "smooth" });
+            }}
+            className={`h-2 sm:h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+              activeSlide === idx
                 ? "w-6 sm:w-8 bg-primary"
                 : "w-2 sm:w-2.5 bg-border hover:bg-ink-secondary"
             }`}
